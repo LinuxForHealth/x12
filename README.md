@@ -1,13 +1,13 @@
 # LinuxForHealth x12
 
-![GitHub License](https://img.shields.io/github/license/linuxforhealth/x12)
+![GitHub License](https://img.shields.io/github/license/LinuxForHealth/x12)
 ![Supported Versions](https://img.shields.io/badge/python%20version-3.8%2C%203.9-blue)
 <br>
-![Template CI](https://github.com/linuxforhealth/x12/actions/workflows/continuous-integration.yml/badge.svg)
+![Template CI](https://github.com/LinuxForHealth/x12/actions/workflows/continuous-integration.yml/badge.svg)
 <br>
-![GitHub Issues](https://img.shields.io/github/issues/linuxforhealth/x12)
-![GitHub Forks](https://img.shields.io/github/forks/linuxforhealth/x12)
-![GitHub Stars](https://img.shields.io/github/stars/linuxforhealth/x12)
+![GitHub Issues](https://img.shields.io/github/issues/LinuxForHealth/x12)
+![GitHub Forks](https://img.shields.io/github/forks/LinuxForHealth/x12)
+![GitHub Stars](https://img.shields.io/github/stars/LinuxForHealth/x12)
 
 
 LinuxForHealth x12 streams ASC 5010 X12 health care transactions into [Pydantic Models](https://pydantic-docs.helpmanual.io/)  for a pleasant pythonic parsing experience! Integration options include REST endpoints, CLI (command line), or direct access using the Python SDK.
