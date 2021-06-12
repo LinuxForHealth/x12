@@ -23,6 +23,8 @@ Supported formats include:
 * 005010X224 Dental Claim
 * 005010X279 Eligibility
 
+This project is currently under construction. Please refer to the [LinuxForHealth X12 Issue Board](https://github.com/LinuxForHealth/x12/issues) to review current issues and progress.
+
 ## Quickstart
 
 ### Pre-requisites
