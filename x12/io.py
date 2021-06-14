@@ -52,7 +52,7 @@ class X12SegmentReader:
         """
         self.x12_stream.seek(0)
 
-        isa_segment = self.x12_stream.read(self.isa_segment_length)
+        isa_segment: str = self.x12_stream.read(self.isa_segment_length)
         self.element_separator = isa_segment[self.isa_element_separator]
         self.repetition_separator = isa_segment[self.isa_repetition_separator]
         self.segment_terminator = isa_segment[self.isa_segment_terminator]
