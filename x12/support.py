@@ -4,6 +4,7 @@ support.py
 Convenience functions for X12 Processing
 """
 import os
+from x12.config import get_config, X12Config
 
 
 def is_x12_data(input_data: str) -> bool:
@@ -32,5 +33,6 @@ def is_x12_file(file_path: str) -> bool:
     with (open(expanded_path, "r")) as f:
         f.seek(0)
         # ISA segment is first 106 characters
-        isa_segment = f.read(106)
+        config: X12Config = get_config()
+        isa_segment = f.read(config.isa_segment_length)
         return is_x12_data(isa_segment)

@@ -11,6 +11,7 @@ import x12.io
 )
 def test_init(request, test_input: str):
     """
+    Tests X12SegmentReader initialization
 
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param test_input: The fixture name.
@@ -19,6 +20,11 @@ def test_init(request, test_input: str):
     x12_reader = X12SegmentReader(input_value)
     assert x12_reader.x12_input
     assert x12_reader.buffer_size is not None and x12_reader.buffer_size > 0
+    assert x12_reader.isa_segment_length == 106
+    assert x12_reader.isa_element_separator == 3
+    assert x12_reader.isa_repetition_separator == 82
+    assert x12_reader.isa_segment_terminator == 105
+
     assert x12_reader.x12_stream is None
     assert x12_reader.element_separator is None
     assert x12_reader.repetition_separator is None
