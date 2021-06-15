@@ -1,7 +1,7 @@
 """
 io.py
 
-Supports X12 I/O operations such as reading, writing, and modeling raw segments.
+Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
 from io import TextIOBase, StringIO
 from x12.config import get_config, X12Config
@@ -11,10 +11,10 @@ from typing import Union, Iterator, List
 
 class X12SegmentReader:
     """
-    Streams segments from a X12 message or file.
+    Streams models from a X12 message or file.
 
     with X12Reader(x12_data) as r:
-       for segment in r.segments():
+       for segment in r.models():
           # do something interesting
 
     Segments are streamed in order using a buffered generator function.
@@ -93,7 +93,7 @@ class X12SegmentReader:
 
     def segments(self) -> Iterator[List[str]]:
         """
-        Iterator function used to return X12 segments from the underlying X12 stream.
+        Iterator function used to return X12 models from the underlying X12 stream.
         The read buffer size may be configured using X12_READER_BUFFER_SIZE.
         :return: X12 Segment
         """

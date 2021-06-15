@@ -36,7 +36,7 @@ def test_init(request, test_input: str):
 )
 def test_segments_with_string_data(request, test_input: str):
     """
-    Test X12SegmentReader segments with a x12 data/message input.
+    Test X12SegmentReader models with a x12 data/message input.
 
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param test_input: The fixture name.
@@ -61,7 +61,7 @@ def test_segments_with_string_data(request, test_input: str):
 )
 def test_segments_with_file_path(request, tmpdir, test_input: str):
     """
-    Test X12SegmentReader segments with a x12 file path input.
+    Test X12SegmentReader models with a x12 file path input.
 
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param tmpdir: Pytest fixture used to create temporary files and directories

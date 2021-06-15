@@ -1,7 +1,7 @@
 """
-segments package
+models package
 
-Types within the base segments package are "common" and may be used with multiple X12 specification versions.
+Types within the base models package are "common" and may be used with multiple X12 specification versions.
 """
 from pydantic import BaseModel, Field
 import datetime
@@ -9,7 +9,7 @@ import datetime
 
 class X12Loop(BaseModel):
     """
-    Models a X12 loop, which is a logical grouping of segments within a transaction set.
+    Models a X12 loop, which is a logical grouping of models within a transaction set.
     """
 
     id: str
@@ -18,7 +18,7 @@ class X12Loop(BaseModel):
 
 class X12Delimiters(BaseModel):
     """
-    X12Delimiters models the common delimiters used within a X12 message's segments.
+    X12Delimiters models the common delimiters used within a X12 message's models.
     """
 
     element_separator: str = Field(min_length=1, max_length=1)

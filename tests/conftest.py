@@ -50,7 +50,7 @@ def large_x12_message():
     )
 
     x12_message += "\n"
-    # will create 5000 transaction sets with 17 segments each
+    # will create 5000 transaction sets with 17 models each
     for i in range(1, 5_001, 1):
         transaction_set = "\n".join(
             [
