@@ -31,31 +31,26 @@ class X12SegmentReader:
 
         self.x12_input: str = x12_input
 
-        # cache config settings
-        config: X12Config = get_config()
-        self.buffer_size: int = config.x12_reader_buffer_size
-        self.isa_segment_length: int = config.x12_isa_segment_length
-        self.isa_element_separator: int = config.x12_isa_element_separator
-        self.isa_repetition_separator: int = config.x12_isa_repetition_separator
-        self.isa_segment_terminator: int = config.x12_isa_segment_terminator
-
         # set in __enter__
+        self.buffer_size: Union[None, int] = None
         self.x12_stream: Union[None, TextIOBase] = None
         self.element_separator: Union[None, str] = None
         self.repetition_separator: Union[None, str] = None
         self.segment_terminator: Union[None, str] = None
+        self.component_separator: Union[None, str] = None
 
-    def _set_delimiters(self):
+    def _set_delimiters(self, x12_config: X12Config):
         """
         Sets the X12 message delimiters based on leading ISA segment/control header.
         The ISA segment is conveyed in the first 106 characters of the transmission.
         """
         self.x12_stream.seek(0)
 
-        isa_segment: str = self.x12_stream.read(self.isa_segment_length)
-        self.element_separator = isa_segment[self.isa_element_separator]
-        self.repetition_separator = isa_segment[self.isa_repetition_separator]
-        self.segment_terminator = isa_segment[self.isa_segment_terminator]
+        isa_segment: str = self.x12_stream.read(x12_config.x12_isa_segment_length)
+        self.component_separator = isa_segment[x12_config.x12_isa_component_separator]
+        self.element_separator = isa_segment[x12_config.x12_isa_element_separator]
+        self.repetition_separator = isa_segment[x12_config.x12_isa_repetition_separator]
+        self.segment_terminator = isa_segment[x12_config.x12_isa_segment_terminator]
 
     def __enter__(self) -> "X12SegmentReader":
         """
@@ -72,12 +67,13 @@ class X12SegmentReader:
                 "Invalid x12_input. Expecting X12 Message or valid path to X12 File"
             )
 
+        x12_config = get_config()
         self.x12_stream.seek(0)
-
-        if not self.x12_stream.read(self.isa_segment_length):
+        if not self.x12_stream.read(x12_config.x12_isa_segment_length):
             raise ValueError("Invalid X12Stream")
 
-        self._set_delimiters()
+        self.buffer_size: int = x12_config.x12_reader_buffer_size
+        self._set_delimiters(x12_config)
 
         return self
 

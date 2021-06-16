@@ -1,5 +1,6 @@
 import pytest
 from x12.config import X12Config
+from x12.models import X12Delimiters
 
 
 @pytest.fixture
@@ -87,3 +88,8 @@ def config():
     config: X12Config = X12Config()
     config.x12_reader_buffer_size = 1024000
     return config
+
+
+@pytest.fixture
+def x12_delimiters():
+    return X12Delimiters()

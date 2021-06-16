@@ -1,10 +1,12 @@
 """
-models package
+models.py
 
-Types within the base models package are "common" and may be used with multiple X12 specification versions.
+Includes the base model used for X12 parsing and validation, in addition to models that aren't coupled to a specific
+X12 version.
 """
-from pydantic import BaseModel, Field
 import datetime
+
+from pydantic import BaseModel, Field
 
 
 class X12Loop(BaseModel):
@@ -21,9 +23,10 @@ class X12Delimiters(BaseModel):
     X12Delimiters models the common delimiters used within a X12 message's models.
     """
 
-    element_separator: str = Field(min_length=1, max_length=1)
-    repetition_separator: str = Field(min_length=1, max_length=1)
-    segment_terminator: str = Field(min_length=1, max_length=1)
+    element_separator: str = Field("*", min_length=1, max_length=1)
+    repetition_separator: str = Field("^", min_length=1, max_length=1)
+    segment_terminator: str = Field("~", min_length=1, max_length=1)
+    component_separator: str = Field(":", min_length=1, max_length=1)
 
 
 class X12BaseModel(BaseModel):
@@ -31,9 +34,15 @@ class X12BaseModel(BaseModel):
     X12BaseModel serves as the base class for all X12 segment models.
     """
 
-    delimiters: X12Delimiters
+    delimiters: X12Delimiters = X12Delimiters()
     loop_context: X12Loop
     segment_name: str = Field(min_length=2, max_length=3)
+
+    class Config:
+        """
+        Default configuration for X12 Models
+        """
+        use_enum_values = True
 
     def x12(self) -> str:
         """
@@ -44,17 +53,19 @@ class X12BaseModel(BaseModel):
         ]
         x12_values = []
         for v in model_values:
-            if isinstance(v, list):
+            if isinstance(v, str):
+                x12_values.append(v)
+            elif isinstance(v, list):
                 repeating_values = self.delimiters.repetition_separator.join(v)
                 x12_values.append(repeating_values)
             elif isinstance(v, datetime.date):
                 x12_values.append(v.isoformat().replace("-", ""))
             elif isinstance(v, datetime.time):
-                x12_values.append(v.isoformat())
+                x12_values.append(v.isoformat().replace(":", ""))
             elif v is None:
                 x12_values.append("")
             else:
-                x12_values.append(v)
+                x12_values.append(str(v))
 
         x12_str = self.delimiters.element_separator.join(x12_values).rstrip(
             self.delimiters.element_separator

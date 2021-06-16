@@ -12,6 +12,7 @@ class X12Config(BaseSettings):
     X12 Parsing and Validation Configurations
     """
 
+    x12_isa_component_separator: int = 104
     x12_isa_element_separator: int = 3
     x12_isa_repetition_separator: int = 82
     x12_isa_segment_length: int = 106

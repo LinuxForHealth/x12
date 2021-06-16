@@ -19,13 +19,9 @@ def test_init(request, test_input: str):
     input_value = request.getfixturevalue(test_input)
     x12_reader = X12SegmentReader(input_value)
     assert x12_reader.x12_input
-    assert x12_reader.buffer_size is not None and x12_reader.buffer_size > 0
-    assert x12_reader.isa_segment_length == 106
-    assert x12_reader.isa_element_separator == 3
-    assert x12_reader.isa_repetition_separator == 82
-    assert x12_reader.isa_segment_terminator == 105
-
+    assert x12_reader.buffer_size is None
     assert x12_reader.x12_stream is None
+    assert x12_reader.component_separator is None
     assert x12_reader.element_separator is None
     assert x12_reader.repetition_separator is None
     assert x12_reader.segment_terminator is None
@@ -45,6 +41,7 @@ def test_segments_with_string_data(request, test_input: str):
     segment_count = 0
 
     with X12SegmentReader(input_value) as r:
+        assert r.component_separator == ":"
         assert r.element_separator == "*"
         assert r.repetition_separator == "^"
         assert r.segment_terminator == "~"
@@ -74,6 +71,7 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
     segment_count = 0
 
     with X12SegmentReader(f.strpath) as r:
+        assert r.component_separator == ":"
         assert r.element_separator == "*"
         assert r.repetition_separator == "^"
         assert r.segment_terminator == "~"
