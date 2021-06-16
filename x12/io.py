@@ -34,10 +34,10 @@ class X12SegmentReader:
         # cache config settings
         config: X12Config = get_config()
         self.buffer_size: int = config.x12_reader_buffer_size
-        self.isa_segment_length: int = config.isa_segment_length
-        self.isa_element_separator: int = config.isa_element_separator
-        self.isa_repetition_separator: int = config.isa_repetition_separator
-        self.isa_segment_terminator: int = config.isa_segment_terminator
+        self.isa_segment_length: int = config.x12_isa_segment_length
+        self.isa_element_separator: int = config.x12_isa_element_separator
+        self.isa_repetition_separator: int = config.x12_isa_repetition_separator
+        self.isa_segment_terminator: int = config.x12_isa_segment_terminator
 
         # set in __enter__
         self.x12_stream: Union[None, TextIOBase] = None

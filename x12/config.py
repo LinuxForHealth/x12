@@ -12,10 +12,10 @@ class X12Config(BaseSettings):
     X12 Parsing and Validation Configurations
     """
 
-    isa_element_separator: int = 3
-    isa_repetition_separator: int = 82
-    isa_segment_length: int = 106
-    isa_segment_terminator: int = 105
+    x12_isa_element_separator: int = 3
+    x12_isa_repetition_separator: int = 82
+    x12_isa_segment_length: int = 106
+    x12_isa_segment_terminator: int = 105
 
     x12_character_set: str = Field(regex="^(BASIC|EXTENDED)$")
     x12_reader_buffer_size: int = 1024000
