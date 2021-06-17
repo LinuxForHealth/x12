@@ -42,6 +42,7 @@ class X12BaseModel(BaseModel):
         """
         Default configuration for X12 Models
         """
+
         use_enum_values = True
 
     def x12(self) -> str:
