@@ -3,7 +3,7 @@ test_x12_base_model.py
 
 Tests X12 Base Model
 """
-from x12.models import X12BaseModel
+from x12.models import X12BaseSegmentModel
 from typing import List, Optional
 import datetime
 import pytest
@@ -15,7 +15,7 @@ def x12_mock_model():
     :return:A Mock model which extends X12BaseModel
     """
 
-    class MockModel(X12BaseModel):
+    class MockModel(X12BaseSegmentModel):
         """
         A simple model used to test X12BaseModel features.
         """
@@ -30,10 +30,6 @@ def x12_mock_model():
             "element_separator": "*",
             "repetition_separator": "^",
             "segment_terminator": "~",
-        },
-        "loop_context": {
-            "id": "Mock ID",
-            "description": "Mock Data",
         },
         "segment_name": "MCK",
         "first_name": "JOHN",

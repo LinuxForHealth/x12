@@ -1,7 +1,7 @@
 """
 test_control_segments.py
 
-Tests X12 Control Segment Models
+Tests v5010 X12 Control Segment Models
 """
 from x12.v5010.control_segments import *
 import datetime
@@ -9,10 +9,6 @@ import datetime
 
 def test_isa_segment():
     fields = {
-        "loop_context": {
-            "id": "INTERCHANGE_HEADER",
-            "description": "EDI MESSAGE INTERCHANGE HEADER SEGMENT",
-        },
         "segment_name": "ISA",
         "sender_id": "SENDER",
         "receiver_id": "RECEIVER",
@@ -32,12 +28,8 @@ def test_isa_segment():
 
 def test_gs_segment():
     fields = {
-        "loop_context": {
-            "id": "FUNCTIONAL_HEADER",
-            "description": "ASC X12 FUNCTIONAL GROUP HEADER SEGMENT",
-        },
         "segment_name": "GS",
-        "functional_id_code": "HS",
+        "functional_id_code": FunctionalIdCode.ELIGIBILITY_INQUIRY,
         "application_sender_code": "SENDER_CODE",
         "application_receiver_code": "RECEIVER_CODE",
         "creation_date": datetime.date(2021, 6, 16),
@@ -51,12 +43,31 @@ def test_gs_segment():
     )
 
 
+def test_st_segment():
+    fields = {
+        "segment_name": "ST",
+        "transaction_set_code": TransactionSetCode.ELIGIBILITY_INQUIRY,
+        "transaction_set_control_number": 1,
+        "implementation_reference": ImplementationReference.ELIGIBILITY_INQUIRY
+    }
+
+    st_segment = StSegment(**fields)
+    assert st_segment.x12() == "ST*270*1*005010X279A1~"
+
+
+def test_se_segment():
+    fields = {
+        "segment_name": "SE",
+        "segment_count": 20,
+        "transaction_set_control_number": 1
+    }
+
+    se_segment = SeSegment(**fields)
+    assert se_segment.x12() == "SE*20*1~"
+
+
 def test_ge_segment():
     fields = {
-        "loop_context": {
-            "id": "FUNCTIONAL_FOOTER",
-            "description": "ASC X12 FUNCTIONAL GROUP FOOTER SEGMENT",
-        },
         "segment_name": "GE",
         "transaction_set_count": 1,
         "group_control_number": 1,
@@ -67,10 +78,6 @@ def test_ge_segment():
 
 def test_iea_segment():
     fields = {
-        "loop_context": {
-            "id": "INTERCHANGE_FOOTER",
-            "description": "EDI MESSAGE INTERCHANGE FOOTER SEGMENT",
-        },
         "segment_name": "IEA",
         "functional_group_count": 1,
         "interchange_control_number": 512_987_762,

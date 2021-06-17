@@ -3,7 +3,7 @@ test_support.py
 
 Tests support functions.
 """
-from x12.support import is_x12_data, is_x12_file, os
+from x12.support import is_x12_data, is_x12_file
 import pytest
 
 

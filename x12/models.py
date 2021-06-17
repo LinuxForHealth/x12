@@ -29,13 +29,12 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12BaseModel(BaseModel):
+class X12BaseSegmentModel(BaseModel):
     """
-    X12BaseModel serves as the base class for all X12 segment models.
+    X12BaseSegmentModel serves as the base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()
-    loop_context: X12Loop
     segment_name: str = Field(min_length=2, max_length=3)
 
     class Config:

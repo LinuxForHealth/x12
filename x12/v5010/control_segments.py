@@ -3,31 +3,14 @@ control_segments.py
 
 Data models for X12 Control Segments that are not coupled to a specific X12 version.
 """
-from x12.models import X12BaseModel
+from x12.models import X12BaseSegmentModel
 from x12.v5010.control_codes import *
 from pydantic import Field, conint
 import datetime
 from typing import Literal, Union
-from enum import Enum
 
 
-class FunctionalIdCode(str, Enum):
-    """
-    ASC X12 Transaction ID Code as conveyed in GS01
-    """
-
-    HR = "HR"  # 276
-    HN = "HN"  # 277
-    HI = "HI"  # 278
-    RA = "RA"  # 820
-    BE = "BE"  # 834
-    HP = "HP"  # 835
-    HC = "HC"  # 837 (Professional, Institutional, Dental)
-    HB = "HB"  # 271
-    HS = "HS"  # 270
-
-
-class IsaSegment(X12BaseModel):
+class IsaSegment(X12BaseSegmentModel):
     """
     The interchange control header for X12 transactions
     """
@@ -75,7 +58,7 @@ class IsaSegment(X12BaseModel):
         return super().x12()
 
 
-class GsSegment(X12BaseModel):
+class GsSegment(X12BaseSegmentModel):
     """
     The functional group header for a X12 transaction set.
     """
@@ -97,7 +80,24 @@ class GsSegment(X12BaseModel):
         return super().x12()
 
 
-class GeSegment(X12BaseModel):
+class StSegment(X12BaseSegmentModel):
+    """
+    The transaction set header
+    """
+    transaction_set_code: TransactionSetCode
+    transaction_set_control_number: conint(gt=0, lt=1_000_000_000)
+    implementation_reference: ImplementationReference
+
+
+class SeSegment(X12BaseSegmentModel):
+    """
+    The transaction set footer
+    """
+    segment_count: conint(gt=0, lt=1_000_000_001)
+    transaction_set_control_number: conint(gt=0, lt=1_000_000_000)
+
+
+class GeSegment(X12BaseSegmentModel):
     """
     The functional group footer for a X12 transaction set.
     """
@@ -106,7 +106,7 @@ class GeSegment(X12BaseModel):
     group_control_number: conint(gt=0, lt=1_000_000_000)
 
 
-class IeaSegment(X12BaseModel):
+class IeaSegment(X12BaseSegmentModel):
     """
     The interchange control footer for X12 transactions
     """

@@ -1,5 +1,5 @@
 """
-Tests LinuxForHealth X12 IO Features
+Tests LinuxForHealth X12SegmentReader
 """
 import pytest
 from x12.io import X12SegmentReader
