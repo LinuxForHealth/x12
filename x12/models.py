@@ -1,12 +1,28 @@
 """
 models.py
 
-Includes the base model used for X12 parsing and validation, in addition to models that aren't coupled to a specific
-X12 version.
+The base models for X12 parsing and validation that aren't associated with a specific X12 version.
 """
 import datetime
 
 from pydantic import BaseModel, Field
+
+
+class X12VersionIdentifiers(BaseModel):
+    """
+    X12VersionIdentifiers stores the various version ids distributed in the ISA, GS, and ST control segments.
+    """
+
+    interchange_control_version: str
+    functional_id_code: str = Field(min_length=2, max_length=2)
+    functional_version_code: str = Field(min_length=1, max_length=12)
+    transaction_set_code: str = Field(min_length=3, max_length=3)
+
+    def __str__(self):
+        """
+        :return: the string representation of the Version Identifiers as a "-" delimited key
+        """
+        return f"{self.interchange_control_version}-{self.functional_id_code}-{self.functional_version_code}-{self.transaction_set_code}"
 
 
 class X12Delimiters(BaseModel):

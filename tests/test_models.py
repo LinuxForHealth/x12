@@ -1,9 +1,9 @@
 """
-test_x12_base_model.py
+test_models.py
 
-Tests X12 Base Model
+Tests X12 Base Models
 """
-from x12.models import X12BaseSegmentModel
+from x12.models import X12BaseSegmentModel, X12Delimiters, X12VersionIdentifiers
 from typing import List, Optional
 import datetime
 import pytest
@@ -58,3 +58,22 @@ def test_x12(x12_mock_model):
     assert (
         x12_mock_model.x12() == "MCK*JOHN*DOE*1400 ANYHOO LANE^PLEASANTVILLE^SC^90210~"
     )
+
+
+def test_x12_delimiter_defaults():
+    x12_delimiters: X12Delimiters = X12Delimiters()
+    assert x12_delimiters.component_separator == ":"
+    assert x12_delimiters.element_separator == "*"
+    assert x12_delimiters.repetition_separator == "^"
+    assert x12_delimiters.segment_terminator == "~"
+
+
+def test_x12_version_identifiers():
+    fields = {
+        "interchange_control_version": "00501",
+        "functional_id_code": "HS",
+        "functional_version_code": "005010X279A1",
+        "transaction_set_code": "270",
+    }
+    x12_version_identifiers: X12VersionIdentifiers = X12VersionIdentifiers(**fields)
+    assert str(x12_version_identifiers) == "00501-HS-005010X279A1-270"

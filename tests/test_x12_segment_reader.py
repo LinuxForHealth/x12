@@ -22,7 +22,7 @@ def test_init(request, test_input: str):
     assert x12_reader.buffer_size is None
     assert x12_reader.x12_stream is None
     assert x12_reader.x12_delimiters is None
-    assert x12_reader.interchange_version is None
+    assert x12_reader.x12_version_ids is not None
 
 
 @pytest.mark.parametrize(
@@ -36,20 +36,30 @@ def test_segments_with_string_data(request, test_input: str):
     :param test_input: The fixture name.
     """
     input_value = request.getfixturevalue(test_input)
-    segment_count = 0
 
     with X12SegmentReader(input_value) as r:
+        segment_count = 0
+        version_key = None
+
         assert r.x12_delimiters.component_separator == ":"
         assert r.x12_delimiters.element_separator == "*"
         assert r.x12_delimiters.repetition_separator == "^"
         assert r.x12_delimiters.segment_terminator == "~"
-        assert r.interchange_version == "00501"
 
-        for _ in r.segments():
+        for segment_name, segment_fields in r.segments():
+            # read the segment before SE so we can confirm the version key is correct
+            if segment_name == "EQ":
+                version_key = str(r.x12_version_ids)
             segment_count += 1
 
+        assert "00501-HS-005010X279A1-270" == version_key
+        assert 21 == segment_count
+
     assert r.x12_stream.closed
-    assert segment_count == 21
+    assert r.x12_delimiters is None
+    assert r.x12_config is None
+    assert r.x12_version_ids is None
+    assert r.x12_input is None
 
 
 @pytest.mark.parametrize(
@@ -67,20 +77,29 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
     f = tmpdir.mkdir("x12-support").join("test.x12")
     f.write(input_value)
 
-    segment_count = 0
+    with X12SegmentReader(f) as r:
+        segment_count = 0
+        version_key = None
 
-    with X12SegmentReader(f.strpath) as r:
         assert r.x12_delimiters.component_separator == ":"
         assert r.x12_delimiters.element_separator == "*"
         assert r.x12_delimiters.repetition_separator == "^"
         assert r.x12_delimiters.segment_terminator == "~"
-        assert r.interchange_version == "00501"
 
-        for _ in r.segments():
+        for segment_name, segment_fields in r.segments():
+            # read the segment before SE so we can confirm the version key is correct
+            if segment_name == "EQ":
+                version_key = str(r.x12_version_ids)
             segment_count += 1
 
+        assert "00501-HS-005010X279A1-270" == version_key
+        assert 21 == segment_count
+
     assert r.x12_stream.closed
-    assert segment_count == 21
+    assert r.x12_delimiters is None
+    assert r.x12_config is None
+    assert r.x12_version_ids is None
+    assert r.x12_input is None
 
 
 def test_invalid_x12_data(simple_270_one_line):
