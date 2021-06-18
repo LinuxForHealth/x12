@@ -9,15 +9,6 @@ import datetime
 from pydantic import BaseModel, Field
 
 
-class X12Loop(BaseModel):
-    """
-    Models a X12 loop, which is a logical grouping of models within a transaction set.
-    """
-
-    id: str
-    description: str
-
-
 class X12Delimiters(BaseModel):
     """
     X12Delimiters models the common delimiters used within a X12 message's models.
@@ -49,7 +40,7 @@ class X12BaseSegmentModel(BaseModel):
         :return: the X12 representation of the model instance
         """
         model_values = [
-            v for v in self.dict(exclude={"delimiters", "loop_context"}).values()
+            v for v in self.dict(exclude={"delimiters"}).values()
         ]
         x12_values = []
         for v in model_values:
