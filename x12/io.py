@@ -7,6 +7,7 @@ from io import TextIOBase, StringIO
 from x12.config import get_config, X12Config
 from x12.support import is_x12_data, is_x12_file
 from typing import Union, Iterator, List
+from x12.models import X12Delimiters
 
 
 class X12SegmentReader:
@@ -34,23 +35,26 @@ class X12SegmentReader:
         # set in __enter__
         self.buffer_size: Union[None, int] = None
         self.x12_stream: Union[None, TextIOBase] = None
-        self.element_separator: Union[None, str] = None
-        self.repetition_separator: Union[None, str] = None
-        self.segment_terminator: Union[None, str] = None
-        self.component_separator: Union[None, str] = None
+        self.x12_delimiters: Union[None, X12Delimiters] = None
+        self.interchange_version: Union[None, str] = None
 
-    def _set_delimiters(self, x12_config: X12Config):
+    def _parse_isa_segment(self, x12_config: X12Config):
         """
-        Sets the X12 message delimiters based on leading ISA segment/control header.
+        Parses fields from the ISA segment to set delimiters/instance attributes.
         The ISA segment is conveyed in the first 106 characters of the transmission.
         """
         self.x12_stream.seek(0)
 
         isa_segment: str = self.x12_stream.read(x12_config.x12_isa_segment_length)
-        self.component_separator = isa_segment[x12_config.x12_isa_component_separator]
-        self.element_separator = isa_segment[x12_config.x12_isa_element_separator]
-        self.repetition_separator = isa_segment[x12_config.x12_isa_repetition_separator]
-        self.segment_terminator = isa_segment[x12_config.x12_isa_segment_terminator]
+        isa_tokens = isa_segment[0:105].split("*")
+
+        self.x12_delimiters = X12Delimiters(
+            element_separator=isa_segment[x12_config.x12_isa_element_separator],
+            repetition_separator=isa_tokens[11],
+            segment_terminator=isa_segment[-1],
+            component_separator=isa_tokens[16],
+        )
+        self.interchange_version = isa_tokens[12]
 
     def __enter__(self) -> "X12SegmentReader":
         """
@@ -68,12 +72,13 @@ class X12SegmentReader:
             )
 
         x12_config = get_config()
+        self.buffer_size: int = x12_config.x12_reader_buffer_size
+
         self.x12_stream.seek(0)
         if not self.x12_stream.read(x12_config.x12_isa_segment_length):
             raise ValueError("Invalid X12Stream")
 
-        self.buffer_size: int = x12_config.x12_reader_buffer_size
-        self._set_delimiters(x12_config)
+        self._parse_isa_segment(x12_config)
 
         return self
 
@@ -100,14 +105,14 @@ class X12SegmentReader:
             if not buffer:
                 break
 
-            while buffer[-1] != self.segment_terminator:
+            while buffer[-1] != self.x12_delimiters.segment_terminator:
                 next_character: str = self.x12_stream.read(1)
                 if not next_character:
                     break
                 buffer += next_character
 
             # use rstrip to remove trailing empty strings
-            for segment in buffer.rstrip(self.segment_terminator).split(
-                self.segment_terminator
+            for segment in buffer.rstrip(self.x12_delimiters.segment_terminator).split(
+                self.x12_delimiters.segment_terminator
             ):
                 yield segment

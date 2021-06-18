@@ -21,10 +21,8 @@ def test_init(request, test_input: str):
     assert x12_reader.x12_input
     assert x12_reader.buffer_size is None
     assert x12_reader.x12_stream is None
-    assert x12_reader.component_separator is None
-    assert x12_reader.element_separator is None
-    assert x12_reader.repetition_separator is None
-    assert x12_reader.segment_terminator is None
+    assert x12_reader.x12_delimiters is None
+    assert x12_reader.interchange_version is None
 
 
 @pytest.mark.parametrize(
@@ -41,10 +39,11 @@ def test_segments_with_string_data(request, test_input: str):
     segment_count = 0
 
     with X12SegmentReader(input_value) as r:
-        assert r.component_separator == ":"
-        assert r.element_separator == "*"
-        assert r.repetition_separator == "^"
-        assert r.segment_terminator == "~"
+        assert r.x12_delimiters.component_separator == ":"
+        assert r.x12_delimiters.element_separator == "*"
+        assert r.x12_delimiters.repetition_separator == "^"
+        assert r.x12_delimiters.segment_terminator == "~"
+        assert r.interchange_version == "00501"
 
         for _ in r.segments():
             segment_count += 1
@@ -71,10 +70,11 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
     segment_count = 0
 
     with X12SegmentReader(f.strpath) as r:
-        assert r.component_separator == ":"
-        assert r.element_separator == "*"
-        assert r.repetition_separator == "^"
-        assert r.segment_terminator == "~"
+        assert r.x12_delimiters.component_separator == ":"
+        assert r.x12_delimiters.element_separator == "*"
+        assert r.x12_delimiters.repetition_separator == "^"
+        assert r.x12_delimiters.segment_terminator == "~"
+        assert r.interchange_version == "00501"
 
         for _ in r.segments():
             segment_count += 1

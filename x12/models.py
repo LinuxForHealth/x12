@@ -39,9 +39,7 @@ class X12BaseSegmentModel(BaseModel):
         """
         :return: the X12 representation of the model instance
         """
-        model_values = [
-            v for v in self.dict(exclude={"delimiters"}).values()
-        ]
+        model_values = [v for v in self.dict(exclude={"delimiters"}).values()]
         x12_values = []
         for v in model_values:
             if isinstance(v, str):

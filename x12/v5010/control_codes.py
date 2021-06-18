@@ -86,6 +86,7 @@ class TransactionSetCode(str, Enum):
     """
     ST01 code values
     """
+
     BENEFIT_ENROLLMENT = "834"
     CLAIM_PAYMENT = "835"
     CLAIM_STATUS_REQUEST = "276"
@@ -103,6 +104,7 @@ class ImplementationReference(str, Enum):
     """
     ST03 code values
     """
+
     BENEFIT_ENROLLMENT = "005010X220A1"
     CLAIM_PAYMENT = "005010X221A1"
     CLAIM_STATUS_REQUEST = "005010X212"

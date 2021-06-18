@@ -27,7 +27,7 @@ def simple_270_with_new_lines():
             "EQ*1~",
             "SE*17*0001~",
             "GE*1*1~",
-            "IEA*1*000000907~"
+            "IEA*1*000000907~",
         ]
     )
 
@@ -46,7 +46,7 @@ def large_x12_message():
     x12_message: str = "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~"
+            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
         ]
     )
 
@@ -73,7 +73,7 @@ def large_x12_message():
                 "DTP*291*D8*20131031~",
                 "EQ*1~",
                 # SE02 is the transaction set id - zero filled to 4 characters
-                f"SE*17*{i:04d}~"
+                f"SE*17*{i:04d}~",
             ]
         )
         x12_message += transaction_set + "\n"

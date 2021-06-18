@@ -8,3 +8,7 @@ from pydantic import BaseModel
 
 class EligibilityInquiry(BaseModel):
     pass
+
+
+class EligibilityInformation(BaseModel):
+    pass

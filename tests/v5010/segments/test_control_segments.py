@@ -48,7 +48,7 @@ def test_st_segment():
         "segment_name": "ST",
         "transaction_set_code": TransactionSetCode.ELIGIBILITY_INQUIRY,
         "transaction_set_control_number": 1,
-        "implementation_reference": ImplementationReference.ELIGIBILITY_INQUIRY
+        "implementation_reference": ImplementationReference.ELIGIBILITY_INQUIRY,
     }
 
     st_segment = StSegment(**fields)
@@ -59,7 +59,7 @@ def test_se_segment():
     fields = {
         "segment_name": "SE",
         "segment_count": 20,
-        "transaction_set_control_number": 1
+        "transaction_set_control_number": 1,
     }
 
     se_segment = SeSegment(**fields)

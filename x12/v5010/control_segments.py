@@ -84,6 +84,7 @@ class StSegment(X12BaseSegmentModel):
     """
     The transaction set header
     """
+
     transaction_set_code: TransactionSetCode
     transaction_set_control_number: conint(gt=0, lt=1_000_000_000)
     implementation_reference: ImplementationReference
@@ -93,6 +94,7 @@ class SeSegment(X12BaseSegmentModel):
     """
     The transaction set footer
     """
+
     segment_count: conint(gt=0, lt=1_000_000_001)
     transaction_set_control_number: conint(gt=0, lt=1_000_000_000)
 

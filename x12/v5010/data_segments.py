@@ -15,6 +15,7 @@ class BhtSegment(X12BaseSegmentModel):
     Example:
     BHT*0019*00*44445*20040213*0932*CH~
     """
+
     hierarchical_structure_code: str = Field(min_length=4, max_length=4)
     purpose_code: str = Field(min_length=2, max_length=2)
     transaction_identifier: Optional[PositiveInt]
