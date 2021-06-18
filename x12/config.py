@@ -11,6 +11,7 @@ class X12Config(BaseSettings):
     """
     X12 Parsing and Validation Configurations
     """
+
     # index positions for character delimiters in ISA segment
     x12_isa_component_separator: int = 104
     x12_isa_element_separator: int = 3

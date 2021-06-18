@@ -6,6 +6,7 @@ The base models for X12 parsing and validation that aren't associated with a spe
 import datetime
 
 from pydantic import BaseModel, Field
+from typing import List, Optional
 
 
 class X12VersionIdentifiers(BaseModel):
@@ -34,6 +35,23 @@ class X12Delimiters(BaseModel):
     repetition_separator: str = Field("^", min_length=1, max_length=1)
     segment_terminator: str = Field("~", min_length=1, max_length=1)
     component_separator: str = Field(":", min_length=1, max_length=1)
+
+
+class X12SegmentContext(BaseModel):
+    """
+    Provides a working context and metadata for a X12 segment.
+    """
+
+    version: Optional[X12VersionIdentifiers] = None
+    delimiters: Optional[X12Delimiters] = None
+    interchange_header: Optional[List[str]] = None
+    functional_group_header: Optional[List[str]] = None
+    transaction_set_header: Optional[List[str]] = None
+    previous_segment_name: Optional[str] = None
+    previous_segment: Optional[List[str]] = None
+    current_segment_name: Optional[str] = None
+    current_segment: Optional[List[str]] = None
+    current_loop: Optional[str] = None
 
 
 class X12BaseSegmentModel(BaseModel):
