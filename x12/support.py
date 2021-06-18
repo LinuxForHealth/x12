@@ -34,5 +34,5 @@ def is_x12_file(file_path: str) -> bool:
         f.seek(0)
         # ISA segment is first 106 characters
         config: X12Config = get_config()
-        isa_segment = f.read(config.isa_segment_length)
+        isa_segment = f.read(config.x12_isa_segment_length)
         return is_x12_data(isa_segment)

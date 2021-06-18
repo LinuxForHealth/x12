@@ -1,5 +1,5 @@
 """
-Tests LinuxForHealth X12 IO Features
+Tests LinuxForHealth X12SegmentReader
 """
 import pytest
 from x12.io import X12SegmentReader
@@ -19,16 +19,11 @@ def test_init(request, test_input: str):
     input_value = request.getfixturevalue(test_input)
     x12_reader = X12SegmentReader(input_value)
     assert x12_reader.x12_input
-    assert x12_reader.buffer_size is not None and x12_reader.buffer_size > 0
-    assert x12_reader.isa_segment_length == 106
-    assert x12_reader.isa_element_separator == 3
-    assert x12_reader.isa_repetition_separator == 82
-    assert x12_reader.isa_segment_terminator == 105
-
+    assert x12_reader.buffer_size is None
     assert x12_reader.x12_stream is None
-    assert x12_reader.element_separator is None
-    assert x12_reader.repetition_separator is None
-    assert x12_reader.segment_terminator is None
+    assert x12_reader.context is not None
+    assert x12_reader.context.delimiters is not None
+    assert x12_reader.context.version is not None
 
 
 @pytest.mark.parametrize(
@@ -36,24 +31,35 @@ def test_init(request, test_input: str):
 )
 def test_segments_with_string_data(request, test_input: str):
     """
-    Test X12SegmentReader segments with a x12 data/message input.
+    Test X12SegmentReader models with a x12 data/message input.
 
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param test_input: The fixture name.
     """
     input_value = request.getfixturevalue(test_input)
-    segment_count = 0
 
     with X12SegmentReader(input_value) as r:
-        assert r.element_separator == "*"
-        assert r.repetition_separator == "^"
-        assert r.segment_terminator == "~"
+        segment_count = 0
+        version_key = None
 
-        for _ in r.segments():
+        assert r.context.delimiters.component_separator == ":"
+        assert r.context.delimiters.element_separator == "*"
+        assert r.context.delimiters.repetition_separator == "^"
+        assert r.context.delimiters.segment_terminator == "~"
+
+        for segment_name, segment_fields, context in r.segments():
+            # read the segment before SE so we can confirm the version key is correct
+            if segment_name == "EQ":
+                version_key = str(r.context.version)
             segment_count += 1
 
+        assert "00501-HS-005010X279A1-270" == version_key
+        assert 21 == segment_count
+
     assert r.x12_stream.closed
-    assert segment_count == 21
+    assert r.context is None
+    assert r.x12_config is None
+    assert r.x12_input is None
 
 
 @pytest.mark.parametrize(
@@ -61,7 +67,7 @@ def test_segments_with_string_data(request, test_input: str):
 )
 def test_segments_with_file_path(request, tmpdir, test_input: str):
     """
-    Test X12SegmentReader segments with a x12 file path input.
+    Test X12SegmentReader models with a x12 file path input.
 
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param tmpdir: Pytest fixture used to create temporary files and directories
@@ -71,18 +77,28 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
     f = tmpdir.mkdir("x12-support").join("test.x12")
     f.write(input_value)
 
-    segment_count = 0
+    with X12SegmentReader(f) as r:
+        segment_count = 0
+        version_key = None
 
-    with X12SegmentReader(f.strpath) as r:
-        assert r.element_separator == "*"
-        assert r.repetition_separator == "^"
-        assert r.segment_terminator == "~"
+        assert r.context.delimiters.component_separator == ":"
+        assert r.context.delimiters.element_separator == "*"
+        assert r.context.delimiters.repetition_separator == "^"
+        assert r.context.delimiters.segment_terminator == "~"
 
-        for _ in r.segments():
+        for segment_name, segment_fields, context in r.segments():
+            # read the segment before SE so we can confirm the version key is correct
+            if segment_name == "EQ":
+                version_key = str(r.context.version)
             segment_count += 1
 
+        assert "00501-HS-005010X279A1-270" == version_key
+        assert 21 == segment_count
+
     assert r.x12_stream.closed
-    assert segment_count == 21
+    assert r.context is None
+    assert r.x12_config is None
+    assert r.x12_input is None
 
 
 def test_invalid_x12_data(simple_270_one_line):
