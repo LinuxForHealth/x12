@@ -53,7 +53,7 @@ def test_segments_with_string_data(request, test_input: str):
                 version_key = str(r.context.version)
             segment_count += 1
 
-        assert "00501-HS-005010X279A1-270" == version_key
+        assert "00501_HS_005010X279A1_270" == version_key
         assert 21 == segment_count
 
     assert r.x12_stream.closed
@@ -92,7 +92,7 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
                 version_key = str(r.context.version)
             segment_count += 1
 
-        assert "00501-HS-005010X279A1-270" == version_key
+        assert "00501_HS_005010X279A1_270" == version_key
         assert 21 == segment_count
 
     assert r.x12_stream.closed

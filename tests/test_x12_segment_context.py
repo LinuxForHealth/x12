@@ -35,7 +35,7 @@ def test_x12_segment_context(simple_270_one_line):
                 parsed_transaction_set = True
 
             if parsed_transaction_set:
-                assert str(r.context.version) == "00501-HS-005010X279A1-270"
+                assert str(r.context.version) == "00501_HS_005010X279A1_270"
 
         # confirm that we iterated
         assert segment_count > 0

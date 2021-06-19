@@ -76,4 +76,4 @@ def test_x12_version_identifiers():
         "transaction_set_code": "270",
     }
     x12_version_identifiers: X12VersionIdentifiers = X12VersionIdentifiers(**fields)
-    assert str(x12_version_identifiers) == "00501-HS-005010X279A1-270"
+    assert str(x12_version_identifiers) == "00501_HS_005010X279A1_270"
