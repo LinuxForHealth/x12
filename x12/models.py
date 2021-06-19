@@ -52,7 +52,6 @@ class X12SegmentContext(BaseModel):
     previous_segment: Optional[List[str]] = None
     current_segment_name: Optional[str] = None
     current_segment: Optional[List[str]] = None
-    current_loop: Optional[str] = None
 
 
 class X12BaseSegmentModel(BaseModel):
