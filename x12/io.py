@@ -97,10 +97,12 @@ class X12SegmentReader:
 
     def _update_context(self, segment_fields) -> NoReturn:
         """
-        Updates the current context.
+        Updates the current context attributes based on the current segment fields
         :param segment_fields: List of segment fields.
         """
         segment_name = segment_fields[0].upper()
+        self.context.current_segment_name = segment_name
+        self.context.current_segment = segment_fields
 
         if segment_name == "ISA":
             self.context.interchange_header = segment_fields
@@ -113,10 +115,9 @@ class X12SegmentReader:
             self.context.transaction_set_header = segment_fields
             self.context.version.transaction_set_code = segment_fields[X12VersionFields.ST_TRANSACTION_CODE]
 
-        self.context.previous_segment_name = self.context.current_segment_name
-        self.context.previous_segment = self.context.current_segment
-        self.context.current_segment_name = segment_name
-        self.context.current_segment = segment_fields
+        if segment_name not in ("ISA", "GS", "GE", "IEA"):
+            transaction_control_id = self.context.transaction_set_header[X12VersionFields.ST_TRANSACTION_CONTROL]
+            self.context.segment_count[transaction_control_id] += 1
 
     def segments(self) -> Iterator[Tuple[str, List[str], X12ReaderContext]]:
         """

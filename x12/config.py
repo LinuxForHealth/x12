@@ -27,6 +27,7 @@ class X12VersionFields(IntEnum):
     GS_FUNCTIONAL_CODE: int = 1
     GS_FUNCTIONAL_VERSION: int = 8
     ST_TRANSACTION_CODE: int = 1
+    ST_TRANSACTION_CONTROL: int = 2
 
 
 class X12Config(BaseSettings):

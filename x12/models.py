@@ -8,6 +8,7 @@ import datetime
 from pydantic import BaseModel, Field
 from typing import List, Optional, Iterable
 from pydantic.fields import ModelField
+from collections import defaultdict
 
 
 class X12VersionIdentifiers(BaseModel):
@@ -48,11 +49,10 @@ class X12ReaderContext(BaseModel):
     interchange_header: Optional[List[str]] = None
     functional_group_header: Optional[List[str]] = None
     transaction_set_header: Optional[List[str]] = None
-    previous_segment_name: Optional[str] = None
-    previous_segment: Optional[List[str]] = None
+    segment_count: Optional[defaultdict] = defaultdict(int)
+
     current_segment_name: Optional[str] = None
     current_segment: Optional[List[str]] = None
-    # TODO segment count
 
 
 class X12BaseSegmentModel(BaseModel):
