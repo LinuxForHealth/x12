@@ -38,9 +38,9 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12SegmentContext(BaseModel):
+class X12ReaderContext(BaseModel):
     """
-    Provides a working context and metadata for a X12 segment.
+    Provides a working context and metadata for the X12 Segment Reader.
     """
 
     version: Optional[X12VersionIdentifiers] = None
@@ -52,6 +52,7 @@ class X12SegmentContext(BaseModel):
     previous_segment: Optional[List[str]] = None
     current_segment_name: Optional[str] = None
     current_segment: Optional[List[str]] = None
+    # TODO segment count
 
 
 class X12BaseSegmentModel(BaseModel):

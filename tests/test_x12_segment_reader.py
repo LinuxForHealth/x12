@@ -58,7 +58,6 @@ def test_segments_with_string_data(request, test_input: str):
 
     assert r.x12_stream.closed
     assert r.context is None
-    assert r.x12_config is None
     assert r.x12_input is None
 
 
@@ -97,7 +96,6 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
 
     assert r.x12_stream.closed
     assert r.context is None
-    assert r.x12_config is None
     assert r.x12_input is None
 
 

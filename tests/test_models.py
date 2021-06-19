@@ -3,7 +3,7 @@ test_models.py
 
 Tests X12 Base Models
 """
-from x12.models import X12BaseSegmentModel, X12Delimiters, X12VersionIdentifiers, X12SegmentContext
+from x12.models import X12BaseSegmentModel, X12Delimiters, X12VersionIdentifiers, X12ReaderContext
 from typing import List, Optional
 import datetime
 import pytest

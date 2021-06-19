@@ -5,25 +5,34 @@ from pydantic import BaseSettings, Field
 import os
 from os.path import dirname, abspath
 from functools import lru_cache
+from enum import IntEnum
+
+
+class IsaDelimiters(IntEnum):
+    """
+    The indices used to parse the delimiters conveyed in the ISA segment
+    """
+    COMPONENT_SEPARATOR: int = 104
+    ELEMENT_SEPARATOR: int = 3
+    REPETITION_SEPARATOR: int = 82
+    SEGMENT_LENGTH: int = 106
+    SEGMENT_TERMINATOR: int = 105
+
+
+class X12VersionFields(IntEnum):
+    """
+    Positional field indices for X12 version fields
+    """
+    ISA_CONTROL_VERSION: int = 12
+    GS_FUNCTIONAL_CODE: int = 1
+    GS_FUNCTIONAL_VERSION: int = 8
+    ST_TRANSACTION_CODE: int = 1
 
 
 class X12Config(BaseSettings):
     """
     X12 Parsing and Validation Configurations
     """
-
-    # index positions for character delimiters in ISA segment
-    x12_isa_component_separator: int = 104
-    x12_isa_element_separator: int = 3
-    x12_isa_repetition_separator: int = 82
-    x12_isa_segment_length: int = 106
-    x12_isa_segment_terminator: int = 105
-
-    # version field positions in tokenized segments
-    x12_isa_control_version: int = 12
-    x12_gs_functional_code: int = 1
-    x12_gs_function_version: int = 8
-    x12_st_transaction_code: int = 1
 
     x12_character_set: str = Field(regex="^(BASIC|EXTENDED)$")
     x12_reader_buffer_size: int = 1024000

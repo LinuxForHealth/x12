@@ -1,9 +1,9 @@
 from x12.io import X12SegmentReader
 
 
-def test_x12_segment_context(simple_270_one_line):
+def test_x12_reader_context(simple_270_one_line):
     """
-    Tests the X12 segment context object during x12 segment iteration
+    Tests the X12 reader context object during x12 segment iteration
     """
 
     with X12SegmentReader(simple_270_one_line) as r:
