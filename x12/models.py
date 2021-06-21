@@ -25,7 +25,7 @@ class X12VersionIdentifiers(BaseModel):
         """
         :return: the string representation of the Version Identifiers as a "-" delimited key
         """
-        return f"{self.interchange_control_version}_{self.functional_id_code}_{self.functional_version_code}_{self.transaction_set_code}"
+        return f"{self.functional_id_code}_{self.transaction_set_code}_{self.interchange_control_version}"
 
 
 class X12Delimiters(BaseModel):
@@ -97,9 +97,9 @@ class X12BaseSegmentModel(BaseModel):
         return x12_str + self.delimiters.segment_terminator
 
 
-def set_optional_model_fields(self, model_class: X12BaseSegmentModel, optional_fields: Iterable[str]):
+def set_optional_model_fields(
+    self, model_class: X12BaseSegmentModel, optional_fields: Iterable[str]
+):
 
     for optional_field in optional_fields:
         model_class.__fields__[optional_field] = ModelField()
-
-

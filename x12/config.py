@@ -12,6 +12,7 @@ class IsaDelimiters(IntEnum):
     """
     The indices used to parse the delimiters conveyed in the ISA segment
     """
+
     COMPONENT_SEPARATOR: int = 104
     ELEMENT_SEPARATOR: int = 3
     REPETITION_SEPARATOR: int = 82
@@ -23,6 +24,7 @@ class X12VersionFields(IntEnum):
     """
     Positional field indices for X12 version fields
     """
+
     ISA_CONTROL_VERSION: int = 12
     GS_FUNCTIONAL_CODE: int = 1
     GS_FUNCTIONAL_VERSION: int = 8

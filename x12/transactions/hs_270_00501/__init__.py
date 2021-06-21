@@ -1,6 +1,9 @@
 from pydantic import BaseModel
-from .header import Header
 
 
 class EligibilityInquiry(BaseModel):
-    header: Header
+    """
+    The Eligibility/270 transaction
+    """
+
+    pass

@@ -6,8 +6,9 @@ Supports X12 I/O operations such as reading, writing, and modeling raw models.
 from io import TextIOBase, StringIO
 from x12.config import get_config, IsaDelimiters, X12VersionFields
 from x12.support import is_x12_data, is_x12_file
-from typing import Optional, Iterator, List, Tuple, NoReturn
+from typing import Optional, Iterator, List, Tuple, NoReturn, Type
 from x12.models import X12Delimiters, X12VersionIdentifiers, X12ReaderContext
+from pydantic import BaseModel
 
 
 class X12SegmentReader:
@@ -47,10 +48,18 @@ class X12SegmentReader:
         self.x12_stream.seek(0)
 
         isa_segment: str = self.x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
-        self.context.delimiters.element_separator = isa_segment[IsaDelimiters.ELEMENT_SEPARATOR]
-        self.context.delimiters.repetition_separator = isa_segment[IsaDelimiters.REPETITION_SEPARATOR]
-        self.context.delimiters.segment_terminator = isa_segment[IsaDelimiters.SEGMENT_TERMINATOR]
-        self.context.delimiters.component_separator = isa_segment[IsaDelimiters.COMPONENT_SEPARATOR]
+        self.context.delimiters.element_separator = isa_segment[
+            IsaDelimiters.ELEMENT_SEPARATOR
+        ]
+        self.context.delimiters.repetition_separator = isa_segment[
+            IsaDelimiters.REPETITION_SEPARATOR
+        ]
+        self.context.delimiters.segment_terminator = isa_segment[
+            IsaDelimiters.SEGMENT_TERMINATOR
+        ]
+        self.context.delimiters.component_separator = isa_segment[
+            IsaDelimiters.COMPONENT_SEPARATOR
+        ]
 
     def __enter__(self) -> "X12SegmentReader":
         """
@@ -91,9 +100,38 @@ class X12SegmentReader:
         self.x12_input = None
         self.x12_config = None
 
-    def _is_control_segment(self, segment_name) -> bool:
-        """returns True if the segment_name is a control segment"""
-        return segment_name.upper() in ("ISA", "GS", "ST", "SE", "GE", "IEA")
+    def is_control_segment(self) -> bool:
+        """returns True if the current segment is a control segment"""
+        return (
+            self.is_interchange_header()
+            or self.is_interchange_footer()
+            or self.is_functional_group_header()
+            or self.is_functional_group_footer()
+        )
+
+    def is_interchange_header(self) -> bool:
+        """returns True if the current segment is the interchange header"""
+        return self.context.current_segment_name.upper() == "ISA"
+
+    def is_interchange_footer(self) -> bool:
+        """returns True if the current segment is the interchange footer"""
+        return self.context.current_segment_name.upper() == "IEA"
+
+    def is_functional_group_header(self) -> bool:
+        """returns True if the current segment is the functional group header"""
+        return self.context.current_segment_name.upper() == "GS"
+
+    def is_functional_group_footer(self) -> bool:
+        """returns True if the current segment is the functional group footer"""
+        return self.context.current_segment_name.upper() == "GE"
+
+    def is_transaction_header(self) -> bool:
+        """returns True if the current segment is the transaction set header"""
+        return self.context.current_segment_name.upper() == "ST"
+
+    def is_transaction_footer(self) -> bool:
+        """returns True if the current segment is the transaction set footer"""
+        return self.context.current_segment_name.upper() == "SE"
 
     def _update_context(self, segment_fields) -> NoReturn:
         """
@@ -104,19 +142,29 @@ class X12SegmentReader:
         self.context.current_segment_name = segment_name
         self.context.current_segment = segment_fields
 
-        if segment_name == "ISA":
+        if self.is_interchange_header():
             self.context.interchange_header = segment_fields
-            self.context.version.interchange_control_version = segment_fields[X12VersionFields.ISA_CONTROL_VERSION]
-        elif segment_name == "GS":
+            self.context.version.interchange_control_version = segment_fields[
+                X12VersionFields.ISA_CONTROL_VERSION
+            ]
+        elif self.is_functional_group_header():
             self.context.functional_group_header = segment_fields
-            self.context.version.functional_id_code = segment_fields[X12VersionFields.GS_FUNCTIONAL_CODE]
-            self.context.version.functional_version_code = segment_fields[X12VersionFields.GS_FUNCTIONAL_VERSION]
-        elif segment_name == "ST":
+            self.context.version.functional_id_code = segment_fields[
+                X12VersionFields.GS_FUNCTIONAL_CODE
+            ]
+            self.context.version.functional_version_code = segment_fields[
+                X12VersionFields.GS_FUNCTIONAL_VERSION
+            ]
+        elif self.is_transaction_header():
             self.context.transaction_set_header = segment_fields
-            self.context.version.transaction_set_code = segment_fields[X12VersionFields.ST_TRANSACTION_CODE]
+            self.context.version.transaction_set_code = segment_fields[
+                X12VersionFields.ST_TRANSACTION_CODE
+            ]
 
-        if segment_name not in ("ISA", "GS", "GE", "IEA"):
-            transaction_control_id = self.context.transaction_set_header[X12VersionFields.ST_TRANSACTION_CONTROL]
+        if not self.is_control_segment():
+            transaction_control_id = self.context.transaction_set_header[
+                X12VersionFields.ST_TRANSACTION_CONTROL
+            ]
             self.context.segment_count[transaction_control_id] += 1
 
     def segments(self) -> Iterator[Tuple[str, List[str], X12ReaderContext]]:
@@ -153,3 +201,20 @@ class X12SegmentReader:
                     self.context.current_segment,
                     self.context,
                 )
+
+
+class X12ModelReader:
+    def __init__(self, x12_input: str):
+        self.x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
+
+    def __enter__(self):
+        self.x12_segment_reader.__enter__()
+        return self
+
+    def models(self) -> Iterator[Type[BaseModel]]:
+        for segment_name, segment, context in self.x12_segment_reader.segments():
+            pass
+
+    def __exit__(self):
+        if not self.x12_segment_reader.x12_stream.closed:
+            self.x12_segment_reader.x12_stream.close()

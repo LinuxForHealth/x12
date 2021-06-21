@@ -3,7 +3,12 @@ test_models.py
 
 Tests X12 Base Models
 """
-from x12.models import X12BaseSegmentModel, X12Delimiters, X12VersionIdentifiers, X12ReaderContext
+from x12.models import (
+    X12BaseSegmentModel,
+    X12Delimiters,
+    X12VersionIdentifiers,
+    X12ReaderContext,
+)
 from typing import List, Optional
 import datetime
 import pytest
@@ -76,4 +81,4 @@ def test_x12_version_identifiers():
         "transaction_set_code": "270",
     }
     x12_version_identifiers: X12VersionIdentifiers = X12VersionIdentifiers(**fields)
-    assert str(x12_version_identifiers) == "00501_HS_005010X279A1_270"
+    assert str(x12_version_identifiers) == "HS_270_00501"
