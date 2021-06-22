@@ -23,6 +23,7 @@ class EligibilityInquiry(BaseModel):
     """
     The Eligibility/270 transaction
     """
+
     st_segment: StSegment
     bht_segment: BhtSegment
     loop_2000a: List[Loop2000A]

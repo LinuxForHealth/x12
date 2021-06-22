@@ -55,6 +55,7 @@ class HlSegment(X12BaseSegmentModel):
     Example:
         HL*3*2*22*1~
     """
+
     id_number: PositiveInt
     parent_id_number: PositiveInt
     level_code: PositiveInt
@@ -103,6 +104,7 @@ class Nm1Segment(X12BaseSegmentModel):
     Example:
         NM1*PR*2*PAYER C*****PI*12345~
     """
+
     entity_identifier_code: str = Field(min_length=2, max_length=3)
     entity_type_qualifier: str = conint(ge=1, le=2)
     name_last_org_name: str = Field(min_length=1, max_length=60)

@@ -60,8 +60,7 @@ def test_hl_segment():
         "id_number": 3,
         "parent_id_number": 2,
         "level_code": 22,
-        "child_code": 0
-
+        "child_code": 0,
     }
 
     hl_segment: HlSegment = HlSegment(**segment_data)

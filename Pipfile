@@ -15,6 +15,7 @@ python-dotenv = "*"
 pytest = "*"
 black = "*"
 pre-commit = "*"
+isort = "*"
 
 [pipenv]
 allow_prereleases = true
