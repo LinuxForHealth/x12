@@ -1,4 +1,5 @@
 import pytest
+
 from x12.config import X12Config
 from x12.models import X12Delimiters
 

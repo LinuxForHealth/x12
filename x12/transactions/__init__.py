@@ -1,7 +1,7 @@
 """
 transactions package
 """
-from x12.transactions import hs_270_00501, hb_271_00501
+from x12.transactions import hb_271_00501, hs_270_00501
 
 # maps x12.models.X12VersionIdentifier string to a transaction model
 transaction_map = {

@@ -3,13 +3,12 @@ test_models.py
 
 Tests X12 Base Models
 """
-from x12.models import (
-    X12BaseSegmentModel,
-    X12Delimiters,
-)
-from typing import List, Optional
 import datetime
+from typing import List, Optional
+
 import pytest
+
+from x12.models import X12BaseSegmentModel, X12Delimiters
 
 
 @pytest.fixture

@@ -1,6 +1,9 @@
-from x12.models import X12BaseSegmentModel
-from pydantic import Field, PositiveInt
 import datetime
+from typing import Optional
+
+from pydantic import Field, PositiveInt, conint
+
+from x12.models import X12BaseSegmentModel
 
 
 class BhtSegment(X12BaseSegmentModel):
@@ -46,6 +49,18 @@ class GsSegment(X12BaseSegmentModel):
     version_code: str = Field(min_length=1, max_length=12)
 
 
+class HlSegment(X12BaseSegmentModel):
+    """
+    Defines a hierarchical organization used to relate one grouping of segments to another
+    Example:
+        HL*3*2*22*1~
+    """
+    id_number: PositiveInt
+    parent_id_number: PositiveInt
+    level_code: PositiveInt
+    child_code: conint(ge=0, le=1)
+
+
 class IeaSegment(X12BaseSegmentModel):
     """
     Defines the interchange footer and is an EDI control segment.
@@ -80,6 +95,25 @@ class IsaSegment(X12BaseSegmentModel):
     control_number: str = Field(min_length=9, max_length=9)
     acknowledgment_requested: str = Field(min_length=1, max_length=1)
     interchange_usage: str = Field(min_length=1, max_length=1)
+
+
+class Nm1Segment(X12BaseSegmentModel):
+    """
+    Entity Name and Identification Number
+    Example:
+        NM1*PR*2*PAYER C*****PI*12345~
+    """
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    entity_type_qualifier: str = conint(ge=1, le=2)
+    name_last_org_name: str = Field(min_length=1, max_length=60)
+    first_name: Optional[str] = Field(min_length=1, max_length=35)
+    middle_name: Optional[str] = Field(min_length=1, max_length=25)
+    # not used
+    prefix: str = ""
+    suffix: Optional[str] = Field(min_length=1, max_length=10)
+    code_qualifier: str = Field(min_length=1, max_length=2)
+    identification_code: str = Field(min_length=2, max_length=80)
+    # NM110 - NM112 are not used
 
 
 class SeSegment(X12BaseSegmentModel):

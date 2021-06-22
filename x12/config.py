@@ -1,11 +1,12 @@
 """
 config.py
 """
-from pydantic import BaseSettings, Field
 import os
-from os.path import dirname, abspath
-from functools import lru_cache
 from enum import IntEnum
+from functools import lru_cache
+from os.path import abspath, dirname
+
+from pydantic import BaseSettings, Field
 
 
 class IsaDelimiters(IntEnum):

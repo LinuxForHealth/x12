@@ -3,13 +3,10 @@ models.py
 
 The base models for X12 parsing and validation that aren't associated with a specific X12 version.
 """
-import datetime
 import abc
+import datetime
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Iterable
-from pydantic.fields import ModelField
-from collections import defaultdict
 
 
 class X12Delimiters(BaseModel):
@@ -63,11 +60,3 @@ class X12BaseSegmentModel(BaseModel, abc.ABC):
             self.delimiters.element_separator
         )
         return x12_str + self.delimiters.segment_terminator
-
-
-def set_optional_model_fields(
-    self, model_class: X12BaseSegmentModel, optional_fields: Iterable[str]
-):
-
-    for optional_field in optional_fields:
-        model_class.__fields__[optional_field] = ModelField()

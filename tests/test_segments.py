@@ -3,8 +3,8 @@ test_segments.py
 
 Tests the Pydantic X12 segment models
 """
-from x12.segments import *
 from x12.models import X12Delimiters
+from x12.segments import *
 
 
 def test_bht_segment():
@@ -51,6 +51,21 @@ def test_gs_segment():
 
     gs_segment: GsSegment = GsSegment(**segment_data)
     assert gs_segment.dict() == segment_data
+
+
+def test_hl_segment():
+    segment_data = {
+        "delimiters": X12Delimiters().dict(),
+        "segment_name": "HL",
+        "id_number": 3,
+        "parent_id_number": 2,
+        "level_code": 22,
+        "child_code": 0
+
+    }
+
+    hl_segment: HlSegment = HlSegment(**segment_data)
+    assert hl_segment.dict() == segment_data
 
 
 def test_iea_segment():

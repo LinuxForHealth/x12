@@ -3,12 +3,14 @@ io.py
 
 Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
-from io import TextIOBase, StringIO
-from x12.config import get_config, IsaDelimiters
-from x12.support import is_x12_data, is_x12_file
-from typing import Optional, Iterator, List, Tuple, NoReturn, Type
-from x12.models import X12Delimiters
+from io import StringIO, TextIOBase
+from typing import Iterator, List, NoReturn, Optional, Tuple, Type
+
 from pydantic import BaseModel
+
+from x12.config import IsaDelimiters, get_config
+from x12.models import X12Delimiters
+from x12.support import is_x12_data, is_x12_file
 
 
 class X12SegmentReader:
@@ -135,10 +137,7 @@ class X12ModelReader:
         return self
 
     def models(self) -> Iterator[Type[BaseModel]]:
-        model_class: Optional[Type[BaseModel]] = None
-        model_data = {}
-
-        for segment_name, segment, context in self._x12_segment_reader.segments():
+        for segment_name, segment in self._x12_segment_reader.segments():
             pass
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:

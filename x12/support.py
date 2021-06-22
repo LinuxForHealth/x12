@@ -4,6 +4,7 @@ support.py
 Convenience functions for X12 Processing
 """
 import os
+
 from x12.config import IsaDelimiters
 
 

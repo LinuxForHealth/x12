@@ -2,8 +2,9 @@
 Tests LinuxForHealth X12SegmentReader
 """
 import pytest
-from x12.io import X12SegmentReader
+
 import x12.io
+from x12.io import X12SegmentReader
 
 
 @pytest.mark.parametrize(
