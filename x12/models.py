@@ -4,28 +4,12 @@ models.py
 The base models for X12 parsing and validation that aren't associated with a specific X12 version.
 """
 import datetime
+import abc
 
 from pydantic import BaseModel, Field
 from typing import List, Optional, Iterable
 from pydantic.fields import ModelField
 from collections import defaultdict
-
-
-class X12VersionIdentifiers(BaseModel):
-    """
-    X12VersionIdentifiers stores the various version ids distributed in the ISA, GS, and ST control segments.
-    """
-
-    interchange_control_version: str
-    functional_id_code: str = Field(min_length=2, max_length=2)
-    functional_version_code: str = Field(min_length=1, max_length=12)
-    transaction_set_code: str = Field(min_length=3, max_length=3)
-
-    def __str__(self):
-        """
-        :return: the string representation of the Version Identifiers as a "-" delimited key
-        """
-        return f"{self.functional_id_code}_{self.transaction_set_code}_{self.interchange_control_version}"
 
 
 class X12Delimiters(BaseModel):
@@ -39,25 +23,9 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12ReaderContext(BaseModel):
+class X12BaseSegmentModel(BaseModel, abc.ABC):
     """
-    Provides a working context and metadata for the X12 Segment Reader.
-    """
-
-    version: Optional[X12VersionIdentifiers] = None
-    delimiters: Optional[X12Delimiters] = None
-    interchange_header: Optional[List[str]] = None
-    functional_group_header: Optional[List[str]] = None
-    transaction_set_header: Optional[List[str]] = None
-    segment_count: Optional[defaultdict] = defaultdict(int)
-
-    current_segment_name: Optional[str] = None
-    current_segment: Optional[List[str]] = None
-
-
-class X12BaseSegmentModel(BaseModel):
-    """
-    X12BaseSegmentModel serves as the base class for all X12 segment models.
+    X12BaseSegmentModel serves as the abstract base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()

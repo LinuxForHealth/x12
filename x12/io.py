@@ -4,10 +4,10 @@ io.py
 Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
 from io import TextIOBase, StringIO
-from x12.config import get_config, IsaDelimiters, X12VersionFields
+from x12.config import get_config, IsaDelimiters
 from x12.support import is_x12_data, is_x12_file
 from typing import Optional, Iterator, List, Tuple, NoReturn, Type
-from x12.models import X12Delimiters, X12VersionIdentifiers, X12ReaderContext
+from x12.models import X12Delimiters
 from pydantic import BaseModel
 
 
@@ -31,33 +31,31 @@ class X12SegmentReader:
         :param x12_input: The X12 Message or a path to a X12 file
         """
 
-        self.x12_input: str = x12_input
-        self.context: X12ReaderContext = X12ReaderContext.construct()
-        self.context.delimiters = X12Delimiters.construct()
-        self.context.version = X12VersionIdentifiers.construct()
+        self._x12_input: str = x12_input
+        self._delimiters: X12Delimiters = X12Delimiters()
 
         # set in __enter__
-        self.buffer_size: Optional[int] = None
-        self.x12_stream: Optional[TextIOBase] = None
+        self._buffer_size: Optional[int] = None
+        self._x12_stream: Optional[TextIOBase] = None
 
     def _parse_isa_segment(self) -> NoReturn:
         """
         Parses fields from the ISA segment to set delimiters/instance attributes.
         The ISA segment is conveyed in the first 106 characters of the transmission.
         """
-        self.x12_stream.seek(0)
+        self._x12_stream.seek(0)
 
-        isa_segment: str = self.x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
-        self.context.delimiters.element_separator = isa_segment[
+        isa_segment: str = self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
+        self._delimiters.element_separator = isa_segment[
             IsaDelimiters.ELEMENT_SEPARATOR
         ]
-        self.context.delimiters.repetition_separator = isa_segment[
+        self._delimiters.repetition_separator = isa_segment[
             IsaDelimiters.REPETITION_SEPARATOR
         ]
-        self.context.delimiters.segment_terminator = isa_segment[
+        self._delimiters.segment_terminator = isa_segment[
             IsaDelimiters.SEGMENT_TERMINATOR
         ]
-        self.context.delimiters.component_separator = isa_segment[
+        self._delimiters.component_separator = isa_segment[
             IsaDelimiters.COMPONENT_SEPARATOR
         ]
 
@@ -67,19 +65,19 @@ class X12SegmentReader:
         :return: The X12SegmentReader instance
         :raise: ValueError if the x12 input is invalid
         """
-        if is_x12_file(self.x12_input):
-            self.x12_stream = open(self.x12_input, "r")
-        elif is_x12_data(self.x12_input):
-            self.x12_stream = StringIO(self.x12_input)
+        if is_x12_file(self._x12_input):
+            self._x12_stream = open(self._x12_input, "r")
+        elif is_x12_data(self._x12_input):
+            self._x12_stream = StringIO(self._x12_input)
         else:
             raise ValueError(
                 "Invalid x12_input. Expecting X12 Message or valid path to X12 File"
             )
 
-        self.buffer_size: int = get_config().x12_reader_buffer_size
+        self._buffer_size: int = get_config().x12_reader_buffer_size
 
-        self.x12_stream.seek(0)
-        if not self.x12_stream.read(IsaDelimiters.SEGMENT_LENGTH):
+        self._x12_stream.seek(0)
+        if not self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH):
             raise ValueError("Invalid X12Stream")
 
         self._parse_isa_segment()
@@ -93,128 +91,61 @@ class X12SegmentReader:
         :param exc_val: Exception Value
         :param exc_tb: Exception traceback
         """
-        if not self.x12_stream.closed:
-            self.x12_stream.close()
+        if not self._x12_stream.closed:
+            self._x12_stream.close()
 
-        self.context = None
-        self.x12_input = None
-        self.x12_config = None
+        self._delimiters = None
+        self._x12_input = None
 
-    def is_control_segment(self) -> bool:
-        """returns True if the current segment is a control segment"""
-        return (
-            self.is_interchange_header()
-            or self.is_interchange_footer()
-            or self.is_functional_group_header()
-            or self.is_functional_group_footer()
-        )
-
-    def is_interchange_header(self) -> bool:
-        """returns True if the current segment is the interchange header"""
-        return self.context.current_segment_name.upper() == "ISA"
-
-    def is_interchange_footer(self) -> bool:
-        """returns True if the current segment is the interchange footer"""
-        return self.context.current_segment_name.upper() == "IEA"
-
-    def is_functional_group_header(self) -> bool:
-        """returns True if the current segment is the functional group header"""
-        return self.context.current_segment_name.upper() == "GS"
-
-    def is_functional_group_footer(self) -> bool:
-        """returns True if the current segment is the functional group footer"""
-        return self.context.current_segment_name.upper() == "GE"
-
-    def is_transaction_header(self) -> bool:
-        """returns True if the current segment is the transaction set header"""
-        return self.context.current_segment_name.upper() == "ST"
-
-    def is_transaction_footer(self) -> bool:
-        """returns True if the current segment is the transaction set footer"""
-        return self.context.current_segment_name.upper() == "SE"
-
-    def _update_context(self, segment_fields) -> NoReturn:
-        """
-        Updates the current context attributes based on the current segment fields
-        :param segment_fields: List of segment fields.
-        """
-        segment_name = segment_fields[0].upper()
-        self.context.current_segment_name = segment_name
-        self.context.current_segment = segment_fields
-
-        if self.is_interchange_header():
-            self.context.interchange_header = segment_fields
-            self.context.version.interchange_control_version = segment_fields[
-                X12VersionFields.ISA_CONTROL_VERSION
-            ]
-        elif self.is_functional_group_header():
-            self.context.functional_group_header = segment_fields
-            self.context.version.functional_id_code = segment_fields[
-                X12VersionFields.GS_FUNCTIONAL_CODE
-            ]
-            self.context.version.functional_version_code = segment_fields[
-                X12VersionFields.GS_FUNCTIONAL_VERSION
-            ]
-        elif self.is_transaction_header():
-            self.context.transaction_set_header = segment_fields
-            self.context.version.transaction_set_code = segment_fields[
-                X12VersionFields.ST_TRANSACTION_CODE
-            ]
-
-        if not self.is_control_segment():
-            transaction_control_id = self.context.transaction_set_header[
-                X12VersionFields.ST_TRANSACTION_CONTROL
-            ]
-            self.context.segment_count[transaction_control_id] += 1
-
-    def segments(self) -> Iterator[Tuple[str, List[str], X12ReaderContext]]:
+    def segments(self) -> Iterator[Tuple[str, List[str]]]:
         """
         Iterator function used to return X12 models from the underlying X12 stream.
         The read buffer size may be configured using X12_READER_BUFFER_SIZE.
-        :return: Iterator containing segment name, segment fields, and the current context
+        :return: Iterator containing segment name and segment fields.
         """
-        self.x12_stream.seek(0)
+        self._x12_stream.seek(0)
         while True:
-            buffer: str = self.x12_stream.read(self.buffer_size)
+            buffer: str = self._x12_stream.read(self._buffer_size)
 
             if not buffer:
                 break
 
-            while buffer[-1] != self.context.delimiters.segment_terminator:
-                next_character: str = self.x12_stream.read(1)
+            while buffer[-1] != self._delimiters.segment_terminator:
+                next_character: str = self._x12_stream.read(1)
                 if not next_character:
                     break
                 buffer += next_character
 
             # buffer cleanup
             buffer = buffer.replace("\n", "").rstrip(
-                self.context.delimiters.segment_terminator
+                self._delimiters.segment_terminator
             )
 
-            for segment in buffer.split(self.context.delimiters.segment_terminator):
+            for segment in buffer.split(self._delimiters.segment_terminator):
                 segment_fields = segment.split(
-                    self.context.delimiters.element_separator
+                    self._delimiters.element_separator
                 )
-                self._update_context(segment_fields)
                 yield (
-                    self.context.current_segment_name,
-                    self.context.current_segment,
-                    self.context,
+                    segment_fields[0].upper(),
+                    segment_fields
                 )
 
 
 class X12ModelReader:
     def __init__(self, x12_input: str):
-        self.x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
+        self._x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
 
     def __enter__(self):
-        self.x12_segment_reader.__enter__()
+        self._x12_segment_reader.__enter__()
         return self
 
     def models(self) -> Iterator[Type[BaseModel]]:
-        for segment_name, segment, context in self.x12_segment_reader.segments():
+        model_class: Optional[Type[BaseModel]] = None
+        model_data = {}
+
+        for segment_name, segment, context in self._x12_segment_reader.segments():
             pass
 
-    def __exit__(self):
-        if not self.x12_segment_reader.x12_stream.closed:
-            self.x12_segment_reader.x12_stream.close()
+    def __exit__(self,  exc_type, exc_val, exc_tb) -> NoReturn:
+        self._x12_segment_reader.__exit__()
+

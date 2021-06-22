@@ -6,8 +6,6 @@ Tests X12 Base Models
 from x12.models import (
     X12BaseSegmentModel,
     X12Delimiters,
-    X12VersionIdentifiers,
-    X12ReaderContext,
 )
 from typing import List, Optional
 import datetime
@@ -71,14 +69,3 @@ def test_x12_delimiter_defaults():
     assert x12_delimiters.element_separator == "*"
     assert x12_delimiters.repetition_separator == "^"
     assert x12_delimiters.segment_terminator == "~"
-
-
-def test_x12_version_identifiers():
-    fields = {
-        "interchange_control_version": "00501",
-        "functional_id_code": "HS",
-        "functional_version_code": "005010X279A1",
-        "transaction_set_code": "270",
-    }
-    x12_version_identifiers: X12VersionIdentifiers = X12VersionIdentifiers(**fields)
-    assert str(x12_version_identifiers) == "HS_270_00501"
