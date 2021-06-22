@@ -28,7 +28,7 @@ def test_ge_segment():
         "delimiters": X12Delimiters().dict(),
         "segment_name": "GE",
         "transaction_count": 1,
-        "control_number": '1',
+        "control_number": "1",
     }
 
     ge_segment: GeSegment = GeSegment(**segment_data)
@@ -41,12 +41,12 @@ def test_gs_segment():
         "segment_name": "GS",
         "id_code": "HS",
         "sender_code": "000000005",
-        "receiver_code": '54321',
+        "receiver_code": "54321",
         "creation_date": datetime.date(2013, 10, 31),
         "creation_time": datetime.time(hour=11, minute=47),
         "control_number": "1",
         "responsible_agency_code": "X",
-        "version_code": "005010X279A"
+        "version_code": "005010X279A",
     }
 
     gs_segment: GsSegment = GsSegment(**segment_data)
@@ -58,7 +58,7 @@ def test_iea_segment():
         "delimiters": X12Delimiters().dict(),
         "segment_name": "IEA",
         "group_count": 1,
-        "control_number": "000000907"
+        "control_number": "000000907",
     }
 
     iea_segment: IeaSegment = IeaSegment(**segment_data)
@@ -95,7 +95,7 @@ def test_se_segment():
         "delimiters": X12Delimiters().dict(),
         "segment_name": "SE",
         "segment_count": 17,
-        "control_number": "0001"
+        "control_number": "0001",
     }
 
     se_segment: SeSegment = SeSegment(**segment_data)
@@ -108,7 +108,7 @@ def test_st_segment():
         "segment_name": "ST",
         "id": "270",
         "control_number": "0001",
-        "implementation_reference": "005010X279A1"
+        "implementation_reference": "005010X279A1",
     }
 
     st_segment: StSegment = StSegment(**segment_data)

@@ -122,13 +122,8 @@ class X12SegmentReader:
             )
 
             for segment in buffer.split(self._delimiters.segment_terminator):
-                segment_fields = segment.split(
-                    self._delimiters.element_separator
-                )
-                yield (
-                    segment_fields[0].upper(),
-                    segment_fields
-                )
+                segment_fields = segment.split(self._delimiters.element_separator)
+                yield (segment_fields[0].upper(), segment_fields)
 
 
 class X12ModelReader:
@@ -146,6 +141,5 @@ class X12ModelReader:
         for segment_name, segment, context in self._x12_segment_reader.segments():
             pass
 
-    def __exit__(self,  exc_type, exc_val, exc_tb) -> NoReturn:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
         self._x12_segment_reader.__exit__()
-
