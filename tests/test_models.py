@@ -26,6 +26,7 @@ def x12_mock_model():
         last_name: str
         address: Optional[List[str]]
         birth_date: Optional[datetime.date]
+        creation_time: Optional[datetime.time]
 
     fields = {
         "delimiters": {
@@ -38,6 +39,7 @@ def x12_mock_model():
         "last_name": "DOE",
         "address": ["1400 ANYHOO LANE", "PLEASANTVILLE", "SC", "90210"],
         "birth_date": datetime.date(year=1980, month=1, day=1),
+        "creation_time": datetime.time(hour=7, minute=5, second=0),
     }
 
     return MockModel(**fields)
@@ -49,17 +51,20 @@ def test_x12(x12_mock_model):
     """
     assert (
         x12_mock_model.x12()
-        == "MCK*JOHN*DOE*1400 ANYHOO LANE^PLEASANTVILLE^SC^90210*19800101~"
+        == "MCK*JOHN*DOE*1400 ANYHOO LANE^PLEASANTVILLE^SC^90210*19800101*070500~"
+    )
+
+    x12_mock_model.birth_date = None
+    assert (
+        x12_mock_model.x12()
+        == "MCK*JOHN*DOE*1400 ANYHOO LANE^PLEASANTVILLE^SC^90210**070500~"
     )
 
     x12_mock_model.address = None
-    assert x12_mock_model.x12() == "MCK*JOHN*DOE**19800101~"
+    assert x12_mock_model.x12() == "MCK*JOHN*DOE***070500~"
 
-    x12_mock_model.address = ["1400 ANYHOO LANE", "PLEASANTVILLE", "SC", "90210"]
-    x12_mock_model.birth_date = None
-    assert (
-        x12_mock_model.x12() == "MCK*JOHN*DOE*1400 ANYHOO LANE^PLEASANTVILLE^SC^90210~"
-    )
+    x12_mock_model.birth_date = datetime.date(year=1980, month=1, day=1)
+    assert x12_mock_model.x12() == "MCK*JOHN*DOE**19800101*070500~"
 
 
 def test_x12_delimiter_defaults():

@@ -122,7 +122,7 @@ def test_st_segment():
         "segment_name": "ST",
         "id": "270",
         "control_number": "0001",
-        "implementation_reference": "005010X279A1",
+        "reference_version": "005010X279A1",
     }
 
     st_segment: StSegment = StSegment(**segment_data)

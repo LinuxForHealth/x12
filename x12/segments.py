@@ -1,3 +1,9 @@
+"""
+segments.py
+
+Models data segments used within X12 transactions.
+A data segment is a "record" which contains related data elements, or fields.
+"""
 import datetime
 from typing import Optional
 
@@ -136,6 +142,6 @@ class StSegment(X12BaseSegmentModel):
         ST*270*0001*005010X279A1~
     """
 
-    id: str
+    id: str = Field(min_length=3, max_length=3)
     control_number: str = Field(min_length=4, max_length=9)
-    implementation_reference: str = Field(min_length=1, max_length=35)
+    reference_version: str = Field(min_length=1, max_length=35)

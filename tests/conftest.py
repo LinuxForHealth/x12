@@ -5,21 +5,6 @@ from x12.models import X12Delimiters
 
 
 @pytest.fixture
-def simple_270_reader():
-    return "\n".join(
-        [
-            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
-            "ST*270*0001*005010X279A1~",
-            "BHT*0022*13*10001234*20131031*1147~",
-            "SE*17*0001~",
-            "GE*1*1~",
-            "IEA*1*000000907~",
-        ]
-    )
-
-
-@pytest.fixture
 def simple_270_with_new_lines():
     return "\n".join(
         [

@@ -1,10 +1,28 @@
 """
 transactions package
 """
-from x12.transactions import hb_271_00501, hs_270_00501
+import functools
+import importlib
 
-# maps x12.models.X12VersionIdentifier string to a transaction model
-transaction_map = {
-    "00501_hs_270_005010X279A1": hs_270_00501.EligibilityInquiry,
-    "00501_hb_270_005010X279A1": hb_271_00501.EligibilityInformation,
+from pydantic import BaseModel
+
+# maps python packages used to support a x12 transaction to the x12 transaction class
+_transaction_map = {
+    "x12_270_005010X279A1": "EligibilityInquiry",
+    "x12_271_005010X279A1": "EligibilityInformation",
 }
+
+
+@functools.lru_cache(typed=True)
+def get_transaction_model(
+    transaction_code: str, implementation_reference: str
+) -> BaseModel:
+    transaction_package = f"x12_{transaction_code}_{implementation_reference}"
+    model_name = _transaction_map[transaction_package]
+
+    transaction_module = importlib.import_module(
+        f"x12.transactions.{transaction_package}"
+    )
+    transaction_model = getattr(transaction_module, model_name)
+
+    return transaction_model

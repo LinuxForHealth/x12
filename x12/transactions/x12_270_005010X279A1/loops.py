@@ -5,8 +5,10 @@ Models the loops, or logical segment groupings, for the Eligibility 270 5010 tra
 """
 from pydantic import BaseModel
 
-from x12.segments import HlSegment
+
+class Header(BaseModel):
+    pass
 
 
 class Loop2000A(BaseModel):
-    hl_segment: HlSegment
+    pass

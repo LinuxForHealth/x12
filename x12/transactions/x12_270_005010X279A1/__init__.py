@@ -17,6 +17,14 @@ HEADER
 
 
 """
+from typing import Optional
+
+from pydantic import Field
+
+
+class HeaderBhtSegment(BhtSegment):
+    transactional_identifier: Optional[str] = Field(min_length=1, max_length=50)
+    transaction_code: Optional[str]
 
 
 class EligibilityInquiry(BaseModel):
@@ -25,6 +33,6 @@ class EligibilityInquiry(BaseModel):
     """
 
     st_segment: StSegment
-    bht_segment: BhtSegment
-    loop_2000a: List[Loop2000A]
-    se_segment: SeSegment
+    bht_segment: HeaderBhtSegment
+    # loop_2000a: List[Loop2000A]
+    # se_segment: SeSegment
