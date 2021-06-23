@@ -10,12 +10,6 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class X12ConversionException(Exception):
-    """Raised when an error occurs converting a X12 model to a X12 string"""
-
-    pass
-
-
 class X12Delimiters(BaseModel):
     """
     X12Delimiters models the common delimiters used within a X12 message's models.
@@ -82,6 +76,7 @@ class X12BaseLoopModel(BaseModel, abc.ABC):
         :return: Generates a X12 representation of the loop using its segments.
         """
         x12_segments: List[str] = []
+        # filtering on the x12 method since pydantic obfuscates our type hierarchy
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
         for f in fields:

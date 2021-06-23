@@ -1,10 +1,6 @@
-from typing import List
-
 from pydantic import BaseModel
 
-from x12.segments import BhtSegment, SeSegment, StSegment
-
-from .loops import Loop2000A
+from x12.transactions.x12_270_005010X279A1.loops import Header, Loop2000A
 
 """
 batch mode = multiple patients
@@ -14,17 +10,10 @@ HEADER
 2000B
 2000C
 2000D
+FOOTER
 
 
 """
-from typing import Optional
-
-from pydantic import Field
-
-
-class HeaderBhtSegment(BhtSegment):
-    transactional_identifier: Optional[str] = Field(min_length=1, max_length=50)
-    transaction_code: Optional[str]
 
 
 class EligibilityInquiry(BaseModel):
@@ -32,7 +21,7 @@ class EligibilityInquiry(BaseModel):
     The Eligibility/270 transaction
     """
 
-    st_segment: StSegment
-    bht_segment: HeaderBhtSegment
-    # loop_2000a: List[Loop2000A]
-    # se_segment: SeSegment
+    header: Header
+    loop_2000A: Loop2000A
+
+    pass
