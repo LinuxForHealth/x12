@@ -112,7 +112,7 @@ class Nm1Segment(X12BaseSegmentModel):
     """
 
     entity_identifier_code: str = Field(min_length=2, max_length=3)
-    entity_type_qualifier: str = conint(ge=1, le=2)
+    entity_type_qualifier: conint(ge=1, le=2)
     name_last_org_name: str = Field(min_length=1, max_length=60)
     first_name: Optional[str] = Field(min_length=1, max_length=35)
     middle_name: Optional[str] = Field(min_length=1, max_length=25)

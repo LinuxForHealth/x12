@@ -5,8 +5,15 @@ The base models for X12 parsing and validation that aren't associated with a spe
 """
 import abc
 import datetime
+from typing import List
 
 from pydantic import BaseModel, Field
+
+
+class X12ConversionException(Exception):
+    """Raised when an error occurs converting a X12 model to a X12 string"""
+
+    pass
 
 
 class X12Delimiters(BaseModel):
@@ -60,3 +67,25 @@ class X12BaseSegmentModel(BaseModel, abc.ABC):
             self.delimiters.element_separator
         )
         return x12_str + self.delimiters.segment_terminator
+
+
+class X12BaseLoopModel(BaseModel, abc.ABC):
+    """
+    Abstract base class for X12 Loop Containers.
+    Loops are used to group segments together for transactional purposes and loosely resemble a "record".
+    """
+
+    loop_name: str
+
+    def x12(self) -> str:
+        """
+        :return: Generates a X12 representation of the loop using its segments.
+        """
+        x12_segments: List[str] = []
+        fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
+
+        for f in fields:
+            field_instance = getattr(self, f.name)
+            x12_segments.append(field_instance.x12())
+
+        return ",".join(x12_segments).replace(",", "")
