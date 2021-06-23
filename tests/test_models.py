@@ -63,8 +63,8 @@ def test_x12(x12_mock_model):
     x12_mock_model.address = None
     assert x12_mock_model.x12() == "MCK*JOHN*DOE***070500~"
 
-    x12_mock_model.birth_date = datetime.date(year=1980, month=1, day=1)
-    assert x12_mock_model.x12() == "MCK*JOHN*DOE**19800101*070500~"
+    x12_mock_model.creation_time = None
+    assert x12_mock_model.x12() == "MCK*JOHN*DOE~"
 
 
 def test_x12_delimiter_defaults():
