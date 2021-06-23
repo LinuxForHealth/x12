@@ -3,13 +3,12 @@ test_segments.py
 
 Tests the Pydantic X12 segment models
 """
-from x12.models import X12Delimiters
 from x12.segments import *
 
 
-def test_bht_segment():
+def test_bht_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "BHT",
         "structure_code": "0022",
         "purpose_code": "01",
@@ -23,9 +22,9 @@ def test_bht_segment():
     assert bht_segment.dict() == segment_data
 
 
-def test_ge_segment():
+def test_ge_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "GE",
         "transaction_count": 1,
         "control_number": "1",
@@ -35,9 +34,9 @@ def test_ge_segment():
     assert ge_segment.dict() == segment_data
 
 
-def test_gs_segment():
+def test_gs_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "GS",
         "id_code": "HS",
         "sender_code": "000000005",
@@ -53,9 +52,9 @@ def test_gs_segment():
     assert gs_segment.dict() == segment_data
 
 
-def test_hl_segment():
+def test_hl_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "HL",
         "id_number": 3,
         "parent_id_number": 2,
@@ -67,9 +66,9 @@ def test_hl_segment():
     assert hl_segment.dict() == segment_data
 
 
-def test_iea_segment():
+def test_iea_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "IEA",
         "group_count": 1,
         "control_number": "000000907",
@@ -79,9 +78,9 @@ def test_iea_segment():
     assert iea_segment.dict() == segment_data
 
 
-def test_isa_segment():
+def test_isa_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "ISA",
         "auth_qualifier": "03",
         "auth_information": "9876543210",
@@ -104,9 +103,23 @@ def test_isa_segment():
     assert isa_segment.dict() == segment_data
 
 
-def test_se_segment():
+def test_nm1_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
+        "segment_name": "NM1",
+        "entity_identifier_code": "PR",
+        "entity_type_qualifier": 2,
+        "name_last_org_name": "ACME",
+        "code_qualifier": "PI",
+        "identification_code": "12345",
+    }
+    nm1_segment: Nm1Segment = Nm1Segment(**segment_data)
+    assert nm1_segment.dict(exclude_unset=True) == segment_data
+
+
+def test_se_segment(x12_delimiters):
+    segment_data = {
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "SE",
         "segment_count": 17,
         "control_number": "0001",
@@ -116,9 +129,9 @@ def test_se_segment():
     assert se_segment.dict() == segment_data
 
 
-def test_st_segment():
+def test_st_segment(x12_delimiters):
     segment_data = {
-        "delimiters": X12Delimiters().dict(),
+        "delimiters": x12_delimiters.dict(),
         "segment_name": "ST",
         "id": "270",
         "control_number": "0001",
