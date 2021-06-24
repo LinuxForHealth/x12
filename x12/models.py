@@ -70,17 +70,19 @@ class X12BaseLoopModel(BaseModel, abc.ABC):
     """
 
     loop_name: str
+    loop_description: str
 
-    def x12(self) -> str:
+    def x12(self, use_new_lines=True) -> str:
         """
         :return: Generates a X12 representation of the loop using its segments.
         """
         x12_segments: List[str] = []
-        # filtering on the x12 method since pydantic obfuscates our type hierarchy
+        # TODO: look into the type_ here to see if we can access the declared type
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
         for f in fields:
             field_instance = getattr(self, f.name)
             x12_segments.append(field_instance.x12())
 
-        return ",".join(x12_segments).replace(",", "")
+        join_char: str = "\n" if use_new_lines else ""
+        return join_char.join(x12_segments)

@@ -27,22 +27,24 @@ def x12_mock_loop(x12_delimiters):
 
     loop_data = {
         "loop_name": "mock_loop",
+        "loop_description": "mock loop",
         "st_segment": {
             "delimiters": x12_delimiters.dict(),
             "segment_name": "ST",
-            "id": "270",
-            "control_number": "0001",
-            "reference_version": "005010X279A1",
+            "transaction_set_identifier_code": "270",
+            "transaction_set_control_number": "0001",
+            "implementation_convention_reference": "005010X279A1",
         },
         "sub_loop": {
             "loop_name": "sub_loop",
+            "loop_description": "mock sub loop",
             "nm1_segment": {
                 "delimiters": x12_delimiters.dict(),
                 "segment_name": "NM1",
                 "entity_identifier_code": "PR",
                 "entity_type_qualifier": "2",
-                "name_last_org_name": "ACME",
-                "code_qualifier": "PI",
+                "name_last_or_organization_name": "ACME",
+                "identification_code_qualifier": "PI",
                 "identification_code": "12345",
             },
         },
@@ -80,7 +82,7 @@ def x12_mock_model(x12_delimiters):
     return MockModel(**fields)
 
 
-def test_x12(x12_mock_model):
+def test_x12_method(x12_mock_model):
     """
     Tests the X12BaseModel's x12() method
     """
@@ -109,5 +111,7 @@ def test_x12_delimiter_defaults(x12_delimiters):
     assert x12_delimiters.segment_terminator == "~"
 
 
-def test_x12_loop(x12_mock_loop):
-    assert x12_mock_loop.x12() == "ST*270*0001*005010X279A1~NM1*PR*2*ACME*****PI*12345~"
+def test_x12_loop_model(x12_mock_loop):
+    assert (
+        x12_mock_loop.x12() == "ST*270*0001*005010X279A1~\nNM1*PR*2*ACME*****PI*12345~"
+    )

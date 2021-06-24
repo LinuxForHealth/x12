@@ -1,5 +1,1 @@
-from pydantic import BaseModel
-
-
-class EligibilityInformation(BaseModel):
-    pass
+from .eligibility_information import EligibilityInformation

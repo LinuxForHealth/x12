@@ -5,9 +5,10 @@ Models data segments used within X12 transactions.
 A data segment is a "record" which contains related data elements, or fields.
 """
 import datetime
-from typing import Optional
+from enum import Enum
+from typing import Literal, Optional
 
-from pydantic import Field, PositiveInt, conint
+from pydantic import Field, PositiveInt
 
 from x12.models import X12BaseSegmentModel
 
@@ -19,12 +20,13 @@ class BhtSegment(X12BaseSegmentModel):
         BHT*0022*01**19980101*1400*RT~
     """
 
-    structure_code: str
-    purpose_code: str
-    transactional_identifier: str = Field(min_length=1, max_length=50)
-    transaction_creation_date: datetime.date
-    transaction_creation_time: datetime.time
-    transaction_code: str
+    segment_name: Literal["BHT"]
+    hierarchical_structure_code: str = Field(min_length=4, max_length=4)
+    transaction_set_purpose_code: str = Field(min_length=2, max_length=2)
+    submitter_transactional_identifier: str = Field(min_length=1, max_length=50)
+    transaction_set_creation_date: datetime.date
+    transaction_set_creation_time: datetime.time
+    transaction_type_code: str
 
 
 class GeSegment(X12BaseSegmentModel):
@@ -34,8 +36,9 @@ class GeSegment(X12BaseSegmentModel):
         GE*1*1~
     """
 
-    transaction_count: PositiveInt
-    control_number: str = Field(min_length=1, max_length=9)
+    segment_name: Literal["GE"]
+    number_of_transaction_sets_included: PositiveInt
+    group_control_number: str = Field(min_length=1, max_length=9)
 
 
 class GsSegment(X12BaseSegmentModel):
@@ -45,14 +48,15 @@ class GsSegment(X12BaseSegmentModel):
         GS*HS*000000005*54321*20131031*1147*1*X*005010X279A~
     """
 
-    id_code: str = Field(min_length=2, max_length=2)
-    sender_code: str = Field(min_length=2, max_length=15)
-    receiver_code: str = Field(min_length=2, max_length=15)
-    creation_date: datetime.date
-    creation_time: datetime.time
-    control_number: str = Field(min_length=1, max_length=9)
-    responsible_agency_code: str = Field(min_length=1, max_length=2)
-    version_code: str = Field(min_length=1, max_length=12)
+    segment_name: Literal["GS"]
+    functional_identifier_code: str = Field(min_length=2, max_length=2)
+    application_sender_code: str = Field(min_length=2, max_length=15)
+    application_receiver_code: str = Field(min_length=2, max_length=15)
+    functional_group_creation_date: datetime.date
+    functional_group_creation_time: datetime.time
+    group_control_number: str = Field(min_length=1, max_length=9)
+    responsible_agency_code: Literal["X"]
+    version_identifier_code: str = Field(min_length=1, max_length=12)
 
 
 class HlSegment(X12BaseSegmentModel):
@@ -62,10 +66,11 @@ class HlSegment(X12BaseSegmentModel):
         HL*3*2*22*1~
     """
 
-    id_number: PositiveInt
-    parent_id_number: PositiveInt
-    level_code: PositiveInt
-    child_code: conint(ge=0, le=1)
+    segment_name: Literal["HL"]
+    hierarchical_id_number: str = Field(min_length=1, max_length=12)
+    hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
+    hierarchical_level_code: str = Field(min_length=1, max_length=2)
+    hierarchical_child_code: str = Field(min_length=1, max_length=1)
 
 
 class IeaSegment(X12BaseSegmentModel):
@@ -75,8 +80,9 @@ class IeaSegment(X12BaseSegmentModel):
         IEA*1*000000907~
     """
 
-    group_count: PositiveInt
-    control_number: str = Field(min_length=9, max_length=9)
+    segment_name: Literal["IEA"]
+    number_of_included_functional_groups: PositiveInt
+    interchange_control_number: str = Field(min_length=9, max_length=9)
 
 
 class IsaSegment(X12BaseSegmentModel):
@@ -87,21 +93,22 @@ class IsaSegment(X12BaseSegmentModel):
         ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~
     """
 
-    auth_qualifier: str = Field(min_length=2, max_length=2)
-    auth_information: str = Field(min_length=10, max_length=10)
-    security_qualifier: str = Field(min_length=2, max_length=2)
+    segment_name: Literal["ISA"]
+    authorization_information_qualifier: str = Field(min_length=2, max_length=2)
+    authorization_information: str = Field(min_length=10, max_length=10)
+    security_information_qualifier: str = Field(min_length=2, max_length=2)
     security_information: str = Field(min_length=10, max_length=10)
-    sender_qualifier: str = Field(min_length=2, max_length=2)
-    sender_id: str = Field(min_length=15, max_length=15)
-    receiver_qualifier: str = Field(min_length=2, max_length=2)
-    receiver_id: str = Field(min_length=15, max_length=15)
+    interchange_sender_qualifier: str = Field(min_length=2, max_length=2)
+    interchange_sender_id: str = Field(min_length=15, max_length=15)
+    interchange_receiver_qualifier: str = Field(min_length=2, max_length=2)
+    interchange_receiver_id: str = Field(min_length=15, max_length=15)
     interchange_date: datetime.date
     interchange_time: datetime.time
     repetition_separator: str = Field(min_length=1, max_length=1)
-    control_version: str = Field(min_length=5, max_length=5)
-    control_number: str = Field(min_length=9, max_length=9)
+    interchange_control_version_number: str = Field(min_length=5, max_length=5)
+    interchange_control_number: str = Field(min_length=9, max_length=9)
     acknowledgment_requested: str = Field(min_length=1, max_length=1)
-    interchange_usage: str = Field(min_length=1, max_length=1)
+    interchange_usage_indicator: str = Field(min_length=1, max_length=1)
 
 
 class Nm1Segment(X12BaseSegmentModel):
@@ -111,15 +118,24 @@ class Nm1Segment(X12BaseSegmentModel):
         NM1*PR*2*PAYER C*****PI*12345~
     """
 
+    class EntityQualifierCode(str, Enum):
+        """
+        NM1.02 Entity Qualifier Code to specify the entity type
+        """
+
+        PERSON = "1"
+        NON_PERSON = "2"
+
+    segment_name: Literal["NM1"]
     entity_identifier_code: str = Field(min_length=2, max_length=3)
-    entity_type_qualifier: conint(ge=1, le=2)
-    name_last_org_name: str = Field(min_length=1, max_length=60)
-    first_name: Optional[str] = Field(min_length=1, max_length=35)
-    middle_name: Optional[str] = Field(min_length=1, max_length=25)
+    entity_type_qualifier: EntityQualifierCode
+    name_last_or_organization_name: str = Field(min_length=1, max_length=60)
+    name_first: Optional[str] = Field(min_length=1, max_length=35)
+    name_middle: Optional[str] = Field(min_length=1, max_length=25)
     # not used
-    prefix: str = ""
-    suffix: Optional[str] = Field(min_length=1, max_length=10)
-    code_qualifier: str = Field(min_length=1, max_length=2)
+    name_prefix: Optional[str]
+    name_suffix: Optional[str] = Field(min_length=1, max_length=10)
+    identification_code_qualifier: str = Field(min_length=1, max_length=2)
     identification_code: str = Field(min_length=2, max_length=80)
     # NM110 - NM112 are not used
 
@@ -131,8 +147,9 @@ class SeSegment(X12BaseSegmentModel):
         SE*17*0001~
     """
 
-    segment_count: PositiveInt
-    control_number: str = Field(min_length=4, max_length=9)
+    segment_name: Literal["SE"]
+    transaction_segment_count: PositiveInt
+    transaction_set_control_number: str = Field(min_length=4, max_length=9)
 
 
 class StSegment(X12BaseSegmentModel):
@@ -142,6 +159,7 @@ class StSegment(X12BaseSegmentModel):
         ST*270*0001*005010X279A1~
     """
 
-    id: str = Field(min_length=3, max_length=3)
-    control_number: str = Field(min_length=4, max_length=9)
-    reference_version: str = Field(min_length=1, max_length=35)
+    segment_name: Literal["ST"]
+    transaction_set_identifier_code: str = Field(min_length=3, max_length=3)
+    transaction_set_control_number: str = Field(min_length=4, max_length=9)
+    implementation_convention_reference: str = Field(min_length=1, max_length=35)
