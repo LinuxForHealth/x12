@@ -18,7 +18,10 @@ def test_bht_segment():
     }
 
     bht_segment: BhtSegment = BhtSegment(**segment_data)
-    assert bht_segment.x12() == "BHT*0022*01*1c257041a955432091b0c073d788d29a*19980101*140000*RT~"
+    assert (
+        bht_segment.x12()
+        == "BHT*0022*01*1c257041a955432091b0c073d788d29a*19980101*140000*RT~"
+    )
 
 
 def test_ge_segment():
@@ -95,7 +98,10 @@ def test_isa_segment():
     }
 
     isa_segment: IsaSegment = IsaSegment(**segment_data)
-    assert isa_segment.x12() == "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~"
+    assert (
+        isa_segment.x12()
+        == "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~"
+    )
 
 
 def test_nm1_segment():
