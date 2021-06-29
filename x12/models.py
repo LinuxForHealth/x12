@@ -6,6 +6,7 @@ The base models for X12 parsing and validation that aren't associated with a spe
 import abc
 import datetime
 from typing import List
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
@@ -21,9 +22,9 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12BaseSegmentModel(BaseModel, abc.ABC):
+class X12SegmentModel(BaseModel, abc.ABC):
     """
-    X12BaseSegmentModel serves as the abstract base class for all X12 segment models.
+    X12SegmentModel serves as the abstract base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()
@@ -63,21 +64,24 @@ class X12BaseSegmentModel(BaseModel, abc.ABC):
         return x12_str + self.delimiters.segment_terminator
 
 
-class X12BaseLoopModel(BaseModel, abc.ABC):
-    """
-    Abstract base class for X12 Loop Containers.
-    Loops are used to group segments together for transactional purposes and loosely resemble a "record".
-    """
+class X12GroupingType(str, Enum):
+    LOOP = "LOOP"
+    TRANSACTION = "TRANSACTION"
 
-    loop_name: str
-    loop_description: str
+
+class X12SegmentGroupingModel(BaseModel, abc.ABC):
+    """
+    Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
+    """
+    type: X12GroupingType
+    name: str
+    description: str
 
     def x12(self, use_new_lines=True) -> str:
         """
         :return: Generates a X12 representation of the loop using its segments.
         """
         x12_segments: List[str] = []
-        # TODO: look into the type_ here to see if we can access the declared type
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
         for f in fields:

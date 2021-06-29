@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from x12.config import IsaDelimiters, get_config
 from x12.models import X12Delimiters
 from x12.support import is_x12_data, is_x12_file
-from x12.transactions import get_transaction_model
 
 
 class X12SegmentReader:
@@ -140,14 +139,30 @@ class X12ModelReader:
     def _process_segment(self, segment_name, segment, transaction_model):
         pass
 
-    def models(self) -> Iterator[Type[BaseModel]]:
+    def _is_control_segment(self, segment_name):
+        """
+
+        """
+        return segment_name in ("ISA", "GS", "GE", "IEA")
+
+    def _is_transaction_header(self, segment_name):
+        return segment_name == "ST"
+
+    def _parse_transaction_identifiers(self, segment: List[str]) -> Optional[Tuple[str]]:
+        """
+        Returns the transaction identifiers from a ST segment.
+        :param segment: The segment to parse
+        :return: tuple(transaction code, transaction version) if found, otherwise None
+        """
+        return (segment[1], segment[3]) if segment[0] == "ST" else None
+
+    def model(self) -> Iterator[Type[BaseModel]]:
 
         transaction_model: Optional[BaseModel] = None
-
-        for segment_name, segment in self._x12_segment_reader.segments():
-            pass
-
         yield transaction_model
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
-        self._x12_segment_reader.__exit__()
+        """
+        Exits the X12ModelReader and releases resources
+        """
+        self._x12_segment_reader.__exit__(exc_type, exc_val, exc_tb)

@@ -8,26 +8,27 @@ from typing import List, Optional
 
 import pytest
 
-from x12.models import X12BaseLoopModel, X12BaseSegmentModel
+from x12.models import X12SegmentGroupingModel, X12SegmentModel
 from x12.segments import Nm1Segment, StSegment
 
 
 @pytest.fixture()
 def x12_mock_loop(x12_delimiters):
-    class MockSubLoop(X12BaseLoopModel):
+    class MockSubLoop(X12SegmentGroupingModel):
         nm1_segment: Nm1Segment
 
     """
     :return: A mock X12 Loop with segment data
     """
 
-    class MockLoop(X12BaseLoopModel):
+    class MockLoop(X12SegmentGroupingModel):
         st_segment: StSegment
         sub_loop: MockSubLoop
 
     loop_data = {
-        "loop_name": "mock_loop",
-        "loop_description": "mock loop",
+        "type": "LOOP",
+        "name": "mock_loop",
+        "description": "mock loop",
         "st_segment": {
             "delimiters": x12_delimiters.dict(),
             "segment_name": "ST",
@@ -36,8 +37,9 @@ def x12_mock_loop(x12_delimiters):
             "implementation_convention_reference": "005010X279A1",
         },
         "sub_loop": {
-            "loop_name": "sub_loop",
-            "loop_description": "mock sub loop",
+            "type": "LOOP",
+            "name": "sub_loop",
+            "description": "mock sub loop",
             "nm1_segment": {
                 "delimiters": x12_delimiters.dict(),
                 "segment_name": "NM1",
@@ -58,7 +60,7 @@ def x12_mock_model(x12_delimiters):
     :return:A Mock model which extends X12BaseModel
     """
 
-    class MockModel(X12BaseSegmentModel):
+    class MockModel(X12SegmentModel):
         """
         A simple model used to test X12BaseModel features.
         """

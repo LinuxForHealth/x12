@@ -2,20 +2,26 @@
 loops.py
 
 Models the loops, or logical segment groupings, for the Eligibility 270 5010 transaction set.
-LinuxForHealth X12 includes headers and footers within loops to standardize processing.
 
-The 270 is a hierarchical structure with the Information Source, payer or clearinghouse, acting as the root.
-The general loop structure for the 270 transaction includes:
+- Header
+- Loop 2000A (Information Source)
+    -- Loop 2100A (Information Source Name)
+    -- Loop 2000B (Information Receiver)
+        --- Loop 2100B (Information Receiver Name)
+        --- Loop 2000C (Subscriber)
+            --- Loop 2100C (Subscriber Name)
+                --- Loop 2110C (Subscriber Eligibility)
+            --- Loop 2000D (Dependent)
+                --- Loop 2100D (Dependent Name)
+                    --- Loop 2110D (Dependent Eligibility)
+-- Footer
 
-    - Information Receiver (Loop 2000B)
-    - - Subscriber (Loop 2000C)
-    - - - Dependent (Loop 2000D)
-    - - - - Eligibility/Benefit Inquiry
 """
 
 from typing import Literal
 
-from x12.models import X12BaseLoopModel
+from x12.models import X12SegmentGroupingModel
+from x12.segments import SeSegment
 from x12.transactions.x12_270_005010X279A1.segments import (
     HeaderBhtSegment,
     HeaderStSegment,
@@ -24,35 +30,42 @@ from x12.transactions.x12_270_005010X279A1.segments import (
 )
 
 
-class Header(X12BaseLoopModel):
+class Header(X12SegmentGroupingModel):
     """
     Transaction Header Information
     """
 
-    loop_name: Literal["HEADER"]
-    loop_description: Literal["270 Transaction Set Header"]
+    name: Literal["HEADER"]
+    description: Literal["270 Transaction Set Header"]
     st_segment: HeaderStSegment
     bht_segment: HeaderBhtSegment
 
 
-class Loop2100A(X12BaseLoopModel):
+class Loop2100A(X12SegmentGroupingModel):
     """
     Loop 2100A - Information Source Name
     """
 
-    loop_name: Literal["Loop2100A"]
-    loop_description: Literal["Information Source Name"]
+    name: Literal["Loop2100A"]
+    description: Literal["Information Source Name"]
     nm1_segment: Loop2100ANm1Segment
 
 
-class Loop2000A(X12BaseLoopModel):
+class Loop2000A(X12SegmentGroupingModel):
     """
     Loop 2000A - Information Source
     The root node/loop for the 270 transaction
 
     """
 
-    loop_name: Literal["Loop2000A"]
-    loop_description: Literal["Information Source"]
+    name: Literal["Loop2000A"]
+    description: Literal["Information Source"]
     hl_segment: Loop2000AHlSegment
     loop_2100a: Loop2100A
+
+
+class Footer(X12SegmentGroupingModel):
+    """
+    Transaction Footer Information
+    """
+    se_segment: SeSegment
