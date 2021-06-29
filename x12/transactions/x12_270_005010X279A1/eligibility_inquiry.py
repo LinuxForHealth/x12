@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from x12.models import X12BaseSegmentGroup
 from .loops import Header, Footer, Loop2000A
 from typing import List
 
@@ -6,7 +6,7 @@ from typing import List
 """
 
 
-class EligibilityInquiry(BaseModel):
+class EligibilityInquiry(X12BaseSegmentGroup):
     """ """
 
     header: Header

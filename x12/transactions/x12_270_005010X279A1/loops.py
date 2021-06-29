@@ -18,8 +18,6 @@ Models the loops, or logical segment groupings, for the Eligibility 270 5010 tra
 
 """
 
-from typing import Literal
-
 from x12.models import X12BaseSegmentGroup
 from x12.segments import SeSegment
 from x12.transactions.x12_270_005010X279A1.segments import (
@@ -35,8 +33,6 @@ class Header(X12BaseSegmentGroup):
     Transaction Header Information
     """
 
-    name: Literal["HEADER"]
-    description: Literal["270 Transaction Set Header"]
     st_segment: HeaderStSegment
     bht_segment: HeaderBhtSegment
 
@@ -46,8 +42,6 @@ class Loop2100A(X12BaseSegmentGroup):
     Loop 2100A - Information Source Name
     """
 
-    name: Literal["Loop2100A"]
-    description: Literal["Information Source Name"]
     nm1_segment: Loop2100ANm1Segment
 
 
@@ -58,8 +52,6 @@ class Loop2000A(X12BaseSegmentGroup):
 
     """
 
-    name: Literal["Loop2000A"]
-    description: Literal["Information Source"]
     hl_segment: Loop2000AHlSegment
     loop_2100a: Loop2100A
 

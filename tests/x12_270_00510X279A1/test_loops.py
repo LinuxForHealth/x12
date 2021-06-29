@@ -10,9 +10,6 @@ from x12.transactions.x12_270_005010X279A1.loops import Header, Loop2000A
 
 def test_header_loop(x12_delimiters):
     loop_data = {
-        "type": "LOOP",
-        "name": "HEADER",
-        "description": "270 Transaction Set Header",
         "st_segment": {
             "delimiters": x12_delimiters.dict(),
             "segment_name": "ST",
@@ -40,9 +37,6 @@ def test_header_loop(x12_delimiters):
 
 def test_loop_2000a(x12_delimiters):
     loop_data = {
-        "type": "LOOP",
-        "name": "Loop2000A",
-        "description": "Information Source",
         "hl_segment": {
             "delimiters": x12_delimiters,
             "segment_name": "HL",

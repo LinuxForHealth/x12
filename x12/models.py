@@ -74,10 +74,6 @@ class X12BaseSegmentGroup(abc.ABC, BaseModel):
     Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
     """
 
-    type: X12GroupingType
-    name: str
-    description: str
-
     def x12(self, use_new_lines=True) -> str:
         """
         :return: Generates a X12 representation of the loop using its segments.
