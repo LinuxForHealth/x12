@@ -6,14 +6,14 @@ A data segment is a "record" which contains related data elements, or fields.
 """
 import datetime
 from enum import Enum
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 from pydantic import Field, PositiveInt
 
-from x12.models import X12SegmentModel
+from x12.models import X12BaseSegment
 
 
-class BhtSegment(X12SegmentModel):
+class BhtSegment(X12BaseSegment):
     """
     Defines the business application purpose and supporting reference data for the transaction.
     Example:
@@ -29,7 +29,7 @@ class BhtSegment(X12SegmentModel):
     transaction_type_code: str
 
 
-class GeSegment(X12SegmentModel):
+class GeSegment(X12BaseSegment):
     """
     Defines a functional header for the message and is an EDI control segment.
     Example:
@@ -41,7 +41,7 @@ class GeSegment(X12SegmentModel):
     group_control_number: str = Field(min_length=1, max_length=9)
 
 
-class GsSegment(X12SegmentModel):
+class GsSegment(X12BaseSegment):
     """
     Defines a functional header for the message and is an EDI control segment.
     Example:
@@ -59,7 +59,7 @@ class GsSegment(X12SegmentModel):
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
 
-class HlSegment(X12SegmentModel):
+class HlSegment(X12BaseSegment):
     """
     Defines a hierarchical organization used to relate one grouping of segments to another
     Example:
@@ -73,7 +73,7 @@ class HlSegment(X12SegmentModel):
     hierarchical_child_code: str = Field(min_length=1, max_length=1)
 
 
-class IeaSegment(X12SegmentModel):
+class IeaSegment(X12BaseSegment):
     """
     Defines the interchange footer and is an EDI control segment.
     Example:
@@ -85,7 +85,7 @@ class IeaSegment(X12SegmentModel):
     interchange_control_number: str = Field(min_length=9, max_length=9)
 
 
-class IsaSegment(X12SegmentModel):
+class IsaSegment(X12BaseSegment):
     """
     Defines the interchange header and is an EDI control segment.
     The ISA Segment is a fixed length segment (106 characters)
@@ -109,9 +109,20 @@ class IsaSegment(X12SegmentModel):
     interchange_control_number: str = Field(min_length=9, max_length=9)
     acknowledgment_requested: str = Field(min_length=1, max_length=1)
     interchange_usage_indicator: str = Field(min_length=1, max_length=1)
+    component_element_separator: str = Field(min_length=1, max_length=1)
+
+    def x12(self) -> str:
+        x12_str: str = super().x12()
+
+        x12_fields: List[str] = x12_str.split(self.delimiters.element_separator)
+        x12_fields[9] = x12_fields[9][2:]
+        x12_fields[10] = x12_fields[10][0:4]
+
+        x12_str = self.delimiters.element_separator.join(x12_fields)
+        return x12_str
 
 
-class Nm1Segment(X12SegmentModel):
+class Nm1Segment(X12BaseSegment):
     """
     Entity Name and Identification Number
     Example:
@@ -140,7 +151,7 @@ class Nm1Segment(X12SegmentModel):
     # NM110 - NM112 are not used
 
 
-class SeSegment(X12SegmentModel):
+class SeSegment(X12BaseSegment):
     """
     Transaction Set Footer
     Example:
@@ -152,7 +163,7 @@ class SeSegment(X12SegmentModel):
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
 
 
-class StSegment(X12SegmentModel):
+class StSegment(X12BaseSegment):
     """
     Transaction Set Header.
     Example:

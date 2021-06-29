@@ -140,15 +140,15 @@ class X12ModelReader:
         pass
 
     def _is_control_segment(self, segment_name):
-        """
-
-        """
+        """ """
         return segment_name in ("ISA", "GS", "GE", "IEA")
 
     def _is_transaction_header(self, segment_name):
         return segment_name == "ST"
 
-    def _parse_transaction_identifiers(self, segment: List[str]) -> Optional[Tuple[str]]:
+    def _parse_transaction_identifiers(
+        self, segment: List[str]
+    ) -> Optional[Tuple[str]]:
         """
         Returns the transaction identifiers from a ST segment.
         :param segment: The segment to parse

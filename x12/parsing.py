@@ -22,9 +22,14 @@ def match(segment_name: str, conditions: Dict[int, str] = None):
         @wraps(f)
         def wrapped(segment_data, data_context, data_cache):
             if segment_name.upper() == segment_data[0].upper():
-                unmatched = {k: v for k, v in conditions.items() if segment_data[k].upper() != v.upper()}
+                unmatched = {
+                    k: v
+                    for k, v in conditions.items()
+                    if segment_data[k].upper() != v.upper()
+                }
                 if len(unmatched) == 0:
                     f(segment_data, data_context, data_cache)
+
         return wrapped
 
     return decorator
@@ -34,4 +39,5 @@ class X12SegmentParser(abc.ABC):
     """
     Parses X12 segments into a Pydantic Model
     """
+
     pass

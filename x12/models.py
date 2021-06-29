@@ -22,9 +22,9 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12SegmentModel(BaseModel, abc.ABC):
+class X12BaseSegment(abc.ABC, BaseModel):
     """
-    X12SegmentModel serves as the abstract base class for all X12 segment models.
+    X12BaseSegment serves as the abstract base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()
@@ -69,10 +69,11 @@ class X12GroupingType(str, Enum):
     TRANSACTION = "TRANSACTION"
 
 
-class X12SegmentGroupingModel(BaseModel, abc.ABC):
+class X12BaseSegmentGroup(abc.ABC, BaseModel):
     """
     Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
     """
+
     type: X12GroupingType
     name: str
     description: str
