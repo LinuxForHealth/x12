@@ -112,6 +112,9 @@ class IsaSegment(X12BaseSegment):
     component_element_separator: str = Field(min_length=1, max_length=1)
 
     def x12(self) -> str:
+        """
+        Overriden to support ISA Segment specific date formatting
+        """
         x12_str: str = super().x12()
 
         x12_fields: List[str] = x12_str.split(self.delimiters.element_separator)
