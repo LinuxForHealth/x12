@@ -10,17 +10,17 @@ from typing import List, Literal, Optional
 
 from pydantic import Field, PositiveInt
 
-from x12.models import X12BaseSegment
+from x12.models import X12Segment, X12SegmentName
 
 
-class BhtSegment(X12BaseSegment):
+class BhtSegment(X12Segment):
     """
     Defines the business application purpose and supporting reference data for the transaction.
     Example:
         BHT*0022*01**19980101*1400*RT~
     """
 
-    segment_name: Literal["BHT"]
+    segment_name: X12SegmentName = X12SegmentName.BHT
     hierarchical_structure_code: str = Field(min_length=4, max_length=4)
     transaction_set_purpose_code: str = Field(min_length=2, max_length=2)
     submitter_transactional_identifier: str = Field(min_length=1, max_length=50)
@@ -29,26 +29,26 @@ class BhtSegment(X12BaseSegment):
     transaction_type_code: str
 
 
-class GeSegment(X12BaseSegment):
+class GeSegment(X12Segment):
     """
     Defines a functional header for the message and is an EDI control segment.
     Example:
         GE*1*1~
     """
 
-    segment_name: Literal["GE"]
+    segment_name: X12SegmentName = X12SegmentName.GE
     number_of_transaction_sets_included: PositiveInt
     group_control_number: str = Field(min_length=1, max_length=9)
 
 
-class GsSegment(X12BaseSegment):
+class GsSegment(X12Segment):
     """
     Defines a functional header for the message and is an EDI control segment.
     Example:
         GS*HS*000000005*54321*20131031*1147*1*X*005010X279A~
     """
 
-    segment_name: Literal["GS"]
+    segment_name: X12SegmentName = X12SegmentName.GS
     functional_identifier_code: str = Field(min_length=2, max_length=2)
     application_sender_code: str = Field(min_length=2, max_length=15)
     application_receiver_code: str = Field(min_length=2, max_length=15)
@@ -59,33 +59,33 @@ class GsSegment(X12BaseSegment):
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
 
-class HlSegment(X12BaseSegment):
+class HlSegment(X12Segment):
     """
     Defines a hierarchical organization used to relate one grouping of segments to another
     Example:
         HL*3*2*22*1~
     """
 
-    segment_name: Literal["HL"]
+    segment_name: X12SegmentName = X12SegmentName.HL
     hierarchical_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_level_code: str = Field(min_length=1, max_length=2)
     hierarchical_child_code: str = Field(min_length=1, max_length=1)
 
 
-class IeaSegment(X12BaseSegment):
+class IeaSegment(X12Segment):
     """
     Defines the interchange footer and is an EDI control segment.
     Example:
         IEA*1*000000907~
     """
 
-    segment_name: Literal["IEA"]
+    segment_name: X12SegmentName = X12SegmentName.IEA
     number_of_included_functional_groups: PositiveInt
     interchange_control_number: str = Field(min_length=9, max_length=9)
 
 
-class IsaSegment(X12BaseSegment):
+class IsaSegment(X12Segment):
     """
     Defines the interchange header and is an EDI control segment.
     The ISA Segment is a fixed length segment (106 characters)
@@ -93,7 +93,7 @@ class IsaSegment(X12BaseSegment):
         ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~
     """
 
-    segment_name: Literal["ISA"]
+    segment_name: X12SegmentName = X12SegmentName.ISA
     authorization_information_qualifier: str = Field(min_length=2, max_length=2)
     authorization_information: str = Field(min_length=10, max_length=10)
     security_information_qualifier: str = Field(min_length=2, max_length=2)
@@ -125,7 +125,7 @@ class IsaSegment(X12BaseSegment):
         return x12_str
 
 
-class Nm1Segment(X12BaseSegment):
+class Nm1Segment(X12Segment):
     """
     Entity Name and Identification Number
     Example:
@@ -140,7 +140,7 @@ class Nm1Segment(X12BaseSegment):
         PERSON = "1"
         NON_PERSON = "2"
 
-    segment_name: Literal["NM1"]
+    segment_name: X12SegmentName = X12SegmentName.NM1
     entity_identifier_code: str = Field(min_length=2, max_length=3)
     entity_type_qualifier: EntityQualifierCode
     name_last_or_organization_name: str = Field(min_length=1, max_length=60)
@@ -154,26 +154,26 @@ class Nm1Segment(X12BaseSegment):
     # NM110 - NM112 are not used
 
 
-class SeSegment(X12BaseSegment):
+class SeSegment(X12Segment):
     """
     Transaction Set Footer
     Example:
         SE*17*0001~
     """
 
-    segment_name: Literal["SE"]
+    segment_name: X12SegmentName = X12SegmentName.SE
     transaction_segment_count: PositiveInt
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
 
 
-class StSegment(X12BaseSegment):
+class StSegment(X12Segment):
     """
     Transaction Set Header.
     Example:
         ST*270*0001*005010X279A1~
     """
 
-    segment_name: Literal["ST"]
+    segment_name: X12SegmentName = X12SegmentName.ST
     transaction_set_identifier_code: str = Field(min_length=3, max_length=3)
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
     implementation_convention_reference: str = Field(min_length=1, max_length=35)

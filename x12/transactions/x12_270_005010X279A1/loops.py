@@ -18,7 +18,7 @@ Models the loops, or logical segment groupings, for the Eligibility 270 5010 tra
 
 """
 
-from x12.models import X12BaseSegmentGroup
+from x12.models import X12SegmentGroup
 from x12.segments import SeSegment
 from x12.transactions.x12_270_005010X279A1.segments import (
     HeaderBhtSegment,
@@ -28,7 +28,7 @@ from x12.transactions.x12_270_005010X279A1.segments import (
 )
 
 
-class Header(X12BaseSegmentGroup):
+class Header(X12SegmentGroup):
     """
     Transaction Header Information
     """
@@ -37,7 +37,7 @@ class Header(X12BaseSegmentGroup):
     bht_segment: HeaderBhtSegment
 
 
-class Loop2100A(X12BaseSegmentGroup):
+class Loop2100A(X12SegmentGroup):
     """
     Loop 2100A - Information Source Name
     """
@@ -45,7 +45,7 @@ class Loop2100A(X12BaseSegmentGroup):
     nm1_segment: Loop2100ANm1Segment
 
 
-class Loop2000A(X12BaseSegmentGroup):
+class Loop2000A(X12SegmentGroup):
     """
     Loop 2000A - Information Source
     The root node/loop for the 270 transaction
@@ -56,7 +56,7 @@ class Loop2000A(X12BaseSegmentGroup):
     loop_2100a: Loop2100A
 
 
-class Footer(X12BaseSegmentGroup):
+class Footer(X12SegmentGroup):
     """
     Transaction Footer Information
     """

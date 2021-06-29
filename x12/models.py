@@ -7,7 +7,6 @@ import abc
 import datetime
 from typing import List
 from enum import Enum
-
 from pydantic import BaseModel, Field
 
 
@@ -22,13 +21,29 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12BaseSegment(abc.ABC, BaseModel):
+class X12SegmentName(str, Enum):
+    """
+    Supported X12 Segment Names
+    """
+
+    BHT = "BHT"
+    GE = "GE"
+    GS = "GS"
+    HL = "HL"
+    IEA = "IEA"
+    ISA = "ISA"
+    NM1 = "NM1"
+    SE = "SE"
+    ST = "ST"
+
+
+class X12Segment(abc.ABC, BaseModel):
     """
     X12BaseSegment serves as the abstract base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()
-    segment_name: str = Field(min_length=2, max_length=3)
+    segment_name: X12SegmentName
 
     class Config:
         """
@@ -64,12 +79,7 @@ class X12BaseSegment(abc.ABC, BaseModel):
         return x12_str + self.delimiters.segment_terminator
 
 
-class X12GroupingType(str, Enum):
-    LOOP = "LOOP"
-    TRANSACTION = "TRANSACTION"
-
-
-class X12BaseSegmentGroup(abc.ABC, BaseModel):
+class X12SegmentGroup(abc.ABC, BaseModel):
     """
     Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
     """

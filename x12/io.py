@@ -136,30 +136,9 @@ class X12ModelReader:
         self._x12_segment_reader.__enter__()
         return self
 
-    def _process_segment(self, segment_name, segment, transaction_model):
-        pass
-
-    def _is_control_segment(self, segment_name):
-        """ """
-        return segment_name in ("ISA", "GS", "GE", "IEA")
-
-    def _is_transaction_header(self, segment_name):
-        return segment_name == "ST"
-
-    def _parse_transaction_identifiers(
-        self, segment: List[str]
-    ) -> Optional[Tuple[str]]:
-        """
-        Returns the transaction identifiers from a ST segment.
-        :param segment: The segment to parse
-        :return: tuple(transaction code, transaction version) if found, otherwise None
-        """
-        return (segment[1], segment[3]) if segment[0] == "ST" else None
-
-    def model(self) -> Iterator[Type[BaseModel]]:
-
-        transaction_model: Optional[BaseModel] = None
-        yield transaction_model
+    def model(self):
+        for segment in self._x12_segment_reader.segments():
+            pass
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
         """

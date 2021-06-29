@@ -1,4 +1,4 @@
-from x12.models import X12BaseSegmentGroup
+from x12.models import X12SegmentGroup
 from .loops import Header, Footer, Loop2000A
 from typing import List
 
@@ -6,7 +6,7 @@ from typing import List
 """
 
 
-class EligibilityInquiry(X12BaseSegmentGroup):
+class EligibilityInquiry(X12SegmentGroup):
     """ """
 
     header: Header
