@@ -4,12 +4,16 @@ io.py
 Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
 from io import StringIO, TextIOBase
-from typing import Iterator, List, NoReturn, Optional, Tuple
+from typing import Iterator, List, NoReturn, Optional, Tuple, Dict
 
 from x12.config import IsaDelimiters, get_config
-from x12.models import X12Delimiters, X12SegmentName, X12SegmentGroup
+from x12.models import X12Delimiters, X12SegmentName, X12SegmentGroup, X12Segment
 from x12.support import is_x12_data, is_x12_file
 from x12.parse import X12SegmentParser
+from x12.segments import SEGMENT_LOOKUP
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class X12SegmentReader:
@@ -128,8 +132,19 @@ class X12SegmentReader:
 
 
 class X12ModelReader:
+    """
+    Streams X12 Models from a X12 message or file
+    """
+
     def __init__(self, x12_input: str):
+        """
+        Initializes the X12ModelReader with a x12_input.
+        The x12 input may be a message payload or a path to a x12 file.
+
+        :param x12_input: The X12 Message or a path to a X12 file
+        """
         self._x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
+        self._segment_lookup: Dict = SEGMENT_LOOKUP
 
     def __enter__(self):
         self._x12_segment_reader.__enter__()
@@ -152,19 +167,21 @@ class X12ModelReader:
         """
         Creates a stream of X12 models from X12 segments
         """
-        for segment_name, segment in self._x12_segment_reader.segments():
+        for segment_name, segment_fields in self._x12_segment_reader.segments():
 
             if self._is_control_segment(segment_name):
                 continue
 
             if self._is_transaction_header(segment_name):
-                transaction_code: str = segment[1]
-                implementation_version: str = segment[3]
+
+                transaction_code: str = segment_fields[1]
+                implementation_version: str = segment_fields[3]
+
                 parser: X12SegmentParser = X12SegmentParser.load_parser(
                     transaction_code, implementation_version
                 )
 
-            model: X12SegmentGroup = parser.parse(segment)
+            model: X12SegmentGroup = parser.parse(segment_name, segment_fields)
             if model:
                 yield model
 

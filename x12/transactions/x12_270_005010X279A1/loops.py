@@ -4,16 +4,16 @@ loops.py
 Models the loops, or logical segment groupings, for the Eligibility 270 5010 transaction set.
 
 - Header
-- Loop 2000A (Information Source)
-    -- Loop 2100A (Information Source Name)
-    -- Loop 2000B (Information Receiver)
-        --- Loop 2100B (Information Receiver Name)
-        --- Loop 2000C (Subscriber)
-            --- Loop 2100C (Subscriber Name)
-                --- Loop 2110C (Subscriber Eligibility)
-            --- Loop 2000D (Dependent)
-                --- Loop 2100D (Dependent Name)
-                    --- Loop 2110D (Dependent Eligibility)
+- Loop 2000A (Information Source) - HL*1**20*1
+    -- Loop 2100A (Information Source Name) - NM1*PR*etc*etc~
+    -- Loop 2000B (Information Receiver) - HL*2**21*1
+        --- Loop 2100B (Information Receiver Name) - NM1*1P*etc*etc
+        --- Loop 2000C (Subscriber) - HL*3*2*22*1~
+            --- Loop 2100C (Subscriber Name) - NM*1*etc~
+                --- Loop 2110C (Subscriber Eligibility) - EQ*etc~
+            --- Loop 2000D (Dependent) - HL*4*3*23*0~
+                --- Loop 2100D (Dependent Name) - NM1*03*etc~
+                    --- Loop 2110D (Dependent Eligibility) EQ*etc~
 -- Footer
 
 """

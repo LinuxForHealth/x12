@@ -10,5 +10,5 @@ class EligibilityInquiry(X12SegmentGroup):
     """ """
 
     header: Header
-    loop_2000A: List[Loop2000A]
+    loop_2000a: List[Loop2000A]
     footer: Footer

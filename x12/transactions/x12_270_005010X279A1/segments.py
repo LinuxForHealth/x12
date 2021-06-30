@@ -93,3 +93,6 @@ class Loop2100ANm1Segment(Nm1Segment):
 
     entity_identifier_code: EntityIdentifierCode
     identification_code_qualifier: IdentificationCodeQualifier
+    name_first: Optional[str]
+    name_middle: Optional[str]
+    name_suffix: Optional[str]

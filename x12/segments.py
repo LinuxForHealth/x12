@@ -185,5 +185,8 @@ cached_attrs = [v for v in globals().values()]
 
 for a in cached_attrs:
     if hasattr(a, "x12") and a.__name__ != "X12Segment":
-        segment_key: str = str(a.__fields__["segment_name"].default)
+        # clean up the string representation to limit it to the 2 - 3 character segment name
+        segment_key: str = str(a.__fields__["segment_name"].default).replace(
+            "X12SegmentName.", ""
+        )
         SEGMENT_LOOKUP[segment_key] = a
