@@ -4,13 +4,12 @@ io.py
 Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
 from io import StringIO, TextIOBase
-from typing import Iterator, List, NoReturn, Optional, Tuple, Type
-
-from pydantic import BaseModel
+from typing import Iterator, List, NoReturn, Optional, Tuple
 
 from x12.config import IsaDelimiters, get_config
-from x12.models import X12Delimiters
+from x12.models import X12Delimiters, X12SegmentName, X12SegmentGroup
 from x12.support import is_x12_data, is_x12_file
+from x12.parse import X12SegmentParser
 
 
 class X12SegmentReader:
@@ -136,9 +135,38 @@ class X12ModelReader:
         self._x12_segment_reader.__enter__()
         return self
 
-    def model(self):
-        for segment in self._x12_segment_reader.segments():
-            pass
+    def _is_control_segment(self, segment_name) -> bool:
+        """Returns True if a segment is a control segment"""
+        return segment_name in (
+            X12SegmentName.ISA,
+            X12SegmentName.GS,
+            X12SegmentName.GE,
+            X12SegmentName.IEA,
+        )
+
+    def _is_transaction_header(self, segment_name) -> bool:
+        """Returns True if a segment is a transaction header"""
+        return segment_name == X12SegmentName.ST
+
+    def model(self) -> Iterator[X12SegmentGroup]:
+        """
+        Creates a stream of X12 models from X12 segments
+        """
+        for segment_name, segment in self._x12_segment_reader.segments():
+
+            if self._is_control_segment(segment_name):
+                continue
+
+            if self._is_transaction_header(segment_name):
+                transaction_code: str = segment[1]
+                implementation_version: str = segment[3]
+                parser: X12SegmentParser = X12SegmentParser.load_parser(
+                    transaction_code, implementation_version
+                )
+
+            model: X12SegmentGroup = parser.parse(segment)
+            if model:
+                yield model
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
         """

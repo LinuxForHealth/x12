@@ -1,11 +1,12 @@
 """
-test_parsing.py
+test_parse.py
 
-Test cases for the match decorator used to parse X12 segments into a "data record" (Dictionary) structure.
+Tests the X12 base parse module
 """
 import pytest
 from typing import List, Dict, Callable
-from x12.parsing import match
+from x12.parse import match
+from x12.parse import X12SegmentParser
 
 
 @pytest.fixture
@@ -87,3 +88,11 @@ def test_match_with_conditions(
     mock_func_with_conditions(st_segment, {}, data_record)
     assert data_record == parsed_st_segment
     assert mock_func_with_conditions.segment_group == "ST"
+
+
+def test_load_parser():
+    parser = X12SegmentParser.load_parser("270", "005010X279A1")
+    assert parser.__name__ == "EligibilityInquiryParser"
+
+    with pytest.raises(ModuleNotFoundError):
+        X12SegmentParser.load_parser("911", "bad-bad-version")

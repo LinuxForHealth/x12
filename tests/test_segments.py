@@ -138,3 +138,7 @@ def test_st_segment():
 
     st_segment: StSegment = StSegment(**segment_data)
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
+
+
+def test_segment_lookup():
+    assert len(SEGMENT_LOOKUP) == 9

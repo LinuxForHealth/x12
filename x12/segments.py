@@ -6,8 +6,7 @@ A data segment is a "record" which contains related data elements, or fields.
 """
 import datetime
 from enum import Enum
-from typing import List, Literal, Optional
-
+from typing import Dict, List, Literal, Optional
 from pydantic import Field, PositiveInt
 
 from x12.models import X12Segment, X12SegmentName
@@ -177,3 +176,14 @@ class StSegment(X12Segment):
     transaction_set_identifier_code: str = Field(min_length=3, max_length=3)
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
     implementation_convention_reference: str = Field(min_length=1, max_length=35)
+
+
+# load segment classes into a lookup table indexed by segment name
+SEGMENT_LOOKUP: Dict = {}
+
+cached_attrs = [v for v in globals().values()]
+
+for a in cached_attrs:
+    if hasattr(a, "x12") and a.__name__ != "X12Segment":
+        segment_key: str = str(a.__fields__["segment_name"].default)
+        SEGMENT_LOOKUP[segment_key] = a

@@ -1,4 +1,4 @@
-from x12.transactions.x12_270_005010X279A1 import EligibilityInquiry
+from x12.transactions.x12_270_005010X279A1.eligibility_inquiry import EligibilityInquiry
 
 
 def test_it():
