@@ -1,14 +1,14 @@
 """
 io.py
 
-Supports X12 I/O operations such as reading, writing, and modeling raw models.
+Supports X12 I/O operations related to reading and writing X12 transaction sets.
 """
 import logging
 from io import StringIO, TextIOBase
 from typing import Dict, Iterator, List, NoReturn, Optional, Tuple
 
 from x12.config import IsaDelimiters, TransactionSetVersionIds, get_config
-from x12.models import X12Delimiters, X12Segment, X12SegmentGroup, X12SegmentName
+from x12.models import X12Delimiters, X12SegmentGroup, X12SegmentName
 from x12.parse import X12SegmentParser
 from x12.segments import SEGMENT_LOOKUP
 from x12.support import is_x12_data, is_x12_file
@@ -21,11 +21,11 @@ class X12SegmentReader:
     Streams segments from a X12 message or file.
 
     with X12Reader(x12_data) as r:
-       for segment_name, segment, context in r.models():
+       for segment_name, segment_fields in r.segments():
           # do something interesting
 
-    Segments are streamed in order using a buffered generator function.
-    The buffer size is configured using the config/env variable X12_READER_BUFFER_SIZE which defaults to 1MB.
+    Segments are streamed in order received using a buffered generator function.
+    Buffer size is configured using the config/env variable X12_READER_BUFFER_SIZE (default = 1MB).
     """
 
     def __init__(self, x12_input: str):
@@ -67,6 +67,7 @@ class X12SegmentReader:
     def __enter__(self) -> "X12SegmentReader":
         """
         Initializes the X12 Stream and parses messages delimiters from the ISA segment.
+
         :return: The X12SegmentReader instance
         :raise: ValueError if the x12 input is invalid
         """
@@ -75,15 +76,14 @@ class X12SegmentReader:
         elif is_x12_data(self._x12_input):
             self._x12_stream = StringIO(self._x12_input)
         else:
-            raise ValueError(
-                "Invalid x12_input. Expecting X12 Message or valid path to X12 File"
-            )
+            msg = f"Invalid x12_input {type(self._x12_input)}. Expecting string or file path"
+            raise ValueError(msg)
 
         self._buffer_size: int = get_config().x12_reader_buffer_size
 
         self._x12_stream.seek(0)
         if not self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH):
-            raise ValueError("Invalid X12Stream")
+            raise ValueError("Invalid X12Stream. Unable to read ISA Segment.")
 
         self._parse_isa_segment()
 
@@ -92,6 +92,7 @@ class X12SegmentReader:
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
         """
         Closes the X12SegmentReader's X12 Stream and sets instance attributes to None
+
         :param exc_type: Exception Type
         :param exc_val: Exception Value
         :param exc_tb: Exception traceback
@@ -106,6 +107,7 @@ class X12SegmentReader:
         """
         Iterator function used to return X12 models from the underlying X12 stream.
         The read buffer size may be configured using X12_READER_BUFFER_SIZE.
+
         :return: Iterator containing segment name and segment fields.
         """
         self._x12_stream.seek(0)
@@ -133,7 +135,12 @@ class X12SegmentReader:
 
 class X12ModelReader:
     """
-    Streams X12 Models from a X12 message or file
+    The X12ModelReader is a higher level reader which parses X12 segments into transactional models.
+    Data is buffered using a X12SegmentReader.
+
+    with X12ModelReader(x12_data) as r:
+       for model in r.model():
+          # do something interesting
     """
 
     def __init__(self, x12_input: str):
@@ -147,11 +154,21 @@ class X12ModelReader:
         self._segment_lookup: Dict = SEGMENT_LOOKUP
 
     def __enter__(self):
+        """
+        Initializes the X12 Stream.
+
+        :return: The X12ModelReader instance
+        """
         self._x12_segment_reader.__enter__()
         return self
 
     def _is_control_segment(self, segment_name) -> bool:
-        """Returns True if a segment is a control segment"""
+        """
+        Returns True if the segment_name is a control segment.
+
+        :param segment_name: The segment name
+        :return: True if the segment is a control segment, otherwise False.
+        """
         return segment_name in (
             X12SegmentName.ISA,
             X12SegmentName.GS,
@@ -160,12 +177,20 @@ class X12ModelReader:
         )
 
     def _is_transaction_header(self, segment_name) -> bool:
-        """Returns True if a segment is a transaction header"""
+        """
+        Returns True if the segment_name is the transaction set header segment.
+
+        :param segment_name: The segment name
+        :return: True if the segment is the transaction set header, otherwise False.
+        """
         return segment_name == X12SegmentName.ST
 
     def model(self) -> Iterator[X12SegmentGroup]:
         """
-        Creates a stream of X12 models from X12 segments
+        Creates a stream of X12 models from a X12 segment stream.
+        The stream returns transaction specific implementations of the X12SegmentGroup base class.
+
+        :return: X12SegmentGroup model iterator
         """
         for segment_name, segment_fields in self._x12_segment_reader.segments():
 
@@ -192,5 +217,9 @@ class X12ModelReader:
     def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
         """
         Exits the X12ModelReader and releases resources
+
+        :param exc_type: Exception Type
+        :param exc_val: Exception Value
+        :param exc_tb: Exception traceback
         """
         self._x12_segment_reader.__exit__(exc_type, exc_val, exc_tb)
