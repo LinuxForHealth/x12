@@ -1,29 +1,14 @@
 """
 models.py
 
-The base models for X12 parsing and validation that aren't associated with a specific X12 version.
+Base models for X12 parsing and validation.
 """
+import abc
 import datetime
+from enum import Enum
+from typing import List
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
-
-
-class X12VersionIdentifiers(BaseModel):
-    """
-    X12VersionIdentifiers stores the various version ids distributed in the ISA, GS, and ST control segments.
-    """
-
-    interchange_control_version: str
-    functional_id_code: str = Field(min_length=2, max_length=2)
-    functional_version_code: str = Field(min_length=1, max_length=12)
-    transaction_set_code: str = Field(min_length=3, max_length=3)
-
-    def __str__(self):
-        """
-        :return: the string representation of the Version Identifiers as a "-" delimited key
-        """
-        return f"{self.interchange_control_version}-{self.functional_id_code}-{self.functional_version_code}-{self.transaction_set_code}"
 
 
 class X12Delimiters(BaseModel):
@@ -37,30 +22,29 @@ class X12Delimiters(BaseModel):
     component_separator: str = Field(":", min_length=1, max_length=1)
 
 
-class X12SegmentContext(BaseModel):
+class X12SegmentName(str, Enum):
     """
-    Provides a working context and metadata for a X12 segment.
+    Supported X12 Segment Names
     """
 
-    version: Optional[X12VersionIdentifiers] = None
-    delimiters: Optional[X12Delimiters] = None
-    interchange_header: Optional[List[str]] = None
-    functional_group_header: Optional[List[str]] = None
-    transaction_set_header: Optional[List[str]] = None
-    previous_segment_name: Optional[str] = None
-    previous_segment: Optional[List[str]] = None
-    current_segment_name: Optional[str] = None
-    current_segment: Optional[List[str]] = None
-    current_loop: Optional[str] = None
+    BHT = "BHT"
+    GE = "GE"
+    GS = "GS"
+    HL = "HL"
+    IEA = "IEA"
+    ISA = "ISA"
+    NM1 = "NM1"
+    SE = "SE"
+    ST = "ST"
 
 
-class X12BaseSegmentModel(BaseModel):
+class X12Segment(abc.ABC, BaseModel):
     """
-    X12BaseSegmentModel serves as the base class for all X12 segment models.
+    X12BaseSegment serves as the abstract base class for all X12 segment models.
     """
 
     delimiters: X12Delimiters = X12Delimiters()
-    segment_name: str = Field(min_length=2, max_length=3)
+    segment_name: X12SegmentName
 
     class Config:
         """
@@ -94,3 +78,23 @@ class X12BaseSegmentModel(BaseModel):
             self.delimiters.element_separator
         )
         return x12_str + self.delimiters.segment_terminator
+
+
+class X12SegmentGroup(abc.ABC, BaseModel):
+    """
+    Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
+    """
+
+    def x12(self, use_new_lines=True) -> str:
+        """
+        :return: Generates a X12 representation of the loop using its segments.
+        """
+        x12_segments: List[str] = []
+        fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
+
+        for f in fields:
+            field_instance = getattr(self, f.name)
+            x12_segments.append(field_instance.x12())
+
+        join_char: str = "\n" if use_new_lines else ""
+        return join_char.join(x12_segments)
