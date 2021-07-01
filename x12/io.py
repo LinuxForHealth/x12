@@ -9,7 +9,7 @@ from typing import Dict, Iterator, List, NoReturn, Optional, Tuple
 
 from x12.config import IsaDelimiters, TransactionSetVersionIds, get_config
 from x12.models import X12Delimiters, X12SegmentGroup, X12SegmentName
-from x12.parse import X12SegmentParser
+from x12.parsing import X12SegmentParser
 from x12.segments import SEGMENT_LOOKUP
 from x12.support import is_x12_data, is_x12_file
 

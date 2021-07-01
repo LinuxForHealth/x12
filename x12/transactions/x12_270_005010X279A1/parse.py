@@ -1,7 +1,7 @@
 from enum import Enum
 
 from x12.models import X12SegmentGroup
-from x12.parse import X12SegmentParser, match
+from x12.parsing import X12SegmentParser, match
 
 from .transaction_set import EligibilityInquiry
 

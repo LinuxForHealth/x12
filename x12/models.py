@@ -1,7 +1,7 @@
 """
 models.py
 
-The base models for X12 parsing and validation that aren't associated with a specific X12 version.
+Base models for X12 parsing and validation.
 """
 import abc
 import datetime

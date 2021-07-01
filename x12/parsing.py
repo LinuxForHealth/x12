@@ -1,5 +1,5 @@
 """
-parse.py
+parsing.py
 
 Provides X12 segment parsing support.
 """
@@ -24,14 +24,13 @@ PARSING_FUNCTION_REGEX = "parse\\_(.)*\\_segment"
 
 def match(segment_name: str, conditions: Dict[str, str] = None):
     """
-    The match decorator matches a "parsed" X12 segment to a parsing rule using the segment name and optional conditions.
+    The match decorator matches a "parsed" X12 segment to a parsing function.
 
-    A "parsed" X12 segment is a segment which has been parsed from a list of values to a dictionary with fields names
-    as keys.
-
+    Matches are made using the segment name and conditions (optional).
     Conditions are limited to equality checks.
 
-    The decorator also adds a "segment grouping" attribute to the decorated function to optimize lookup times.
+    The decorator also adds a "segment grouping" attribute to the decorated function to optimize lookups.
+
     :param segment_name: The X12 segment name
     :param conditions: Dictionary of conditions. Key = x12 segment field name, Value = field value
     """
@@ -58,7 +57,7 @@ def match(segment_name: str, conditions: Dict[str, str] = None):
 
 class X12SegmentParser(ABC):
     """
-    Parses X12 segments into a Pydantic Model
+    Parses X12 segments into a transactional model.
     """
 
     @classmethod
@@ -67,8 +66,8 @@ class X12SegmentParser(ABC):
         cls, transaction_code: str, implementation_version: str
     ) -> "X12SegmentParser":
         """
-        Returns the parser for a specific transaction and version.
-        The parser is configured with the segment parsers for the transaction set.
+        Returns the parser for a specific X12 transaction and version.
+        The parser includes specific parsers for each segment in the transaction set.
 
         :param transaction_code: The X12 transaction code (270, 271, 834, etc)
         :param implementation_version: The X12 implementation version (005010X279A1)
@@ -125,6 +124,9 @@ class X12SegmentParser(ABC):
         segment_data: Dict = {}
         field_names = [f for f in segment_model.__fields__ if f != "delimiters"]
 
+        # segment_fields and field_name lengths may not match
+        # drive the mapping with segment_fields as it includes all fields within the transactional context
+        # field-names includes ALL available fields within the specification
         for index, value in enumerate(segment_fields):
             field_name = field_names[index]
             segment_data[field_name] = value
@@ -145,6 +147,11 @@ class X12SegmentParser(ABC):
 
     @abstractmethod
     def load_model(self) -> X12SegmentGroup:
+        """
+        Loads the instance's data record into a X12 transactional model.
+
+        :return: The X12 transactional model.
+        """
         pass
 
     def parse(
@@ -160,8 +167,9 @@ class X12SegmentParser(ABC):
         """
         model: Optional[X12SegmentGroup] = None
 
-        # convert segment data to a record and execute parsers
+        # convert segment data to a record
         segment_data = self._parse_segment(segment_name, segment_fields)
+        # execute parsers
         for segment_parser in self.segment_parsers[segment_name]:
             segment_parser(segment_data, self._context, self._data_record)
 
