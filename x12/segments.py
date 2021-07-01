@@ -1,8 +1,10 @@
 """
 segments.py
 
-Models data segments used within X12 transactions.
-A data segment is a "record" which contains related data elements, or fields.
+The segments module contains models for ALL ASC X12 segments used within health care transactions.
+The segments defined within this module serve as "base models" for transactional use, where a segment subclass is defined
+and overriden as necessary to support a transaction's specific validation and usage constraints.
+
 """
 import datetime
 from enum import Enum
@@ -113,7 +115,7 @@ class IsaSegment(X12Segment):
 
     def x12(self) -> str:
         """
-        Overriden to support ISA Segment specific date formatting
+        Overriden to support ISA Segment specific date formatting for its fixed length segment.
         """
         x12_str: str = super().x12()
 

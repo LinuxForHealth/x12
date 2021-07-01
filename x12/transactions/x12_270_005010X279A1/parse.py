@@ -1,3 +1,8 @@
+"""
+parse.py
+
+Defines the classes and functions used to parse X12 270 005010X279A1 segments into a transactional model.
+"""
 from enum import Enum
 
 from x12.models import X12SegmentGroup
@@ -7,6 +12,10 @@ from .transaction_set import EligibilityInquiry
 
 
 class EligibilityInquiryLoops(str, Enum):
+    """
+    The loops used to support the 270 005010X279A1 format.
+    """
+
     HEADER = "header"
     INFORMATION_SOURCE = "loop_2000a"
     INFORMATION_SOURCE_NAME = "loop_2100a"
@@ -22,11 +31,27 @@ class EligibilityInquiryLoops(str, Enum):
 
 
 class EligibilityInquiryParser(X12SegmentParser):
+    """
+    The 270 005010X279A1 parser.
+    """
+
     def __init__(self):
+        """
+        Configures the data record for the 270 transaction.
+        """
         super().__init__()
         self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
 
+    def reset(self):
+        """
+        Resets the data record for the 270 transaction.
+        """
+        self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
+
     def load_model(self) -> X12SegmentGroup:
+        """
+        Loads the data model for the 280 transaction
+        """
         return EligibilityInquiry(**self._data_record)
 
 

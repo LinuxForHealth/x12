@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import lru_cache, wraps
 from importlib import import_module
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, NoReturn, Optional
 
 from x12.models import X12SegmentGroup
 from x12.segments import SEGMENT_LOOKUP
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 PARSING_FUNCTION_REGEX = "parse\\_(.)*\\_segment"
 
 
-def match(segment_name: str, conditions: Dict[str, str] = None):
+def match(segment_name: str, conditions: Dict[str, str] = None) -> Callable:
     """
     The match decorator matches a "parsed" X12 segment to a parsing function.
 
@@ -117,7 +117,7 @@ class X12SegmentParser(ABC):
                 segment_name
             ]
         except KeyError:
-            msg = f"Unsupported segment {segment_name}"
+            msg: str = f"Unsupported segment {segment_name}"
             logger.exception(msg)
             raise
 
@@ -128,12 +128,12 @@ class X12SegmentParser(ABC):
         # drive the mapping with segment_fields as it includes all fields within the transactional context
         # field-names includes ALL available fields within the specification
         for index, value in enumerate(segment_fields):
-            field_name = field_names[index]
+            field_name: str = field_names[index]
             segment_data[field_name] = value
 
         return segment_data
 
-    def _reset(self):
+    def reset(self) -> NoReturn:
         """
         Resets the parser's state
         """
@@ -174,11 +174,11 @@ class X12SegmentParser(ABC):
             segment_parser(segment_data, self._context, self._data_record)
 
             if self._context["is_record_complete"]:
-                model = self.load_model()
-                self._reset()
+                model: X12SegmentGroup = self.load_model()
+                self.reset()
                 return model
 
-    def __init__(self):
+    def __init__(self) -> NoReturn:
         """
         Configures the data record for the parser instance
         """
@@ -188,4 +188,4 @@ class X12SegmentParser(ABC):
         self._segment_lookup = SEGMENT_LOOKUP
 
         # resets state attributes to an initial condition
-        self._reset()
+        self.reset()

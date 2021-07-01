@@ -58,6 +58,6 @@ class X12Config(BaseSettings):
 
 
 @lru_cache
-def get_config():
+def get_config() -> "X12Config":
     """Returns the X12Config"""
     return X12Config()

@@ -28,7 +28,7 @@ class X12SegmentReader:
     Buffer size is configured using the config/env variable X12_READER_BUFFER_SIZE (default = 1MB).
     """
 
-    def __init__(self, x12_input: str):
+    def __init__(self, x12_input: str) -> NoReturn:
         """
         Initializes the X12SegmentReader with a x12 input.
         The x12 input may be a message payload or a path to a x12 file.
@@ -143,7 +143,7 @@ class X12ModelReader:
           # do something interesting
     """
 
-    def __init__(self, x12_input: str):
+    def __init__(self, x12_input: str) -> NoReturn:
         """
         Initializes the X12ModelReader with a x12_input.
         The x12 input may be a message payload or a path to a x12 file.
@@ -153,7 +153,7 @@ class X12ModelReader:
         self._x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
         self._segment_lookup: Dict = SEGMENT_LOOKUP
 
-    def __enter__(self):
+    def __enter__(self) -> "X12ModelReader":
         """
         Initializes the X12 Stream.
 

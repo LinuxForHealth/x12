@@ -1,3 +1,8 @@
+"""
+segments.py
+
+Subclasses base segment models for use within the 270 005010X279A1 transaction set.
+"""
 from enum import Enum
 from typing import Literal, Optional
 
