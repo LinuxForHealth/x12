@@ -1,7 +1,9 @@
-from x12.parse import X12SegmentParser, match
-from x12.models import X12SegmentGroup
-from .transaction_set import EligibilityInquiry
 from enum import Enum
+
+from x12.models import X12SegmentGroup
+from x12.parse import X12SegmentParser, match
+
+from .transaction_set import EligibilityInquiry
 
 
 class EligibilityInquiryLoops(str, Enum):

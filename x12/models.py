@@ -5,8 +5,9 @@ The base models for X12 parsing and validation that aren't associated with a spe
 """
 import abc
 import datetime
-from typing import List
 from enum import Enum
+from typing import List
+
 from pydantic import BaseModel, Field
 
 

@@ -1,5 +1,7 @@
 """
 config.py
+
+LinuxForHealth X12 Configuration Settings and specification/format "constants"
 """
 import os
 from enum import IntEnum
@@ -19,6 +21,15 @@ class IsaDelimiters(IntEnum):
     REPETITION_SEPARATOR: int = 82
     SEGMENT_LENGTH: int = 106
     SEGMENT_TERMINATOR: int = 105
+
+
+class TransactionSetVersionIds(IntEnum):
+    """
+    The indices used to parse transaction set version identifiers
+    """
+
+    TRANSACTION_SET_CODE = 1
+    IMPLEMENTATION_VERSION = 3
 
 
 class X12VersionFields(IntEnum):

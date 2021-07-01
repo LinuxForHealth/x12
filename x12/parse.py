@@ -3,16 +3,17 @@ parse.py
 
 Provides X12 segment parsing support.
 """
-from abc import ABC, abstractmethod
-from functools import wraps, lru_cache
-from typing import Dict, Optional, List, Callable
-from x12.models import X12SegmentGroup
-from x12.segments import SEGMENT_LOOKUP
-from importlib import import_module
-from collections import defaultdict
 import inspect
 import logging
 import re
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from functools import lru_cache, wraps
+from importlib import import_module
+from typing import Callable, Dict, List, Optional
+
+from x12.models import X12SegmentGroup
+from x12.segments import SEGMENT_LOOKUP
 
 logger = logging.getLogger(__name__)
 

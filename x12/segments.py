@@ -7,6 +7,7 @@ A data segment is a "record" which contains related data elements, or fields.
 import datetime
 from enum import Enum
 from typing import Dict, List, Literal, Optional
+
 from pydantic import Field, PositiveInt
 
 from x12.models import X12Segment, X12SegmentName

@@ -3,15 +3,15 @@ io.py
 
 Supports X12 I/O operations such as reading, writing, and modeling raw models.
 """
+import logging
 from io import StringIO, TextIOBase
-from typing import Iterator, List, NoReturn, Optional, Tuple, Dict
+from typing import Dict, Iterator, List, NoReturn, Optional, Tuple
 
-from x12.config import IsaDelimiters, get_config
-from x12.models import X12Delimiters, X12SegmentName, X12SegmentGroup, X12Segment
-from x12.support import is_x12_data, is_x12_file
+from x12.config import IsaDelimiters, TransactionSetVersionIds, get_config
+from x12.models import X12Delimiters, X12Segment, X12SegmentGroup, X12SegmentName
 from x12.parse import X12SegmentParser
 from x12.segments import SEGMENT_LOOKUP
-import logging
+from x12.support import is_x12_data, is_x12_file
 
 logger = logging.getLogger(__name__)
 
@@ -174,8 +174,12 @@ class X12ModelReader:
 
             if self._is_transaction_header(segment_name):
 
-                transaction_code: str = segment_fields[1]
-                implementation_version: str = segment_fields[3]
+                transaction_code: str = segment_fields[
+                    TransactionSetVersionIds.TRANSACTION_SET_CODE
+                ]
+                implementation_version: str = segment_fields[
+                    TransactionSetVersionIds.IMPLEMENTATION_VERSION
+                ]
 
                 parser: X12SegmentParser = X12SegmentParser.load_parser(
                     transaction_code, implementation_version
