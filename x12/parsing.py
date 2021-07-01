@@ -75,8 +75,8 @@ class X12SegmentParser(ABC):
         :raises: ValueError if the transaction module exists, but a parser class cannot be found.
         """
         transaction_package: str = f"x12_{transaction_code}_{implementation_version}"
-        parser_package: str = f"x12.transactions.{transaction_package}.parse"
-        mod = import_module(parser_package)
+        parsing_package: str = f"x12.transactions.{transaction_package}.parsing"
+        mod = import_module(parsing_package)
 
         def load_segment_parsers() -> Dict[str, List[Callable]]:
             """Returns dictionary of Segment Name [Key], Segment Parsers [List]"""

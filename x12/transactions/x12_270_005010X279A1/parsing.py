@@ -1,5 +1,5 @@
 """
-parse.py
+parsing.py
 
 Defines the classes and functions used to parse X12 270 005010X279A1 segments into a transactional model.
 """
@@ -35,17 +35,11 @@ class EligibilityInquiryParser(X12SegmentParser):
     The 270 005010X279A1 parser.
     """
 
-    def __init__(self):
-        """
-        Configures the data record for the 270 transaction.
-        """
-        super().__init__()
-        self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
-
     def reset(self):
         """
         Resets the data record for the 270 transaction.
         """
+        super().reset()
         self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
 
     def load_model(self) -> X12SegmentGroup:
