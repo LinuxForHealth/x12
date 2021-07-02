@@ -1,12 +1,14 @@
 # New Transaction Set Guide
 
-This guide documents the process used to add a new transaction set to LinuxForHealth x12.
+This guide documents the process used to add a new transaction set to LinuxForHealth x12. Please review this guide and
+the implementation within the `x12_270_005010X279A1` transaction set before adding a new transaction.
 
 ## Add Transaction Package
 
-Add a new transaction package to `x12.transactions` for the transaction set. The new transaction package must adhere to
-the following convention to support transaction discovery - `x12_[transaction set code]_[implementation version]`.
-Within the package add the following modules:
+Add a new transaction package to `x12.transactions` for the transaction set. The new transaction package name must
+adhere to the following convention to support transaction discovery - `x12_[transaction set code]_[implementation version]`.
+
+Add the following modules to the new transaction package:
 
 * __init__.py (required to support the new package)
 * loops.py
@@ -16,21 +18,72 @@ Within the package add the following modules:
 
 ## Add Segments
 
-Review the transaction specification and determine if all segments within the specification are supported within the
-`x12.segments` module. Add new segment models and entries to the `x12.models.X12SegmentName` as necessary. Remember that
-segments constraints are generally limited to data type and field length. Specialized validations are implemented within
-the transactional loop models.
+Review the transaction specification and determine if all segments within the transaction set are supported within the
+`x12.segments` module. 
 
-Next, add specialized segment models to `x12.transactoins.[new transaction package]`as necessary. The specialized models
-must extend its base segment model counterpart. 
-
-In the example below, `Loop2000AHlSegment` overrides the `HlSegment` to provide literal, optional, and "choice"/one of constraints. Note
-that code tables are implemented as nested enumeration definitions within the model class. The enumerations are nested
-rather than defined as a separate type, since the code values are typically not shared between loop contexts.
+If a segment is missing from the `x12.segments` module, add a new entry to `x12.models.X12SegmentName`
 
 ```python
 from enum import Enum
+
+class X12SegmentName(str, Enum):
+    """
+    Supported X12 Segment Names
+    """
+
+    BHT = "BHT"
+    GE = "GE"
+    GS = "GS"
+    HL = "HL"
+    # etc
+```
+
+Next, create a new model by extending the `X12Segment` class. 
+
+Each new model must override the `segment_name` attribute to support the appropriate `X12SegmentName` enumeration value.
+Pydantic field type constraints are used as necessary to ensure that field types adhere to the base specification.
+
+The example below illustrates the following:
+
+* The `GeSegment` class overrides `segment_name` to support the appropriate enumeration value.
+* The Pydantic constrained type `PositiveInt` is used to ensure that `number_of_transaction_sets_included` is a positive integer.
+* A Pydantic `Field` type is used to ensure that `group_control_number` has a constrained width.
+
+
+```python
+from x12.models import X12Segment, X12SegmentName
+from pydantic import PositiveInt, Field
+
+class GeSegment(X12Segment):
+    """
+    Defines a functional header for the message and is an EDI control segment.
+    Example:
+        GE*1*1~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.GE
+    number_of_transaction_sets_included: PositiveInt
+    group_control_number: str = Field(min_length=1, max_length=9)
+
+
+```
+
+Next, add specialized segment models to `x12.transactoins.[new transaction package]`as necessary. Each specialized model
+must extend its base segment model counterpart.
+
+In the example below `Loop2000AHlSegment` extends `HlSegment` with overrides appropriate for the Eligibility (270)
+Transaction's 2000A Loop (Information Receiver).  
+
+The `Loop2000AHlSegment` provides the following:
+
+* A clear type name that includes the loop context, Loop 2000A, and the segment, HL.
+* A nested enum class used to specify valid field values. The enum is nested since it's usage is limited to this loop/segment/field.
+* The class overrides `hierarchical_id_number` to specify that it may only accept a single, literal value.
+* The class overrides `hierarchical_parent_id_number` to set it as `Optional` since it is not required in the 2000A loop.
+
+```python
 from x12.segments import HlSegment
+from enum import Enum
 from typing import Literal, Optional
 
 class Loop2000AHlSegment(HlSegment):
@@ -51,17 +104,65 @@ class Loop2000AHlSegment(HlSegment):
     hierarchical_parent_id_number: Optional[str]
     hierarchical_level_code: HierarchicalLevelCode
 ```
+## Add Header and Footer Loop Models
 
-## Add Loop Models
+Create loop models which extend the `x12.models.X12SegmentGroup` to support the transaction set's header and footer.
+Typically, the header supports the `ST` segment while the footer supports the `SE` segment. Review the specification to
+determine if additional segments should be included in the header or footer. 
 
-Create model classes which extend the `x12.models.X12SegmentGroup` class. Review the specification carefully to ensure
-that the loop structure is modeled correctly. Within the loop reference the appropriate "base" segments or transaction
-specific segments as necessary.
+The following example is from the Eligibility (270) loop modules.
+
+The Header loop model includes two segments, `ST` and `BHT`.  The `ST` segment, `HeaderStSegment` is a specialized segment
+which overrides transaction set fields as appropriate to specify the Eligibility (270) transaction.
+
+The Footer loop model uses the "standard" or "base" `SE` segment from the `x12.segments` module.
+
+```python
+from x12.models import X12SegmentGroup
+from x12.segments import SeSegment
+from x12.transactions.x12_270_005010X279A1.segments import (
+    HeaderBhtSegment,
+    HeaderStSegment,
+)
+
+class Header(X12SegmentGroup):
+    """
+    Transaction Header Information
+    """
+
+    st_segment: HeaderStSegment
+    bht_segment: HeaderBhtSegment
+
+class Footer(X12SegmentGroup):
+    """
+    Transaction Footer Information
+    """
+
+    se_segment: SeSegment
+```
+## Add Additional Loop Models
+
+Create additional models to support the transaction set's loop groupings. Use the same approach taken when creating the
+Header and Footer models.
 
 ## Add Transaction Set Model
 
 The transaction set model is defined within the `transaction_set.py` module. The transaction set model must extend 
 `x12.models.X12SegmentGroup`.
+
+```python
+from typing import List
+from x12.models import X12SegmentGroup
+from x12.transactions.x12_270_005010X279A1.loops import Footer, Header, Loop2000A
+
+
+class EligibilityInquiry(X12SegmentGroup):
+    """ """
+    header: Header
+    # the transaction set is nested within the 2000A loop
+    loop_2000a: List[Loop2000A]
+    footer: Footer
+```
 
 ## Add Transaction Set Parser and Parsing Functions
 
@@ -71,6 +172,26 @@ methods.
 
 The `reset` method returns the `data_record` dictionary instance attribute to a known starting state when the parser is ready
 to start parsing a new record. The `load_model` method loads the `data_record`attribute into the transaction set model. 
+
+```python
+class EligibilityInquiryParser(X12SegmentParser):
+    """
+    The 270 005010X279A1 parser.
+    """
+
+    def reset(self):
+        """
+        Resets the data record for the 270 transaction.
+        """
+        super().reset()
+        self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
+
+    def load_model(self) -> X12SegmentGroup:
+        """
+        Loads the data model for the 280 transaction
+        """
+        return EligibilityInquiry(**self._data_record)
+```
 
 Finally each parsing module includes parsing functions which are used to parse the transaction sets segments into the 
 parser's `data_record` attribute. Parsing functions use the `match` decorator to identify the segment to parse and any optional 
@@ -88,4 +209,3 @@ def parse_information_source_hl_segment(segment_data, context, data_record):
         {"hl_segment": segment_data}
     )
 ```
-

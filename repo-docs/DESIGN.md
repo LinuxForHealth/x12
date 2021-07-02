@@ -42,7 +42,7 @@ The specification uses loops to build a higher level record, such as a subscribe
 grouping typically adds additional validation constraints to each segment. A segment in one loop typically utilizes
 different field constraints than it does in another. 
 
-For example, the `HL` segment's hierarchical level code, or `HL03`, is used within the Eligibility (270) transaction
+For example, the `HL` segment's hierarchical level code field, or `HL03`, is used within the Eligibility (270) transaction
 to specify the beginning of a new hierarchical record. The permitted values for the `HL03` field differ based on which
 loop the segment is in.
 
@@ -144,5 +144,56 @@ The contents of a transaction package include:
 X12Segment is the base model class for X12 segments. It includes a `x12` method which transforms the segment to a valid
 x12 string.
 
+```python
+import abc
+from pydantic import BaseModel
+
+class X12Segment(abc.ABC, BaseModel):
+    """
+    X12BaseSegment serves as the abstract base class for all X12 segment models.
+    """
+
+    delimiters: X12Delimiters = X12Delimiters()
+    segment_name: X12SegmentName
+
+    class Config:
+        """
+        Default configuration for X12 Models
+        """
+
+        use_enum_values = True
+
+    def x12(self) -> str:
+        """
+        :return: the X12 representation of the model instance
+        """
+        # transform segment (omitted for clarity)
+```
+
 The X12SegmentGroup model is the base model used to model a X12 loop or transaction set. The X12SegmentGroup also includes
 a `x12` method which generates valid x12 from its contained segments.
+
+```python
+import abc
+from pydantic import BaseModel
+from typing import List
+
+class X12SegmentGroup(abc.ABC, BaseModel):
+    """
+    Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
+    """
+
+    def x12(self, use_new_lines=True) -> str:
+        """
+        :return: Generates a X12 representation of the loop using its segments.
+        """
+        x12_segments: List[str] = []
+        fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
+
+        for f in fields:
+            field_instance = getattr(self, f.name)
+            x12_segments.append(field_instance.x12())
+
+        join_char: str = "\n" if use_new_lines else ""
+        return join_char.join(x12_segments)
+```
