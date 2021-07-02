@@ -22,5 +22,5 @@ def x12_sample():
 
 def test_model_reader(x12_sample):
     with X12ModelReader(x12_sample) as r:
-        for model in r.model():
+        for model in r.models():
             assert model
