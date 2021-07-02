@@ -185,7 +185,7 @@ class X12ModelReader:
         """
         return segment_name == X12SegmentName.ST
 
-    def model(self) -> Iterator[X12SegmentGroup]:
+    def models(self) -> Iterator[X12SegmentGroup]:
         """
         Creates a stream of X12 models from a X12 segment stream.
         The stream returns transaction specific implementations of the X12SegmentGroup base class.

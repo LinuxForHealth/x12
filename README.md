@@ -28,7 +28,7 @@ This project is currently under construction. Please refer to the [LinuxForHealt
 ## Quickstart
 
 ### Pre-requisites
-The LinuxForHealth EDI development environment relies on the following software packages:
+The LinuxForHealth X12 development environment relies on the following software packages:
 
 - [git](https://git-scm.com) for project version control
 - [Python 3.8 or higher](https://www.python.org/downloads/) for runtime/coding support
@@ -45,11 +45,45 @@ pipenv sync --dev
 pipenv run pytest
 ```
 
+### SDK
+
+The X12 SDK provides an `io` package which supports streaming X12 segments or transaction models. Segment
+streaming parses each segment into a list containing the fields. Model streaming validates the X12 payload, and returns
+one or transaction models from the X12 message.
+
+
+To stream segments, create a X12SegmentReader instance: 
+```python
+from x12.io import X12SegmentReader
+
+with X12SegmentReader("/home/edi/270.x12") as r:
+    # return the segment name and field list
+    for segment_name, segment_fields in r.segments():
+        print(segment_name)
+        print(segment_fields)
+```
+
+To stream models, create a X12ModelReader instance:
+```python
+from x12.io import X12ModelReader
+
+with X12ModelReader("/home/edi/270.x12") as r:
+    for model in r.models():
+        # common model properties include "header" and "footer"
+        print(model.header)
+        print(model.footer)
+        
+        # to convert back to X12
+        model.x12()
+```
+
 ### CLI
 Under Development
 
 ### REST API
 Under Development
 
-### SDK
-Under Development
+
+### Additional Resources
+- [Design Overview](repo-docs/DESIGN.md)
+- [New Transaction Support](repo-docs/NEW_TRANSACTION.md)
