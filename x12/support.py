@@ -3,6 +3,7 @@ support.py
 
 Convenience functions for X12 Processing.
 """
+import datetime
 import os
 
 from x12.config import IsaDelimiters
@@ -15,6 +16,7 @@ def is_x12_data(input_data: str) -> bool:
     :param input_data: Input data to evaluate
     :return: True if the input data is a x12 message, otherwise False
     """
+
     return input_data.startswith("ISA") if input_data else False
 
 
@@ -26,6 +28,7 @@ def is_x12_file(file_path: str) -> bool:
     :param file_path: The file path to test.
     :return: True if the file path is a x12 file, otherwise false
     """
+
     if not file_path:
         return False
 
@@ -38,3 +41,20 @@ def is_x12_file(file_path: str) -> bool:
         # ISA segment is first 106 characters
         isa_segment = f.read(IsaDelimiters.SEGMENT_LENGTH)
         return is_x12_data(isa_segment)
+
+
+def parse_interchange_date(date_string: str) -> datetime.date:
+    """Parses a datetime.date from date fields in the ISA (interchange) segment"""
+
+    return datetime.datetime.strptime(date_string, "%y%m%d").date()
+
+
+def parse_x12_date(date_string: str) -> datetime.date:
+    """Parses a datetime.date from date fields in X12 transaction segments"""
+
+    return datetime.datetime.strptime(date_string, "%Y%m%d").date()
+
+
+def parse_x12_time(time_string: str) -> datetime.time:
+    """Parses a datetime.time from time fields in X12 transaction segments"""
+    return datetime.datetime.strptime(time_string, "%H%M").time()

@@ -20,7 +20,7 @@ ASC X12 data types to Python's type system.
 | ASC X12 Data Type | Python Type   |
 | ----------------- | ------------- |
 | Numeric           | int           |
-| Decimal           | float         |
+| Decimal           | Decimal       |
 | ID                | str           |
 | String            | str           |
 | Date              | datetime.date |
@@ -135,7 +135,7 @@ The contents of a transaction package include:
 ![transaction-package.png](transaction-package.png)
 
 * loops.py - Loop data model implementations.
-* parsing.py - Segment parsers used to parse segments into a transaction set model.
+* parsing.py - Parsing functions used to create loop records within the transactional data model.
 * segments.py - Segment subclasses used to enforce loop context validation constraints.
 * transaction_set.py - The transaction set model.
 
@@ -167,7 +167,16 @@ class X12Segment(abc.ABC, BaseModel):
         """
         :return: the X12 representation of the model instance
         """
-        # transform segment (omitted for clarity)
+        x12_values = []
+        for k, v in self.dict(exclude={"delimiters"}).items():
+            # evaluate fields
+    
+        x12_str = self.delimiters.element_separator.join(x12_values).rstrip(
+        self.delimiters.element_separator
+        )
+        return x12_str + self.delimiters.segment_terminator
+
+
 ```
 
 The X12SegmentGroup model is the base model used to model a X12 loop or transaction set. The X12SegmentGroup also includes
@@ -191,9 +200,7 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
         for f in fields:
-            field_instance = getattr(self, f.name)
-            x12_segments.append(field_instance.x12())
-
+            # process fields
         join_char: str = "\n" if use_new_lines else ""
         return join_char.join(x12_segments)
 ```

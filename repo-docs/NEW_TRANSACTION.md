@@ -41,13 +41,13 @@ class X12SegmentName(str, Enum):
 Next, create a new model by extending the `X12Segment` class. 
 
 Each new model must override the `segment_name` attribute to support the appropriate `X12SegmentName` enumeration value.
-Pydantic field type constraints are used as necessary to ensure that field types adhere to the base specification.
+Models use Pydantic field type constraints to ensure that field types adhere to the X12 specification.
 
 The example below illustrates the following:
 
 * The `GeSegment` class overrides `segment_name` to support the appropriate enumeration value.
-* The Pydantic constrained type `PositiveInt` is used to ensure that `number_of_transaction_sets_included` is a positive integer.
-* A Pydantic `Field` type is used to ensure that `group_control_number` has a constrained width.
+* The Pydantic constrained type `PositiveInt` ensures that `number_of_transaction_sets_included` is a positive integer.
+* A Pydantic `Field` type ensures that `group_control_number` has a constrained width.
 
 
 ```python
@@ -68,8 +68,8 @@ class GeSegment(X12Segment):
 
 ```
 
-Next, add specialized segment models to `x12.transactoins.[new transaction package]`as necessary. Each specialized model
-must extend its base segment model counterpart.
+Next, add specialized segment models to `x12.transactoins.[new transaction package].segments.py`as necessary.
+Each specialized model must extend its base segment model counterpart.
 
 In the example below `Loop2000AHlSegment` extends `HlSegment` with overrides appropriate for the Eligibility (270)
 Transaction's 2000A Loop (Information Receiver).  
@@ -164,48 +164,63 @@ class EligibilityInquiry(X12SegmentGroup):
     footer: Footer
 ```
 
-## Add Transaction Set Parser and Parsing Functions
+## Add Transaction Set Parser and Loop Parsing Functions
 
-LinuxForHealth x12 decouples segment parsing from segment iteration/io. To implement a parser create a new class within
-the parsing module that extends `x12.parsing.X12SegmentParser`. The new parser must implement the `reset` and `load_model`
-methods.
+LinuxForHealth x12 decouples segment parsing from segment iteration/io. To implement a parser, create a new class within
+the parsing module that extends `x12.parsing.X12Parser`. The new parser must set the `self._model_class` attribute
+to the appropriate transaction set model. The requirement to create a parser subclass is superfluous, and will be
+removed in a future PR.
 
-The `reset` method returns the `data_record` dictionary instance attribute to a known starting state when the parser is ready
-to start parsing a new record. The `load_model` method loads the `data_record`attribute into the transaction set model. 
 
 ```python
-class EligibilityInquiryParser(X12SegmentParser):
+from x12.parsing import X12Parser
+from x12.models import X12Delimiters
+from x12.transactions.x12_270_005010X279A1 import EligibilityInquiry
+
+class EligibilityInquiryParser(X12Parser):
     """
     The 270 005010X279A1 parser.
     """
 
-    def reset(self):
+    def __init__(self, x12_delimiters: X12Delimiters):
         """
-        Resets the data record for the 270 transaction.
-        """
-        super().reset()
-        self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
+        Configures the Eligibility 270 Transactions parser.
 
-    def load_model(self) -> X12SegmentGroup:
+        :param x12_delimiters: The delimiters used in the 270 message
         """
-        Loads the data model for the 280 transaction
-        """
-        return EligibilityInquiry(**self._data_record)
+        super().__init__(x12_delimiters)
+        self._model_class = EligibilityInquiry
+    
+
 ```
 
-Finally each parsing module includes parsing functions which are used to parse the transaction sets segments into the 
-parser's `data_record` attribute. Parsing functions use the `match` decorator to identify the segment to parse and any optional 
-conditions which must be met. The conditions are optional field equality checks.
+Each parsing module includes parsing functions which are used to create loop containers within the transaction set
+data record. Loop parsing functions use the `match` decorator to identify the loop's first segment and provide additional
+matching conditions, if needed.
 
 ```python
-from x12.parsing import match
-from x12.transactions.x12_270_005010X279A1.parsing import EligibilityInquiryLoops
+from x12.parsing import match, X12ParserContext
+from x12.transactions.x12_270_005010X279A1.parsing import TransactionLoops
 
 @match("HL", conditions={"hierarchical_level_code": "20"})
-def parse_information_source_hl_segment(segment_data, context, data_record):
-    context["current_loop"] = EligibilityInquiryLoops.INFORMATION_SOURCE
+def set_information_source_hl_loop(context: X12ParserContext):
+    """
+    Sets the Information Source (Payer/Clearinghouse) loop.
 
-    data_record[EligibilityInquiryLoops.INFORMATION_SOURCE].append(
-        {"hl_segment": segment_data}
-    )
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = [{}]
+    else:
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
+
+    info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
+    context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
+
 ```
+
+## Testing
+
+Transaction testing verifies x12 generation at the transaction level with use-case specific messages. Loop level and
+segment level testing is omitted due to the overlap with transactional testing.

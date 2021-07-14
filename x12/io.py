@@ -9,7 +9,7 @@ from typing import Dict, Iterator, List, NoReturn, Optional, Tuple
 
 from x12.config import IsaDelimiters, TransactionSetVersionIds, get_config
 from x12.models import X12Delimiters, X12SegmentGroup, X12SegmentName
-from x12.parsing import X12SegmentParser
+from x12.parsing import X12Parser, create_parser
 from x12.segments import SEGMENT_LOOKUP
 from x12.support import is_x12_data, is_x12_file
 
@@ -37,32 +37,28 @@ class X12SegmentReader:
         """
 
         self._x12_input: str = x12_input
-        self._delimiters: X12Delimiters = X12Delimiters()
 
         # set in __enter__
         self._buffer_size: Optional[int] = None
         self._x12_stream: Optional[TextIOBase] = None
+        self.delimiters: Optional[X12Delimiters] = None
 
-    def _parse_isa_segment(self) -> NoReturn:
+    def _parse_isa_segment(self) -> Dict:
         """
         Parses fields from the ISA segment to set delimiters/instance attributes.
         The ISA segment is conveyed in the first 106 characters of the transmission.
+        :return: The message delimiters as a dict
         """
         self._x12_stream.seek(0)
 
         isa_segment: str = self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
-        self._delimiters.element_separator = isa_segment[
-            IsaDelimiters.ELEMENT_SEPARATOR
-        ]
-        self._delimiters.repetition_separator = isa_segment[
-            IsaDelimiters.REPETITION_SEPARATOR
-        ]
-        self._delimiters.segment_terminator = isa_segment[
-            IsaDelimiters.SEGMENT_TERMINATOR
-        ]
-        self._delimiters.component_separator = isa_segment[
-            IsaDelimiters.COMPONENT_SEPARATOR
-        ]
+
+        return {
+            "element_separator": isa_segment[IsaDelimiters.ELEMENT_SEPARATOR],
+            "repetition_separator": isa_segment[IsaDelimiters.REPETITION_SEPARATOR],
+            "segment_terminator": isa_segment[IsaDelimiters.SEGMENT_TERMINATOR],
+            "component_separator": isa_segment[IsaDelimiters.COMPONENT_SEPARATOR],
+        }
 
     def __enter__(self) -> "X12SegmentReader":
         """
@@ -85,7 +81,8 @@ class X12SegmentReader:
         if not self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH):
             raise ValueError("Invalid X12Stream. Unable to read ISA Segment.")
 
-        self._parse_isa_segment()
+        delimiters: Dict = self._parse_isa_segment()
+        self.delimiters = X12Delimiters(**delimiters)
 
         return self
 
@@ -100,7 +97,7 @@ class X12SegmentReader:
         if not self._x12_stream.closed:
             self._x12_stream.close()
 
-        self._delimiters = None
+        self.delimiters = None
         self._x12_input = None
 
     def segments(self) -> Iterator[Tuple[str, List[str]]]:
@@ -117,25 +114,23 @@ class X12SegmentReader:
             if not buffer:
                 break
 
-            while buffer[-1] != self._delimiters.segment_terminator:
+            while buffer[-1] != self.delimiters.segment_terminator:
                 next_character: str = self._x12_stream.read(1)
                 if not next_character:
                     break
                 buffer += next_character
 
             # buffer cleanup
-            buffer = buffer.replace("\n", "").rstrip(
-                self._delimiters.segment_terminator
-            )
+            buffer = buffer.replace("\n", "").rstrip(self.delimiters.segment_terminator)
 
-            for segment in buffer.split(self._delimiters.segment_terminator):
-                segment_fields = segment.split(self._delimiters.element_separator)
+            for segment in buffer.split(self.delimiters.segment_terminator):
+                segment_fields = segment.split(self.delimiters.element_separator)
                 yield (segment_fields[0].upper(), segment_fields)
 
 
 class X12ModelReader:
     """
-    The X12ModelReader is a higher level reader which parses X12 segments into transactional models.
+    The X12ModelReader parses X12 segments into transactional models.
     Data is buffered using a X12SegmentReader.
 
     with X12ModelReader(x12_data) as r:
@@ -198,16 +193,15 @@ class X12ModelReader:
                 continue
 
             if self._is_transaction_header(segment_name):
-
                 transaction_code: str = segment_fields[
                     TransactionSetVersionIds.TRANSACTION_SET_CODE
                 ]
-                implementation_version: str = segment_fields[
+                version: str = segment_fields[
                     TransactionSetVersionIds.IMPLEMENTATION_VERSION
                 ]
 
-                parser: X12SegmentParser = X12SegmentParser.load_parser(
-                    transaction_code, implementation_version
+                parser: X12Parser = create_parser(
+                    transaction_code, version, self._x12_segment_reader.delimiters
                 )
 
             model: X12SegmentGroup = parser.parse(segment_name, segment_fields)

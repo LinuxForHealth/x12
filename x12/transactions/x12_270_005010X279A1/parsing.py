@@ -1,17 +1,23 @@
 """
 parsing.py
 
-Defines the classes and functions used to parse X12 270 005010X279A1 segments into a transactional model.
+Parses X12 270 005010X279A1 segments into a transactional domain model.
+
+The parsing module includes a specific parser for the 270 transaction and loop parsing functions to create new loops
+as segments are streamed to the transactional data model.
+
+Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext).
 """
 from enum import Enum
 
-from x12.models import X12SegmentGroup
-from x12.parsing import X12SegmentParser, match
+from x12.parsing import X12Parser, match, X12ParserContext
+from typing import Optional
+from x12.models import X12Delimiters
 
 from .transaction_set import EligibilityInquiry
 
 
-class EligibilityInquiryLoops(str, Enum):
+class TransactionLoops(str, Enum):
     """
     The loops used to support the 270 005010X279A1 format.
     """
@@ -30,61 +36,158 @@ class EligibilityInquiryLoops(str, Enum):
     FOOTER = "footer"
 
 
-class EligibilityInquiryParser(X12SegmentParser):
+class EligibilityInquiryParser(X12Parser):
     """
     The 270 005010X279A1 parser.
     """
 
-    def reset(self):
+    def __init__(self, x12_delimiters: X12Delimiters):
         """
-        Resets the data record for the 270 transaction.
-        """
-        super().reset()
-        self._data_record[EligibilityInquiryLoops.INFORMATION_SOURCE] = []
+        Configures the Eligibility 270 Transactions parser.
 
-    def load_model(self) -> X12SegmentGroup:
+        :param x12_delimiters: The delimiters used in the 270 message
         """
-        Loads the data model for the 280 transaction
-        """
-        return EligibilityInquiry(**self._data_record)
+        super().__init__(x12_delimiters)
+        self._model_class = EligibilityInquiry
 
 
+def _get_info_source(context):
+    """Returns the current information source"""
+
+    return context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
+
+
+def _get_info_receiver(context):
+    """Returns the current information receiver"""
+
+    info_source = _get_info_source(context)
+    return info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
+
+
+# eligibility 270 loop parsing functions
 @match("ST")
-def parse_st_segment(segment_data, context, data_record):
-    context["current_loop"] = EligibilityInquiryLoops.HEADER
-    data_record[EligibilityInquiryLoops.HEADER]["st_segment"] = segment_data
+def set_header_loop(context: X12ParserContext):
+    """
+    Sets the transaction set header loop for the 270 transaction set.
 
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
 
-@match("BHT")
-def parse_bht_segment(segment_data, context, data_record):
-    data_record[EligibilityInquiryLoops.HEADER]["bht_segment"] = segment_data
+    context.set_loop_context(
+        TransactionLoops.HEADER, context.transaction_data[TransactionLoops.HEADER]
+    )
 
 
 @match("HL", conditions={"hierarchical_level_code": "20"})
-def parse_information_source_hl_segment(segment_data, context, data_record):
-    context["current_loop"] = EligibilityInquiryLoops.INFORMATION_SOURCE
+def set_information_source_hl_loop(context: X12ParserContext):
+    """
+    Sets the Information Source (Payer/Clearinghouse) loop.
 
-    data_record[EligibilityInquiryLoops.INFORMATION_SOURCE].append(
-        {"hl_segment": segment_data}
-    )
-    # TODO: record complete
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = [{}]
+    else:
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
+
+    info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
+    context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
+
+
+@match("HL", conditions={"hierarchical_level_code": "21"})
+def set_information_receiver_hl_loop(context: X12ParserContext):
+    """
+    Sets the Information Receiver (Provider) loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    info_source = _get_info_source(context)
+
+    if TransactionLoops.INFORMATION_RECEIVER not in info_source:
+        info_source[TransactionLoops.INFORMATION_RECEIVER] = [{}]
+    else:
+        info_source[TransactionLoops.INFORMATION_RECEIVER].append({})
+
+    info_receiver = info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
+    context.set_loop_context(TransactionLoops.INFORMATION_RECEIVER, info_receiver)
+
+
+@match("HL", conditions={"hierarchical_level_code": "22"})
+def set_subscriber_hl_loop(context: X12ParserContext):
+    """
+    Sets the Subscriber (Member) loop
+    Initializes optional TRN segment list.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    info_receiver = _get_info_receiver(context)
+
+    if TransactionLoops.SUBSCRIBER not in info_receiver:
+        info_receiver[TransactionLoops.SUBSCRIBER] = [{}]
+    else:
+        info_receiver[TransactionLoops.SUBSCRIBER].append({})
+
+    subscriber = info_receiver[TransactionLoops.SUBSCRIBER][-1]
+    subscriber["trn_segment"] = []
+
+    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
 
 
 @match("NM1")
-def parse_nm1_segment(segment_data, context, data_record):
-    if context["current_loop"] == EligibilityInquiryLoops.INFORMATION_SOURCE:
-        context["current_loop"] = EligibilityInquiryLoops.INFORMATION_SOURCE_NAME
+def set_entity_name_loop(context: X12ParserContext):
+    """
+    Sets the entity name loop based on the current loop context.
+    Initializes optional REF segment list
 
-    if context["current_loop"] == EligibilityInquiryLoops.INFORMATION_SOURCE_NAME:
-        information_source = data_record[EligibilityInquiryLoops.INFORMATION_SOURCE][-1]
-        information_source[EligibilityInquiryLoops.INFORMATION_SOURCE_NAME] = {
-            "nm1_segment": segment_data
-        }
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    new_loop_name: Optional[str] = None
+
+    if context.loop_name == TransactionLoops.INFORMATION_SOURCE:
+        new_loop_name = TransactionLoops.INFORMATION_SOURCE_NAME
+    elif context.loop_name == TransactionLoops.INFORMATION_RECEIVER:
+        new_loop_name = TransactionLoops.INFORMATION_RECEIVER_NAME
+    elif context.loop_name == TransactionLoops.SUBSCRIBER:
+        new_loop_name = TransactionLoops.SUBSCRIBER_NAME
+
+    context.loop_container[new_loop_name] = {"ref_segment": []}
+    context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
+
+
+@match("EQ")
+def set_eligibility_inquiry_loop(context: X12ParserContext):
+    """
+    Sets the eligibility inquiry loop, 2110C or 2110D, for a subscriber or dependent record.
+    """
+
+    new_loop_name: Optional[str] = None
+
+    if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
+        new_loop_name = TransactionLoops.SUBSCRIBER_ELIGIBILITY
+    elif context.loop_name == TransactionLoops.DEPENDENT_NAME:
+        raise NotImplementedError("Dependent Eligibility Is Not Implemented")
+
+    context.loop_container[new_loop_name] = {}
+    context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
+
+
+@match("HL", conditions={"hierarchical_level_code": "23"})
+def set_dependent_hl_loop(context: X12ParserContext):
+    raise NotImplementedError("Dependent Eligibility Is Not Implemented")
 
 
 @match("SE")
-def parse_se_segment(segment_data, context, data_record):
-    context["current_loop"] = EligibilityInquiryLoops.FOOTER
-    data_record[EligibilityInquiryLoops.FOOTER] = {"se_segment": segment_data}
+def set_se_loop(context: X12ParserContext):
+    """
+    Sets the transaction set footer loop.
 
-    context["is_record_complete"] = True
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    context.set_loop_context(
+        TransactionLoops.FOOTER, context.transaction_data["footer"]
+    )
