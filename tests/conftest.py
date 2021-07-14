@@ -1,3 +1,8 @@
+"""
+conftest.py
+
+Pytest Global Fixtures
+"""
 import pytest
 
 from x12.config import X12Config
@@ -44,6 +49,7 @@ def large_x12_message():
     Generates a large x12 message by repeating a transaction set a fixed number of times.
     :return: large x12 message
     """
+
     x12_message: str = "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",

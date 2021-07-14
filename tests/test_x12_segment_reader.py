@@ -17,12 +17,13 @@ def test_init(request, test_input: str):
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param test_input: The fixture name.
     """
+
     input_value = request.getfixturevalue(test_input)
     x12_reader = X12SegmentReader(input_value)
     assert x12_reader._x12_input
     assert x12_reader._buffer_size is None
     assert x12_reader._x12_stream is None
-    assert x12_reader._delimiters is not None
+    assert x12_reader.delimiters is None
 
 
 @pytest.mark.parametrize(
@@ -35,16 +36,16 @@ def test_segments_with_string_data(request, test_input: str):
     :param request: The pytest request fixture. Used to lookup fixture values by name.
     :param test_input: The fixture name.
     """
+
     input_value = request.getfixturevalue(test_input)
 
     with X12SegmentReader(input_value) as r:
         segment_count = 0
-        version_key = None
 
-        assert r._delimiters.component_separator == ":"
-        assert r._delimiters.element_separator == "*"
-        assert r._delimiters.repetition_separator == "^"
-        assert r._delimiters.segment_terminator == "~"
+        assert r.delimiters.component_separator == ":"
+        assert r.delimiters.element_separator == "*"
+        assert r.delimiters.repetition_separator == "^"
+        assert r.delimiters.segment_terminator == "~"
 
         for _ in r.segments():
             segment_count += 1
@@ -52,7 +53,7 @@ def test_segments_with_string_data(request, test_input: str):
         assert 21 == segment_count
 
     assert r._x12_stream.closed
-    assert r._delimiters is None
+    assert r.delimiters is None
     assert r._x12_input is None
 
 
@@ -67,6 +68,7 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
     :param tmpdir: Pytest fixture used to create temporary files and directories
     :param test_input: The fixture name.
     """
+
     input_value = request.getfixturevalue(test_input)
     f = tmpdir.mkdir("x12-support").join("test.x12")
     f.write(input_value)
@@ -75,10 +77,10 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
         segment_count = 0
         version_key = None
 
-        assert r._delimiters.component_separator == ":"
-        assert r._delimiters.element_separator == "*"
-        assert r._delimiters.repetition_separator == "^"
-        assert r._delimiters.segment_terminator == "~"
+        assert r.delimiters.component_separator == ":"
+        assert r.delimiters.element_separator == "*"
+        assert r.delimiters.repetition_separator == "^"
+        assert r.delimiters.segment_terminator == "~"
 
         for _ in r.segments():
             segment_count += 1
@@ -86,7 +88,7 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
         assert 21 == segment_count
 
     assert r._x12_stream.closed
-    assert r._delimiters is None
+    assert r.delimiters is None
     assert r._x12_input is None
 
 
@@ -95,6 +97,7 @@ def test_invalid_x12_data(simple_270_one_line):
     Tests an invalid x12 message input.
     :param simple_270_one_line: X12 Fixture
     """
+
     invalid_x12 = simple_270_one_line.replace("ISA", "FOO")
 
     with pytest.raises(ValueError):
@@ -109,6 +112,7 @@ def test_invalid_x12_file(tmpdir, simple_270_one_line):
     :param tmpdir: Pytest fixture used to create temp files and directories.
     :param simple_270_one_line: X12 Fixture
     """
+
     invalid_x12 = simple_270_one_line.replace("ISA", "FOO")
     f = tmpdir.mkdir("x12-support").join("test.x12")
     f.write(invalid_x12)

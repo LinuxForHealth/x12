@@ -4,8 +4,14 @@ test_support.py
 Tests support functions.
 """
 import pytest
-
-from x12.support import is_x12_data, is_x12_file
+import datetime
+from x12.support import (
+    is_x12_data,
+    is_x12_file,
+    parse_x12_date,
+    parse_x12_time,
+    parse_interchange_date,
+)
 
 
 @pytest.mark.parametrize(
@@ -26,6 +32,7 @@ def test_is_x12_data(request, test_input: str, is_fixture: bool, expected: bool)
     :param is_fixture: Indicates if test_input is a fixture name.
     :param expected: The expected test value
     """
+
     input_value = request.getfixturevalue(test_input) if is_fixture else test_input
     assert is_x12_data(input_value) is expected
 
@@ -40,6 +47,7 @@ def test_is_x12_file_true(request, tmpdir, test_input: str):
     :param tmpdir: The pytest tmpdir fixture. Used to create tmp directory and files.
     :param test_input: The fixture name.
     """
+
     input_value = request.getfixturevalue(test_input)
     f = tmpdir.mkdir("x12-support").join("test.x12")
     f.write(input_value)
@@ -51,3 +59,15 @@ def test_is_x12_file_false():
     assert is_x12_file("/home/not-a-real/file.txt") is False
     assert is_x12_file("") is False
     assert is_x12_file(None) is False
+
+
+def test_parser_interchange_date():
+    assert parse_interchange_date("131031") == datetime.date(2013, 10, 31)
+
+
+def test_parse_x12_date():
+    assert parse_x12_date("20120501") == datetime.date(2012, 5, 1)
+
+
+def test_parse_x12_time():
+    assert parse_x12_time("1147") == datetime.time(11, 47)
