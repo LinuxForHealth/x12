@@ -220,7 +220,7 @@ class X12Parser(ABC):
             if multivalue_separator:
                 value = value.split(multivalue_separator)
 
-            segment_data[field_name] = value
+            segment_data[field_name] = value if value else None
 
         return segment_data
 
