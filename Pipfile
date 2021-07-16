@@ -5,6 +5,7 @@ name = "pypi"
 
 [scripts]
 check-format="black -t py38 --check --diff x12 tests"
+cli="python3 x12/cli.py"
 format="black -t py38 x12 tests"
 
 [packages]

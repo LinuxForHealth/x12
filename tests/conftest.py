@@ -21,10 +21,10 @@ def simple_270_with_new_lines():
             "NM1*PR*2*PAYER C*****PI*12345~",
             "HL*2*1*21*1~",
             "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-            "REF*4A*000111222~"
-            "N3*123 MAIN ST.*SUITE 42~"
-            "N4*SAN MATEO*CA*94401~"
-            "HL*3*2*22*0~"
+            "REF*4A*000111222~",
+            "N3*123 MAIN ST.*SUITE 42~",
+            "N4*SAN MATEO*CA*94401~",
+            "HL*3*2*22*0~",
             "TRN*1*930000000000*9800000004*PD~",
             "NM1*IL*1*DOE*JOHN****MI*00000000001~",
             "REF*6P*0123456789~",
@@ -69,10 +69,10 @@ def large_x12_message():
                 "NM1*PR*2*PAYER C*****PI*12345~",
                 "HL*2*1*21*1~",
                 "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-                "REF*4A*000111222~"
-                "N3*123 MAIN ST.*SUITE 42~"
-                "N4*SAN MATEO*CA*94401~"
-                "HL*3*2*22*0~"
+                "REF*4A*000111222~",
+                "N3*123 MAIN ST.*SUITE 42~",
+                "N4*SAN MATEO*CA*94401~",
+                "HL*3*2*22*0~",
                 "TRN*1*930000000000*9800000004*PD~",
                 "NM1*IL*1*DOE*JOHN****MI*00000000001~",
                 "REF*6P*0123456789~",

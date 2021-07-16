@@ -78,7 +78,65 @@ with X12ModelReader("/home/edi/270.x12") as r:
 ```
 
 ### CLI
-Under Development
+The X12 CLI utility is implemented as a pipenv script. The script parses a X12 input file and returns either a list of
+X12 segments, or a list of X12 models based on the provided options.
+
+To view help information
+```shell
+tdw@dixons-mbp x12 % pipenv run cli --help
+Loading .env environment variables...
+usage: LinuxForHealth X12 [-h] [-s | -m] [-x] [-p] file
+
+The LinuxForHealth X12 CLI parses and validates X12 messages.
+Messages are returned in JSON format in either a segment or transactional format.
+
+positional arguments:
+  file           The path to a ASC X12 file
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -s, --segment  Returns X12 segments
+  -m, --model    Returns X12 models
+  -x, --exclude  Exclude fields set to None in model output
+  -p, --pretty   Pretty print output
+```
+
+To parse a X12 message into segments with pretty printing enabled
+```shell
+pipenv run cli -s -p demo-file/demo.270
+Loading .env environment variables...
+[
+    {
+        "ISA00": "ISA",
+        "ISA01": "03",
+        "ISA02": "9876543210",
+<etc, etc>
+```
+
+To parse a X12 message into models with pretty printing enabled
+```shell
+tdw@dixons-mbp x12 % pipenv run cli -m -p demo-file/demo.270
+Loading .env environment variables...
+[
+    {
+        "header": {
+            "st_segment": {
+                "delimiters": {
+                    "element_separator": "*",
+                    "repetition_separator": "^",
+                    "segment_terminator": "~",
+                    "component_separator": ":"
+                },
+                "segment_name": "ST",
+                "transaction_set_identifier_code": "270",
+                "transaction_set_control_number": "0001",
+                "implementation_convention_reference": "005010X279A1"
+            },
+            "bht_segment": {
+              <etc, etc>
+```
+
+In "model" mode fields that are set to None may be excluded from output using the `-x` option.
 
 ### REST API
 Under Development
