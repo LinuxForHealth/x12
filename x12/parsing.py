@@ -107,6 +107,8 @@ class X12ParserContext:
 
         self.reset_loop_context()
         self.transaction_data.clear()
+        self.transaction_data["header"] = {}
+        self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
 
     def mark_transaction_complete(self) -> NoReturn:

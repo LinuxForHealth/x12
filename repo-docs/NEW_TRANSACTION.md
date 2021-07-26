@@ -164,35 +164,9 @@ class EligibilityInquiry(X12SegmentGroup):
     footer: Footer
 ```
 
-## Add Transaction Set Parser and Loop Parsing Functions
+## Add Loop Parsing Functions
 
-LinuxForHealth x12 decouples segment parsing from segment iteration/io. To implement a parser, create a new class within
-the parsing module that extends `x12.parsing.X12Parser`. The new parser must set the `self._model_class` attribute
-to the appropriate transaction set model. The requirement to create a parser subclass is superfluous, and will be
-removed in a future PR.
-
-
-```python
-from x12.parsing import X12Parser
-from x12.models import X12Delimiters
-from x12.transactions.x12_270_005010X279A1 import EligibilityInquiry
-
-class EligibilityInquiryParser(X12Parser):
-    """
-    The 270 005010X279A1 parser.
-    """
-
-    def __init__(self, x12_delimiters: X12Delimiters):
-        """
-        Configures the Eligibility 270 Transactions parser.
-
-        :param x12_delimiters: The delimiters used in the 270 message
-        """
-        super().__init__(x12_delimiters)
-        self._model_class = EligibilityInquiry
-    
-
-```
+LinuxForHealth x12 decouples segment parsing from segment iteration/io. 
 
 Each parsing module includes parsing functions which are used to create loop containers within the transaction set
 data record. Loop parsing functions use the `match` decorator to identify the loop's first segment and provide additional
@@ -217,7 +191,6 @@ def set_information_source_hl_loop(context: X12ParserContext):
 
     info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
     context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
-
 ```
 
 ## Testing
