@@ -13,9 +13,9 @@ import datetime
 def test_encoding():
     input_data = {
         "product": "thing-a-magigs",
-        "quantity": Decimal('4.89'),
+        "quantity": Decimal("4.89"),
         "order_date": datetime.date(2021, 7, 15),
-        "id": uuid.UUID("11ae9671-f227-48e9-ad4c-565120b7fa8f")
+        "id": uuid.UUID("11ae9671-f227-48e9-ad4c-565120b7fa8f"),
     }
 
     result: str = json.dumps(input_data, cls=X12JsonEncoder)

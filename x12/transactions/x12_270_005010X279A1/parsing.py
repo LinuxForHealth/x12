@@ -10,11 +10,8 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 """
 from enum import Enum
 
-from x12.parsing import X12Parser, match, X12ParserContext
+from x12.parsing import match, X12ParserContext
 from typing import Optional
-from x12.models import X12Delimiters
-
-from .transaction_set import EligibilityInquiry
 
 
 class TransactionLoops(str, Enum):
@@ -34,21 +31,6 @@ class TransactionLoops(str, Enum):
     DEPENDENT_NAME = "loop_2100d"
     DEPENDENT_ELIGIBILITY = "loop_2110d"
     FOOTER = "footer"
-
-
-class EligibilityInquiryParser(X12Parser):
-    """
-    The 270 005010X279A1 parser.
-    """
-
-    def __init__(self, x12_delimiters: X12Delimiters):
-        """
-        Configures the Eligibility 270 Transactions parser.
-
-        :param x12_delimiters: The delimiters used in the 270 message
-        """
-        super().__init__(x12_delimiters)
-        self._model_class = EligibilityInquiry
 
 
 def _get_info_source(context):
