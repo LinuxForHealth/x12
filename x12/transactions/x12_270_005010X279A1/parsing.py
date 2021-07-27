@@ -153,7 +153,7 @@ def set_eligibility_inquiry_loop(context: X12ParserContext):
     elif context.loop_name == TransactionLoops.DEPENDENT_NAME:
         raise NotImplementedError("Dependent Eligibility Is Not Implemented")
 
-    context.loop_container[new_loop_name] = {}
+    context.loop_container[new_loop_name] = {"amt_segment": []}
     context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
 
 

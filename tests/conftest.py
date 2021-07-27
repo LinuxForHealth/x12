@@ -106,3 +106,23 @@ def x12_delimiters():
 @pytest.fixture
 def x12_parser_context():
     return X12ParserContext()
+
+
+@pytest.fixture
+def x12_270_control_header() -> str:
+    return "\n".join(
+        [
+            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
+            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_270_control_footer() -> str:
+    return "\n".join(
+        [
+            "GE*1*1~",
+            "IEA*1*000000907~",
+        ]
+    )
