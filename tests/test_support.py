@@ -67,7 +67,11 @@ def test_parser_interchange_date():
 
 def test_parse_x12_date():
     assert parse_x12_date("20120501") == datetime.date(2012, 5, 1)
+    assert parse_x12_date("") is None
+    assert parse_x12_date(None) is None
 
 
 def test_parse_x12_time():
     assert parse_x12_time("1147") == datetime.time(11, 47)
+    assert parse_x12_time("") is None
+    assert parse_x12_time(None) is None

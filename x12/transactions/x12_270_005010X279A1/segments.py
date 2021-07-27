@@ -272,6 +272,8 @@ class Loop2100CInsSegment(InsSegment):
 
     member_indicator: Literal["Y"]
     individual_relationship_code: Literal["18"]
+    maintenance_type_code: Optional[str]
+    benefit_status_code: Optional[str]
 
 
 class Loop2100CDtpSegment(DtpSegment):
@@ -581,7 +583,7 @@ class Loop2110CDtpSegment(DtpSegment):
     Overrides dates in Loop2100C to support an eligibility inquiry for a specific date or date range.
     """
 
-    date_time_period: Literal["291"]
+    date_time_qualifier: Literal["291"]
 
 
 class Loop2000DHlSegment(HlSegment):

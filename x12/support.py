@@ -5,6 +5,7 @@ Convenience functions for X12 Processing.
 """
 import datetime
 import os
+from typing import Union
 
 from x12.config import IsaDelimiters
 
@@ -49,12 +50,15 @@ def parse_interchange_date(date_string: str) -> datetime.date:
     return datetime.datetime.strptime(date_string, "%y%m%d").date()
 
 
-def parse_x12_date(date_string: str) -> datetime.date:
+def parse_x12_date(date_string: str) -> Union[datetime.date, None]:
     """Parses a datetime.date from date fields in X12 transaction segments"""
-
+    if not date_string:
+        return None
     return datetime.datetime.strptime(date_string, "%Y%m%d").date()
 
 
-def parse_x12_time(time_string: str) -> datetime.time:
+def parse_x12_time(time_string: str) -> Union[datetime.time, None]:
     """Parses a datetime.time from time fields in X12 transaction segments"""
+    if not time_string:
+        return None
     return datetime.datetime.strptime(time_string, "%H%M").time()

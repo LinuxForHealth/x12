@@ -78,7 +78,7 @@ class Loop2110C(X12SegmentGroup):
     """
 
     eq_segment: Optional[Loop2110CEqSegment]
-    amt_segment: Optional[List[Loop2110CAmtSegment]]
+    amt_segment: Optional[List[Loop2110CAmtSegment]] = Field(min_items=0, max_items=2)
     iii_segment: Optional[Loop2110CIiiSegment]
     ref_segment: Optional[Loop2110CRefSegment]
     dtp_segment: Optional[Loop2110CDtpSegment]
