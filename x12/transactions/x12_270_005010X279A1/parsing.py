@@ -11,7 +11,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 from enum import Enum
 
 from x12.parsing import match, X12ParserContext
-from typing import Optional
+from typing import Optional, NoReturn
 
 
 class TransactionLoops(str, Enum):
@@ -158,7 +158,7 @@ def set_eligibility_inquiry_loop(context: X12ParserContext):
 
 
 @match("HL", conditions={"hierarchical_level_code": "23"})
-def set_dependent_hl_loop(context: X12ParserContext):
+def set_dependent_hl_loop(context: X12ParserContext) -> NoReturn:
     raise NotImplementedError("Dependent Eligibility Is Not Implemented")
 
 

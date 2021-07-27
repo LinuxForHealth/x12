@@ -10,7 +10,7 @@ from abc import ABC
 from collections import defaultdict
 from functools import lru_cache, wraps
 from importlib import import_module
-from typing import Callable, Dict, List, NoReturn, Optional, Set
+from typing import Callable, Dict, List, Optional, Set
 
 from x12.models import X12SegmentGroup, X12Segment, X12Delimiters
 from x12.segments import SEGMENT_LOOKUP
@@ -82,7 +82,7 @@ class X12ParserContext:
     The X12ParserContext provides a "current" loop data record used to write to the outer transaction data record.
     """
 
-    def set_loop_context(self, loop_name: str, loop_container: Dict) -> NoReturn:
+    def set_loop_context(self, loop_name: str, loop_container: Dict) -> None:
         """
         Sets the current loop context.
 
@@ -96,13 +96,13 @@ class X12ParserContext:
         self.loop_name = loop_name
         self.loop_container = loop_container
 
-    def reset_loop_context(self) -> NoReturn:
+    def reset_loop_context(self) -> None:
         """Resets loop related instance attributes."""
 
         self.loop_name = None
         self.loop_container = {}
 
-    def reset_transaction(self) -> NoReturn:
+    def reset_transaction(self) -> None:
         """Resets transactional attributes, including loop attributes."""
 
         self.reset_loop_context()
@@ -111,12 +111,12 @@ class X12ParserContext:
         self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
 
-    def mark_transaction_complete(self) -> NoReturn:
+    def mark_transaction_complete(self) -> None:
         """Marks the current transaction as complete"""
 
         self.is_transaction_complete = True
 
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         """
         Configures the X12ParseContext instance.
         The current transaction data record is initialized to include the header and footer keys used in all transaction
@@ -282,7 +282,7 @@ class X12Parser(ABC):
         transaction_model: X12SegmentGroup,
         loop_parsers: Dict,
         x12_delimiters: Optional[X12Delimiters] = None,
-    ) -> NoReturn:
+    ) -> None:
         """
         Configures the parser instance
 

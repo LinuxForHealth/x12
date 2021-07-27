@@ -5,7 +5,7 @@ Supports X12 I/O operations related to reading and writing X12 transaction sets.
 """
 import logging
 from io import StringIO, TextIOBase
-from typing import Dict, Iterator, List, NoReturn, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from x12.config import IsaDelimiters, TransactionSetVersionIds, get_config
 from x12.models import X12Delimiters, X12SegmentGroup, X12SegmentName
@@ -28,7 +28,7 @@ class X12SegmentReader:
     Buffer size is configured using the config/env variable X12_READER_BUFFER_SIZE (default = 1MB).
     """
 
-    def __init__(self, x12_input: str) -> NoReturn:
+    def __init__(self, x12_input: str) -> None:
         """
         Initializes the X12SegmentReader with a x12 input.
         The x12 input may be a message payload or a path to a x12 file.
@@ -86,7 +86,7 @@ class X12SegmentReader:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """
         Closes the X12SegmentReader's X12 Stream and sets instance attributes to None
 
@@ -138,7 +138,7 @@ class X12ModelReader:
           # do something interesting
     """
 
-    def __init__(self, x12_input: str) -> NoReturn:
+    def __init__(self, x12_input: str) -> None:
         """
         Initializes the X12ModelReader with a x12_input.
         The x12 input may be a message payload or a path to a x12 file.
@@ -208,7 +208,7 @@ class X12ModelReader:
             if model:
                 yield model
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """
         Exits the X12ModelReader and releases resources
 
