@@ -10,7 +10,7 @@ from abc import ABC
 from collections import defaultdict
 from functools import lru_cache, wraps
 from importlib import import_module
-from typing import Callable, Dict, List, NoReturn, Optional
+from typing import Callable, Dict, List, Optional, Set
 
 from x12.models import X12SegmentGroup, X12Segment, X12Delimiters
 from x12.segments import SEGMENT_LOOKUP
@@ -82,7 +82,7 @@ class X12ParserContext:
     The X12ParserContext provides a "current" loop data record used to write to the outer transaction data record.
     """
 
-    def set_loop_context(self, loop_name: str, loop_container: Dict) -> NoReturn:
+    def set_loop_context(self, loop_name: str, loop_container: Dict) -> None:
         """
         Sets the current loop context.
 
@@ -96,25 +96,27 @@ class X12ParserContext:
         self.loop_name = loop_name
         self.loop_container = loop_container
 
-    def reset_loop_context(self) -> NoReturn:
+    def reset_loop_context(self) -> None:
         """Resets loop related instance attributes."""
 
         self.loop_name = None
         self.loop_container = {}
 
-    def reset_transaction(self) -> NoReturn:
+    def reset_transaction(self) -> None:
         """Resets transactional attributes, including loop attributes."""
 
         self.reset_loop_context()
         self.transaction_data.clear()
+        self.transaction_data["header"] = {}
+        self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
 
-    def mark_transaction_complete(self) -> NoReturn:
+    def mark_transaction_complete(self) -> None:
         """Marks the current transaction as complete"""
 
         self.is_transaction_complete = True
 
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         """
         Configures the X12ParseContext instance.
         The current transaction data record is initialized to include the header and footer keys used in all transaction
@@ -236,7 +238,7 @@ class X12Parser(ABC):
         :return: The X12 transactional model.
         """
 
-        return self._model_class(**self._context.transaction_data)
+        return self._transaction_model(**self._context.transaction_data)
 
     def parse(
         self, segment_name: str, segment_fields: List[str]
@@ -255,7 +257,7 @@ class X12Parser(ABC):
         # convert segment data to a dictionary "record"
         segment_data: Dict = self._parse_segment(segment_name, segment_fields)
 
-        for loop_parser in self.loop_parsers[segment_name]:
+        for loop_parser in self._loop_parsers[segment_name]:
             loop_parser(segment_data, self._context)
 
         segment_key = f"{segment_name.lower()}_segment"
@@ -275,15 +277,24 @@ class X12Parser(ABC):
             self._context.reset_transaction()
             return model
 
-    def __init__(self, x12_delimiters: X12Delimiters) -> NoReturn:
+    def __init__(
+        self,
+        transaction_model: X12SegmentGroup,
+        loop_parsers: Dict,
+        x12_delimiters: Optional[X12Delimiters] = None,
+    ) -> None:
         """
         Configures the parser instance
 
+        :param transaction_model: The X12 transaction model.
+        :param loop_parsers: The parser functions used to identify loop boundaries in the X12 transaction.
         :param x12_delimiters: The delimiters used to parse segments and fields.
         """
+        self._transaction_model: X12SegmentGroup = transaction_model
+        self._loop_parsers: Dict = loop_parsers
+        self._delimiters: X12Delimiters = x12_delimiters or X12Delimiters()
+
         self._context: X12ParserContext = X12ParserContext()
-        self._delimiters: X12Delimiters = x12_delimiters
-        self._model_class: Optional[Callable] = None
         self._segment_models: Dict = SEGMENT_LOOKUP
 
 
@@ -307,9 +318,14 @@ def create_parser(
         """Returns dictionary of Loop Parsers indexed by segment name"""
         pattern = re.compile(PARSING_FUNCTION_REGEX)
         loop_parsers = defaultdict(list)
+
+        parsing_module = import_module(
+            f"x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
+        )
+
         funcs = [
             value
-            for name, value in inspect.getmembers(mod, inspect.isfunction)
+            for name, value in inspect.getmembers(parsing_module, inspect.isfunction)
             if pattern.match(name)
         ]
 
@@ -318,17 +334,21 @@ def create_parser(
 
         return loop_parsers
 
-    parsing_package: str = (
-        f"x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
-    )
-    mod = import_module(parsing_package)
+    def load_transaction_model() -> X12SegmentGroup:
+        """Returns the transaction model for the x12 transaction"""
 
-    # load parser class
-    for class_name, class_value in inspect.getmembers(mod, inspect.isclass):
-        if class_name != X12Parser.__class__.__name__ and hasattr(class_value, "parse"):
-            class_value.loop_parsers = load_loop_parsers()
-            return class_value(x12_delimiters)
-    else:
-        raise ValueError(
-            f"Unable to load parser for {transaction_code} - {implementation_version}"
+        transaction_module = import_module(
+            f"x12.transactions.x12_{transaction_code}_{implementation_version}.transaction_set"
         )
+
+        # return transaction set model
+        for _, class_value in inspect.getmembers(transaction_module, inspect.isclass):
+            if hasattr(class_value, "schema"):
+                props: Set = set(class_value.schema()["properties"])
+                # transaction set models have header and footer attributes
+                if props.issuperset({"header", "footer"}):
+                    return class_value
+
+    transaction_model: X12SegmentGroup = load_transaction_model()
+    loop_parsers: Dict = load_loop_parsers()
+    return X12Parser(transaction_model, loop_parsers, x12_delimiters)

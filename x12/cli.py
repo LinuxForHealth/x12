@@ -30,15 +30,26 @@ def _create_arg_parser():
     parser = argparse.ArgumentParser(
         prog="LinuxForHealth X12",
         description=CLI_DESCRIPTION,
-        formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=argparse.RawTextHelpFormatter,
     )
 
     mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument("-s", "--segment", help="Returns X12 segments", action="store_true")
-    mode_group.add_argument("-m", "--model", help="Returns X12 models", action="store_true")
+    mode_group.add_argument(
+        "-s", "--segment", help="Returns X12 segments", action="store_true"
+    )
+    mode_group.add_argument(
+        "-m", "--model", help="Returns X12 models", action="store_true"
+    )
 
-    parser.add_argument("-x", "--exclude", help="Exclude fields set to None in model output", action="store_true")
-    parser.add_argument("-p", "--pretty", help="Pretty print output", action="store_true")
+    parser.add_argument(
+        "-x",
+        "--exclude",
+        help="Exclude fields set to None in model output",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-p", "--pretty", help="Pretty print output", action="store_true"
+    )
 
     parser.add_argument("file", help="The path to a ASC X12 file")
 
@@ -57,7 +68,9 @@ def _parse_segments(file_path: str) -> List:
         segments = []
 
         for segment_name, segment in r.segments():
-            segment_data = {f"{segment_name}{str(i).zfill(2)}": v for i, v in enumerate(segment)}
+            segment_data = {
+                f"{segment_name}{str(i).zfill(2)}": v for i, v in enumerate(segment)
+            }
             segments.append(segment_data)
         return segments
 
@@ -74,8 +87,7 @@ def _parse_models(file_path: str, exclude_none: bool = False) -> List:
     with X12ModelReader(file_path) as r:
         models = []
         for m in r.models():
-            model_data = m.dict(exclude_unset=exclude_none,
-                                exclude_none=exclude_none)
+            model_data = m.dict(exclude_unset=exclude_none, exclude_none=exclude_none)
             models.append(model_data)
         return models
 
@@ -86,7 +98,11 @@ if __name__ == "__main__":
     """
     args = _create_arg_parser()
 
-    x12_data = _parse_segments(args.file) if args.segment else _parse_models(args.file, args.exclude)
+    x12_data = (
+        _parse_segments(args.file)
+        if args.segment
+        else _parse_models(args.file, args.exclude)
+    )
 
     json_opts = {"cls": X12JsonEncoder}
 
