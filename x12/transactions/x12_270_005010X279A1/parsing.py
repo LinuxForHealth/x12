@@ -11,7 +11,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 from enum import Enum
 
 from x12.parsing import match, X12ParserContext
-from typing import Optional, NoReturn
+from typing import Optional, Dict
 
 
 class TransactionLoops(str, Enum):
@@ -33,22 +33,28 @@ class TransactionLoops(str, Enum):
     FOOTER = "footer"
 
 
-def _get_info_source(context):
+def _get_info_source(context) -> Dict:
     """Returns the current information source"""
 
     return context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
 
 
-def _get_info_receiver(context):
+def _get_info_receiver(context) -> Dict:
     """Returns the current information receiver"""
 
     info_source = _get_info_source(context)
     return info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
 
 
+def _get_subscriber(context) -> Dict:
+    """Returns the current subscriber"""
+    info_receiver = _get_info_receiver(context)
+    return info_receiver[TransactionLoops.SUBSCRIBER][-1]
+
+
 # eligibility 270 loop parsing functions
 @match("ST")
-def set_header_loop(context: X12ParserContext):
+def set_header_loop(context: X12ParserContext) -> None:
     """
     Sets the transaction set header loop for the 270 transaction set.
 
@@ -61,7 +67,7 @@ def set_header_loop(context: X12ParserContext):
 
 
 @match("HL", conditions={"hierarchical_level_code": "20"})
-def set_information_source_hl_loop(context: X12ParserContext):
+def set_information_source_hl_loop(context: X12ParserContext) -> None:
     """
     Sets the Information Source (Payer/Clearinghouse) loop.
 
@@ -78,7 +84,7 @@ def set_information_source_hl_loop(context: X12ParserContext):
 
 
 @match("HL", conditions={"hierarchical_level_code": "21"})
-def set_information_receiver_hl_loop(context: X12ParserContext):
+def set_information_receiver_hl_loop(context: X12ParserContext) -> None:
     """
     Sets the Information Receiver (Provider) loop.
 
@@ -97,7 +103,7 @@ def set_information_receiver_hl_loop(context: X12ParserContext):
 
 
 @match("HL", conditions={"hierarchical_level_code": "22"})
-def set_subscriber_hl_loop(context: X12ParserContext):
+def set_subscriber_hl_loop(context: X12ParserContext) -> None:
     """
     Sets the Subscriber (Member) loop
     Initializes optional TRN segment list.
@@ -119,7 +125,7 @@ def set_subscriber_hl_loop(context: X12ParserContext):
 
 
 @match("NM1")
-def set_entity_name_loop(context: X12ParserContext):
+def set_entity_name_loop(context: X12ParserContext) -> None:
     """
     Sets the entity name loop based on the current loop context.
     Initializes optional REF segment list
@@ -135,13 +141,15 @@ def set_entity_name_loop(context: X12ParserContext):
         new_loop_name = TransactionLoops.INFORMATION_RECEIVER_NAME
     elif context.loop_name == TransactionLoops.SUBSCRIBER:
         new_loop_name = TransactionLoops.SUBSCRIBER_NAME
+    elif context.loop_name == TransactionLoops.DEPENDENT:
+        new_loop_name = TransactionLoops.DEPENDENT_NAME
 
     context.loop_container[new_loop_name] = {"ref_segment": []}
     context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
 
 
 @match("EQ")
-def set_eligibility_inquiry_loop(context: X12ParserContext):
+def set_eligibility_inquiry_loop(context: X12ParserContext) -> None:
     """
     Sets the eligibility inquiry loop, 2110C or 2110D, for a subscriber or dependent record.
     """
@@ -151,19 +159,29 @@ def set_eligibility_inquiry_loop(context: X12ParserContext):
     if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
         new_loop_name = TransactionLoops.SUBSCRIBER_ELIGIBILITY
     elif context.loop_name == TransactionLoops.DEPENDENT_NAME:
-        raise NotImplementedError("Dependent Eligibility Is Not Implemented")
+        new_loop_name = TransactionLoops.DEPENDENT_ELIGIBILITY
 
     context.loop_container[new_loop_name] = {"amt_segment": []}
     context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
 
 
 @match("HL", conditions={"hierarchical_level_code": "23"})
-def set_dependent_hl_loop(context: X12ParserContext) -> NoReturn:
-    raise NotImplementedError("Dependent Eligibility Is Not Implemented")
+def set_dependent_hl_loop(context: X12ParserContext) -> None:
+    subscriber = _get_subscriber(context)
+
+    if TransactionLoops.DEPENDENT not in subscriber:
+        subscriber[TransactionLoops.DEPENDENT] = [{}]
+    else:
+        subscriber[TransactionLoops.DEPENDENT].append({})
+
+    dependent = subscriber[TransactionLoops.DEPENDENT][-1]
+    dependent["trn_segment"] = []
+
+    context.set_loop_context(TransactionLoops.DEPENDENT, dependent)
 
 
 @match("SE")
-def set_se_loop(context: X12ParserContext):
+def set_se_loop(context: X12ParserContext) -> None:
     """
     Sets the transaction set footer loop.
 

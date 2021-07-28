@@ -42,14 +42,16 @@ from .segments import (
     Loop2100ANm1Segment,
     Loop2000AHlSegment,
     Loop2100CNm1Segment,
-    Loop2100CRefSegment,
+    Loop2100RefSegment,
     Loop2100CInsSegment,
-    Loop2100CDtpSegment,
-    Loop2110CEqSegment,
-    Loop2110CAmtSegment,
-    Loop2110CIiiSegment,
-    Loop2110CRefSegment,
-    Loop2110CDtpSegment,
+    Loop2100DtpSegment,
+    Loop2110EqSegment,
+    Loop2110AmtSegment,
+    Loop2110IiiSegment,
+    Loop2110RefSegment,
+    Loop2110DtpSegment,
+    Loop2100DNm1Segment,
+    Loop2100DInsSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -64,12 +66,43 @@ class Header(X12SegmentGroup):
     bht_segment: HeaderBhtSegment
 
 
+class Loop2110D(X12SegmentGroup):
+    """
+    Loop 2110D Dependent Eligibility
+    """
+
+    eq_segment: Optional[Loop2110EqSegment]
+    amt_segment: Optional[List[Loop2110AmtSegment]] = Field(min_items=0, max_items=2)
+    iii_segment: Optional[Loop2110IiiSegment]
+    ref_segment: Optional[Loop2110RefSegment]
+    dtp_segment: Optional[Loop2110DtpSegment]
+
+
+class Loop2100D(X12SegmentGroup):
+    """
+    Loop 2100D - Dependent Name
+    """
+
+    nm1_segment: Loop2100DNm1Segment
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    prv_segment: Optional[PrvSegment]
+    dmg_segment: Optional[DmgSegment]
+    ins_segment: Optional[Loop2100DInsSegment]
+    hi_segment: Optional[HiSegment]
+    dtp_segment: Optional[Loop2100DtpSegment]
+    loop_2110d: Loop2110D
+
+
 class Loop2000D(X12SegmentGroup):
     """
     Loop 2000D - Dependent
     """
 
     hl_segment: Loop2000DHlSegment
+    trn_segment: Optional[List[TrnSegment]] = Field(min_items=0, max_items=2)
+    loop_2100d: Loop2100D
 
 
 class Loop2110C(X12SegmentGroup):
@@ -77,11 +110,11 @@ class Loop2110C(X12SegmentGroup):
     Loop2110C - Subscriber Eligibility
     """
 
-    eq_segment: Optional[Loop2110CEqSegment]
-    amt_segment: Optional[List[Loop2110CAmtSegment]] = Field(min_items=0, max_items=2)
-    iii_segment: Optional[Loop2110CIiiSegment]
-    ref_segment: Optional[Loop2110CRefSegment]
-    dtp_segment: Optional[Loop2110CDtpSegment]
+    eq_segment: Optional[Loop2110EqSegment]
+    amt_segment: Optional[List[Loop2110AmtSegment]] = Field(min_items=0, max_items=2)
+    iii_segment: Optional[Loop2110IiiSegment]
+    ref_segment: Optional[Loop2110RefSegment]
+    dtp_segment: Optional[Loop2110DtpSegment]
 
 
 class Loop2100C(X12SegmentGroup):
@@ -90,15 +123,15 @@ class Loop2100C(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100CNm1Segment
-    ref_segment: Optional[List[Loop2100CRefSegment]] = Field(min_items=0, max_items=9)
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
     prv_segment: Optional[PrvSegment]
     dmg_segment: Optional[DmgSegment]
     ins_segment: Optional[Loop2100CInsSegment]
     hi_segment: Optional[HiSegment]
-    dtp_segment: Optional[Loop2100CDtpSegment]
-    loop_2110c: Loop2110C
+    dtp_segment: Optional[Loop2100DtpSegment]
+    loop_2110c: Optional[Loop2110C]
 
 
 class Loop2000C(X12SegmentGroup):

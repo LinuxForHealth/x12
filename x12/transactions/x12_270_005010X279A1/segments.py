@@ -106,7 +106,7 @@ class Loop2000BHlSegment(HlSegment):
 
 class Loop2100BNm1Segment(Nm1Segment):
     """
-    Loop2000B Nm1 Segment requires identification code qualifier and value (NM108 and NM109)
+    Loop2000B (Information Receiver) Nm1 Segment requires identification code qualifier and value (NM108 and NM109)
     """
 
     class EntityIdentifierCode(str, Enum):
@@ -172,6 +172,10 @@ class Loop2100BRefSegment(RefSegment):
 
 
 class Loop2100BPrvSegment(PrvSegment):
+    """
+    Additional provider information for Information Receiver.
+    """
+
     class ProviderCode(str, Enum):
         """
         PRV01 code value
@@ -213,11 +217,12 @@ class Loop2100CNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["IL"]
+    name_last_or_organization_name: Optional[str]
 
 
-class Loop2100CRefSegment(RefSegment):
+class Loop2100RefSegment(RefSegment):
     """
-    Conveys additional Subscriber identification data.
+    Conveys additional Subscriber or Dependent identification data.
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -276,7 +281,7 @@ class Loop2100CInsSegment(InsSegment):
     benefit_status_code: Optional[str]
 
 
-class Loop2100CDtpSegment(DtpSegment):
+class Loop2100DtpSegment(DtpSegment):
     """
     Loop 2100C STP segment for Subscriber date/date ranges.
     """
@@ -292,7 +297,7 @@ class Loop2100CDtpSegment(DtpSegment):
     date_time_qualifier: DateTimeQualifier
 
 
-class Loop2110CEqSegment(EqSegment):
+class Loop2110EqSegment(EqSegment):
     """
     Loop2110C EQ segment for subscriber eligibility inquiry.
     """
@@ -493,9 +498,10 @@ class Loop2110CEqSegment(EqSegment):
     service_type_code: List[ServiceTypeCode]
 
 
-class Loop2110CAmtSegment(AmtSegment):
+class Loop2110AmtSegment(AmtSegment):
     """
     Used if it is necessary to report the amount applied towards the deductible.
+    Used for Subscriber and Dependent 2110 loops.
     """
 
     class AmountQualifierCode(str, Enum):
@@ -509,7 +515,11 @@ class Loop2110CAmtSegment(AmtSegment):
     amount_qualifier_code: AmountQualifierCode
 
 
-class Loop2110CIiiSegment(IiiSegment):
+class Loop2110IiiSegment(IiiSegment):
+    """
+    Used for Subscriber and Dependent 2110 loops.
+    """
+
     class IndustryCode(str, Enum):
         """
         Code values for III02
@@ -562,9 +572,9 @@ class Loop2110CIiiSegment(IiiSegment):
     industry_code: IndustryCode
 
 
-class Loop2110CRefSegment(RefSegment):
+class Loop2110RefSegment(RefSegment):
     """
-    Conveys referral or prior authorization information, if needed.
+    Conveys referral or prior authorization information, if needed for a Subscriber or Dependent loop.
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -578,7 +588,7 @@ class Loop2110CRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2110CDtpSegment(DtpSegment):
+class Loop2110DtpSegment(DtpSegment):
     """
     Overrides dates in Loop2100C to support an eligibility inquiry for a specific date or date range.
     """
@@ -592,3 +602,35 @@ class Loop2000DHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["23"]
+
+
+class Loop2100DNm1Segment(Nm1Segment):
+    """
+    Loop 2100D NM1 segment for Dependent name.
+    """
+
+    entity_identifier_code: Literal["03"]
+    name_first: str
+    identification_code_qualifier: Optional[str]
+    identification_code: Optional[str]
+
+
+class Loop2100DInsSegment(InsSegment):
+    """
+    Used if the dependent falls within a "multiple birth" condition and cannot be resolved using a lookup by name
+    and birth date.
+    """
+
+    class IndividualRelationshipCode(str, Enum):
+        """
+        Code values for INS02
+        """
+
+        SPOUSE = "01"
+        CHILD = "19"
+        OTHER_CHILD = "34"
+
+    member_indicator: Literal["N"]
+    individual_relationship_code: IndividualRelationshipCode
+    maintenance_type_code: Optional[str]
+    benefit_status_code: Optional[str]
