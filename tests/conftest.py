@@ -113,7 +113,7 @@ def x12_270_control_header() -> str:
     return "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
+            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~\n",
         ]
     )
 
@@ -126,3 +126,84 @@ def x12_270_control_footer() -> str:
             "IEA*1*000000907~",
         ]
     )
+
+
+@pytest.fixture
+def x12_270_subscriber_transaction() -> str:
+    return "\n".join(
+        [
+            "ST*270*0001*005010X279A1~",
+            "BHT*0022*13*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "REF*4A*000111222~",
+            "N3*123 MAIN ST.*SUITE 42~",
+            "N4*SAN MATEO*CA*94401~",
+            "HL*3*2*22*0~",
+            "TRN*1*930000000000*9800000004*PD~",
+            "NM1*IL*1*DOE*JOHN****MI*00000000001~",
+            "REF*6P*0123456789~",
+            "N3*1400 ANYHOO LANE*APT 270~",
+            "N4*SPARTANBURG*SC*29302~",
+            "PRV*PC*HPI*3435612668~",
+            "DMG*D8*19700101~",
+            "INS*Y*18***************3~",
+            "HI*BK:8901*BF:87200*BF:559~",
+            "DTP*291*D8*20131031~",
+            "EQ*30~",
+            "AMT*R*37.50~",
+            "AMT*PB*37.50~",
+            "III*ZZ*21~",
+            "REF*9F*660415~",
+            "DTP*291*D8*20131031~",
+            "SE*27*0001~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_270_subscriber_input(
+    x12_270_control_header, x12_270_subscriber_transaction, x12_270_control_footer
+) -> str:
+    return f"{x12_270_control_header}{x12_270_subscriber_transaction}{x12_270_control_footer}"
+
+
+@pytest.fixture
+def x12_270_dependent_transaction() -> str:
+    return "\n".join(
+        [
+            "ST*270*0001*005010X279A1~",
+            "BHT*0022*13*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "REF*4A*000111222~",
+            "N3*123 MAIN ST.*SUITE 42~",
+            "N4*SAN MATEO*CA*94401~",
+            "HL*3*2*22*1~",
+            "NM1*IL*1******MI*00000000001~",
+            "HL*4*3*23*0~",
+            "TRN*1*930000000000*9800000004*PD~",
+            "NM1*03*1*DOE*JANE~",
+            "REF*6P*0123456789~",
+            "N3*1400 ANYHOO LANE*APT 270~",
+            "N4*SPARTANBURG*SC*29302~",
+            "PRV*PC*HPI*3435612668~",
+            "DMG*D8*19700101~",
+            "INS*N*01~",
+            "HI*BK:8901*BF:87200*BF:559~",
+            "DTP*291*D8*20131031~",
+            "EQ*30~",
+            "SE*18*0001~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_270_dependent_input(
+    x12_270_control_header, x12_270_dependent_transaction, x12_270_control_footer
+) -> str:
+    return f"{x12_270_control_header}{x12_270_dependent_transaction}{x12_270_control_footer}"
