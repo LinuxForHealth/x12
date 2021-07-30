@@ -83,7 +83,7 @@ X12 segments, or a list of X12 models based on the provided options.
 
 To view help information
 ```shell
-tdw@dixons-mbp x12 % pipenv run cli --help
+user@mbp x12 % pipenv run cli --help
 Loading .env environment variables...
 usage: LinuxForHealth X12 [-h] [-s | -m] [-x] [-p] file
 
