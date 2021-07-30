@@ -115,7 +115,7 @@ Loading .env environment variables...
 
 To parse a X12 message into models with pretty printing enabled
 ```shell
-tdw@dixons-mbp x12 % pipenv run cli -m -p demo-file/demo.270
+user@mbp x12 % pipenv run cli -m -p demo-file/demo.270
 Loading .env environment variables...
 [
     {
