@@ -5,6 +5,7 @@ Tests the Pydantic X12 segment models
 """
 from x12.segments import *
 from decimal import Decimal
+from x12.models import X12Delimiters
 
 
 def test_amt_segment():
@@ -259,3 +260,21 @@ def test_segment_lookup():
     assert "ISA" in SEGMENT_LOOKUP
     assert "ST" in SEGMENT_LOOKUP
     assert "SE" in SEGMENT_LOOKUP
+
+
+def test_x12_with_custom_delimiters():
+    """tests x12 generation where custom delimiters are used"""
+    x12_delimiters: X12Delimiters = X12Delimiters(
+        element_separator="|", segment_terminator="?"
+    )
+
+    segment_data = {
+        "delimiters": x12_delimiters.dict(),
+        "trace_type_code": "1",
+        "reference_identification_1": "98175-012547",
+        "originating_company_identifier": "8877281234",
+        "reference_identification_2": "RADIOLOGY",
+    }
+
+    trn_segment: TrnSegment = TrnSegment(**segment_data)
+    assert trn_segment.x12() == "TRN|1|98175-012547|8877281234|RADIOLOGY?"
