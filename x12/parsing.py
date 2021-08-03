@@ -208,7 +208,7 @@ class X12Parser(ABC):
         :return: The parsed data as a dictionary.
         """
 
-        segment_data: Dict = {}
+        segment_data: Dict = {"delimiters": self._delimiters.dict()}
         field_names: List = self._get_segment_field_names(segment_name)
         multivalue_fields: Dict = self._get_multivalue_fields(segment_name)
 
