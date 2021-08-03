@@ -69,12 +69,37 @@ from x12.io import X12ModelReader
 
 with X12ModelReader("/home/edi/270.x12") as r:
     for model in r.models():
-        # common model properties include "header" and "footer"
+        # common model attributes include "header" and "footer"
         print(model.header)
         print(model.footer)
         
         # to convert back to X12
         model.x12()
+```
+
+Each X12 Transaction Model includes property accessors as a convenience. Supported properties vary per transaction.
+```python
+from x12.io import X12ModelReader
+
+def test_property_usage(x12_270_subscriber_input):
+    """A test case used to exercise property usage"""
+
+    with X12ModelReader(x12_270_subscriber_input) as r:
+        transaction_model = [m for m in r.models()][0]
+
+        # the property isn't cached so fetch the subscriber into a variable
+        subscriber = transaction_model.subscriber
+        subscriber_name = subscriber["loop_2100c"]["nm1_segment"]
+        assert subscriber_name["name_last_or_organization_name"] == "DOE"
+        assert subscriber_name["name_first"] == "JOHN"
+        assert subscriber_name["identification_code"] == "00000000001"
+
+        subscriber_transaction = subscriber["trn_segment"][0]
+        assert subscriber_transaction["originating_company_identifier"] == "9800000004"
+
+        info_source_name = transaction_model.information_source["loop_2100a"]["nm1_segment"]
+        assert info_source_name["name_last_or_organization_name"] == "PAYER C"
+        assert info_source_name["identification_code"] == "12345"
 ```
 
 ### CLI
