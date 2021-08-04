@@ -3,6 +3,8 @@ Tests use-cases for the 005010X279A1 (Eligibility Inquiry and Response) transact
 """
 
 from x12.io import X12ModelReader
+import pytest
+from pydantic import ValidationError
 
 
 def test_270_subscriber(x12_270_subscriber_input, x12_270_subscriber_transaction):
@@ -108,3 +110,43 @@ def test_property_usage(x12_270_subscriber_input):
         ]
         assert info_source_name["name_last_or_organization_name"] == "PAYER C"
         assert info_source_name["identification_code"] == "12345"
+
+
+def test_loop_and_segment_validations(invalid_270_input):
+    """
+    Validates the loop and segment based validations which are not executed via a root validator.
+    try/except is used, rather than pytest.raises, as we will execute assertions against the expected validations.
+    """
+
+    try:
+        with X12ModelReader(invalid_270_input) as r:
+            for _ in r.models():
+                pass
+    except ValidationError as ve:
+        assert len(ve.raw_errors) == 1
+    else:
+        assert False, "expected ValidationError"
+
+
+def test_hl_segment_id_increment_validation(x12_270_subscriber_input):
+    """
+    Validates the hl segment id validation where ids are expected to auto-increment
+    """
+    # increment the id to trigger a validation error
+    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*4*1*22*0~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_hl_segment_id_reference_validations(x12_270_subscriber_input):
+    """
+    Validates the hl segment id links throughout the transaction set
+    """
+    # update the parent id to an invalid value to trigger a validation error
+    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*3*10*22*0~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass

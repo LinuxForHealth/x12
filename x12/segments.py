@@ -175,7 +175,7 @@ class HlSegment(X12Segment):
     hierarchical_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_level_code: str = Field(min_length=1, max_length=2)
-    hierarchical_child_code: str = Field(min_length=1, max_length=1)
+    hierarchical_child_code: str = Field(min_length=1, max_length=1, regex="^0|1$")
 
 
 class IeaSegment(X12Segment):
@@ -340,6 +340,23 @@ class Nm1Segment(X12Segment):
     identification_code_qualifier: str = Field(min_length=1, max_length=2)
     identification_code: str = Field(min_length=2, max_length=80)
     # NM110 - NM112 are not used
+
+    @validator("name_first", "name_middle", "name_prefix", "name_suffix")
+    def validate_organization_name_fields(cls, field_value, values):
+        """
+        Validates that person name fields are not used within an organizational record context.
+
+        :param field_value: The person name field (first, middle, prefix, suffix) values
+        :param values: The previously validated field names and values
+        """
+        entity_type = values["entity_type_qualifier"]
+
+        if cls.EntityQualifierCode.NON_PERSON.value == entity_type:
+            if field_value:
+                raise ValueError(
+                    "Invalid field usage for Organization/Non-Person Entity"
+                )
+        return field_value
 
 
 class PrvSegment(X12Segment):

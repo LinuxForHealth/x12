@@ -299,6 +299,45 @@ class X12Parser(ABC):
 
 
 @lru_cache
+def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
+    """Returns dictionary of Loop Parsers indexed by segment name"""
+    pattern = re.compile(PARSING_FUNCTION_REGEX)
+    loop_parsers = defaultdict(list)
+
+    parsing_module = import_module(
+        f"x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
+    )
+
+    funcs = [
+        value
+        for name, value in inspect.getmembers(parsing_module, inspect.isfunction)
+        if pattern.match(name)
+    ]
+
+    for f in funcs:
+        loop_parsers[f.segment_group].append(f)
+
+    return loop_parsers
+
+
+@lru_cache
+def _load_transaction_model(
+    transaction_code: str, implementation_version: str
+) -> X12SegmentGroup:
+    """Returns the transaction model for the x12 transaction"""
+    transaction_module = import_module(
+        f"x12.transactions.x12_{transaction_code}_{implementation_version}.transaction_set"
+    )
+
+    # return transaction set model
+    for _, class_value in inspect.getmembers(transaction_module, inspect.isclass):
+        if hasattr(class_value, "schema"):
+            props: Set = set(class_value.schema()["properties"])
+            # transaction set models have header and footer attributes
+            if props.issuperset({"header", "footer"}):
+                return class_value
+
+
 def create_parser(
     transaction_code: str, implementation_version: str, x12_delimiters: X12Delimiters
 ) -> X12Parser:
@@ -314,41 +353,8 @@ def create_parser(
     :raises: ValueError if the transaction module exists, but a parser class cannot be found.
     """
 
-    def load_loop_parsers() -> Dict[str, List[Callable]]:
-        """Returns dictionary of Loop Parsers indexed by segment name"""
-        pattern = re.compile(PARSING_FUNCTION_REGEX)
-        loop_parsers = defaultdict(list)
-
-        parsing_module = import_module(
-            f"x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
-        )
-
-        funcs = [
-            value
-            for name, value in inspect.getmembers(parsing_module, inspect.isfunction)
-            if pattern.match(name)
-        ]
-
-        for f in funcs:
-            loop_parsers[f.segment_group].append(f)
-
-        return loop_parsers
-
-    def load_transaction_model() -> X12SegmentGroup:
-        """Returns the transaction model for the x12 transaction"""
-
-        transaction_module = import_module(
-            f"x12.transactions.x12_{transaction_code}_{implementation_version}.transaction_set"
-        )
-
-        # return transaction set model
-        for _, class_value in inspect.getmembers(transaction_module, inspect.isclass):
-            if hasattr(class_value, "schema"):
-                props: Set = set(class_value.schema()["properties"])
-                # transaction set models have header and footer attributes
-                if props.issuperset({"header", "footer"}):
-                    return class_value
-
-    transaction_model: X12SegmentGroup = load_transaction_model()
-    loop_parsers: Dict = load_loop_parsers()
+    transaction_model: X12SegmentGroup = _load_transaction_model(
+        transaction_code, implementation_version
+    )
+    loop_parsers: Dict = _load_loop_parsers(transaction_code, implementation_version)
     return X12Parser(transaction_model, loop_parsers, x12_delimiters)
