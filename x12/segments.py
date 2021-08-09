@@ -8,11 +8,11 @@ and overriden as necessary to support a transaction's specific validation and us
 
 import datetime
 from enum import Enum
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Tuple
 from decimal import Decimal
 import functools
 
-from pydantic import Field, PositiveInt, condecimal, validator
+from pydantic import Field, PositiveInt, condecimal, validator, root_validator
 
 from x12.models import X12Segment, X12SegmentName
 from x12.support import parse_x12_date, parse_x12_time, parse_interchange_date
@@ -74,6 +74,24 @@ class DmgSegment(X12Segment):
 
     _parse_x12_date = transform_field("date_time_period")(parse_x12_date)
 
+    @root_validator(pre=True)
+    def validate_date_time_fields(cls, values):
+        """
+        Validates that both a date_time_format_qualifier and date_time_period are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
+            "date_time_period"
+        )
+
+        if any(date_fields) and not all(date_fields):
+            raise ValueError(
+                "DMG Segment requires both a date time format qualifier and date time period if one or the other is present"
+            )
+
+        return values
+
 
 class DtpSegment(X12Segment):
     """
@@ -111,6 +129,24 @@ class EqSegment(X12Segment):
     coverage_level_code: Optional[str] = Field(min_length=3, max_length=3)
     insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
     diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
+
+    @root_validator(pre=True)
+    def validate_type_and_procedure_code(cls, values):
+        """
+        Validates that the EQ segment contains a service type code or a medical procedure id
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        reference_fields: Tuple = values.get("service_type_code"), values.get(
+            "medical_procedure_id"
+        )
+
+        if not any(reference_fields):
+            raise ValueError(
+                "Service Type Code or Medical Procedure is required for EQ segment"
+            )
+
+        return values
 
 
 class GeSegment(X12Segment):
@@ -238,6 +274,24 @@ class InsSegment(X12Segment):
 
     _parse_x12_date = transform_field("member_death_date")(parse_x12_date)
 
+    @root_validator(pre=True)
+    def validate_member_death_datefields(cls, values):
+        """
+        Validates that both a date_time_format_qualifier and member_death_date are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
+            "member_death_date"
+        )
+
+        if any(date_fields) and not all(date_fields):
+            raise ValueError(
+                "If member death date is reported both date time format qualifier and member_death_date are required."
+            )
+
+        return values
+
 
 class IsaSegment(X12Segment):
     """
@@ -285,6 +339,168 @@ class IsaSegment(X12Segment):
         return self.delimiters.element_separator.join(segment_fields)
 
 
+class MpiSegment(X12Segment):
+    """
+    Military Personnel Information
+    """
+
+    class InformationStatusCode(str, Enum):
+        """
+        Code values for MPI01
+        """
+
+        PARTIAL = "P"
+        CURRENT = "C"
+        LATEST = "L"
+        OLDEST = "O"
+        PRIOR = "P"
+        SECOND_MOST_CURRENT = "S"
+        THIRD_MOST_CURRENT = "T"
+
+    class EmploymentStatusCode(str, Enum):
+        """
+        Code values for MPI02
+        """
+
+        ACTIVE_RESERVE = "AE"
+        ACTIVE_MILITARY_OVERSEAS = "AO"
+        ACADEMY_STUDENT = "AS"
+        PRESIDENTIAL_APPOINTEE = "AT"
+        ACTIVE_MILITARY_USA = "AU"
+        CONTRACTOR = "CC"
+        DISHONORABLY_DISCHARGED = "DD"
+        HONORABLY_DISCHARGED = "HD"
+        INACTIVE_RESERVES = "IR"
+        LEAVE_OF_ABSENCE_MILITARY = "LX"
+        PLAN_TO_ENSLIST = "PE"
+        RECOMISSIONED = "RE"
+        RETIRED_MILITARY_OVERSEAS = "RM"
+        RETIRED_WITHOUT_RECALL = "RR"
+        RETIRED_MILITARY_USA = "RU"
+
+    class GovernmentServicesAffiliationCode(str, Enum):
+        """
+        Code values for MPI03
+        """
+
+        AIR_FORCE = "A"
+        AIR_FORCE_RESERVE = "B"
+        ARMY = "C"
+        ARMY_RESERVES = "D"
+        COAST_GUARD = "E"
+        MARINE_CORPS = "F"
+        MARINE_CORPS_RESERVE = "G"
+        NATIONAL_GUARD = "H"
+        NAVY = "I"
+        NAVY_RESERVES = "J"
+        OTHER = "K"
+        PEACE_CORP = "L"
+        REGULAR_ARMED_FORCES = "M"
+        RESERVES = "N"
+        US_PUBLIC_HEALTH_SERVICE = "O"
+        FOREIGN_MILITARY = "Q"
+        AMERICAN_RED_CROSS = "R"
+        DEPARTMENT_OF_DEFENSE = "S"
+        UNITED_SERVICES_ORGANIZATION = "U"
+        MILITARY_SEALIFT_COMMAND = "W"
+
+    class MilitaryServiceRankCode(str, Enum):
+        """
+        Code values for MPI05
+        """
+
+        ADMIRAL = "A1"
+        AIRMAN = "A2"
+        AIRMAN_FIRST_CLASS = "A3"
+        BASIC_AIRMAN = "B1"
+        BRIGADIER_GENERAL = "B2"
+        CAPTAIN = "C1"
+        CHIEF_MASTER_SERGEANT = "C2"
+        CHIEF_PETTY_OFFICER = "C3"
+        CHIEF_WARRANT = "C4"
+        COLONEL = "C5"
+        COMMANDER = "C6"
+        COMMODORE = "C7"
+        CORPORAL = "C8"
+        CORPORAL_SPECIALIST_4 = "C9"
+        ENSIGN = "E1"
+        FIRST_LIEUTENANT = "F1"
+        FIRST_SERGEANT = "F2"
+        FIRST_SERGEANT_MASTER_SERGEANT = "F3"
+        FLEET_ADMIRAL = "F4"
+        GENERAL = "G1"
+        GUNNERY_SERGEANT = "G4"
+        LANCE_CORPORAL = "L1"
+        LIEUTENANT = "L2"
+        LIEUTENANT_COLONEL = "L3"
+        LIEUTENANT_COMMANDER = "L4"
+        LIEUTENANT_GENERAL = "L5"
+        LIEUTENANT_JUNIOR_GRADE = "L6"
+        MAJOR = "M1"
+        MAJOR_GENERAL = "M2"
+        MASTER_CHIEF_PETTY_OFFICER = "M3"
+        MASTER_GUNNERY_SERGEANT_MAJOR = "M4"
+        MASTER_SERGEANT = "M5"
+        MASTER_SERGEANT_SPECIALIST_8 = "M6"
+        PETTY_OFFICER_FIRST_CLASS = "P1"
+        PETTY_OFFICER_SECOND_CLASS = "P2"
+        PETTY_OFFICER_THIRD_CLASS = "P3"
+        PRIVATE = "P4"
+        PRIVATE_FIRST_CLASS = "P5"
+        REAR_ADMIRAL = "R1"
+        RECRUIT = "R2"
+        SEAMAN = "S1"
+        SEAMAN_APPRENTICE = "S2"
+        SEAMAN_RECRUIT = "S3"
+        SECOND_LIEUTENANT = "S4"
+        SENIOR_CHIEF_PETTY_OFFICER = "S5"
+        SENIOR_MASTER_SERGEANT = "S6"
+        SERGEANT = "S7"
+        SERGEANT_FIRST_CLASS_SPECIALIST_7 = "S8"
+        SERGEANT_MAJOR_SPECIALIST_9 = "S9"
+        SERGEANT_SPECIALIST_5 = "SA"
+        STAFF_SERGEANT = "SB"
+        STAFF_SERGEANT_SPECIALIST_6 = "SC"
+        TECHNICAL_SERGEANT = "T1"
+        VICE_ADMIRAL = "V1"
+        WARRANT_OFFICER = "W1"
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code values for MPI06
+        """
+
+        DATE = "D8"
+        DATE_RANGE = "RD8"
+
+    segment_name: X12SegmentName = X12SegmentName.MPI
+    information_status_code: InformationStatusCode
+    employment_status_code: EmploymentStatusCode
+    government_services_affiliation_code: GovernmentServicesAffiliationCode
+    description: Optional[str]
+    military_service_rank_code: Optional[MilitaryServiceRankCode]
+    date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
+    date_time_period: Optional[str]
+
+    @root_validator(pre=True)
+    def validate_date_fields(cls, values):
+        """
+        Validates that both a date_time_format_qualifier and date_time_period are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
+            "date_time_period"
+        )
+
+        if any(date_fields) and not all(date_fields):
+            raise ValueError(
+                "If either date_time_period_format_qualifier or date_time_period are provided, both are required"
+            )
+
+        return values
+
+
 class N3Segment(X12Segment):
     """
     Party Location (Address)
@@ -313,6 +529,24 @@ class N4Segment(X12Segment):
     location_identifier: Optional[str] = Field(min_length=1, max_length=30)
     country_subdivision_code: Optional[str] = Field(min_length=1, max_length=3)
 
+    @root_validator(pre=True)
+    def validate_state_codes(cls, values):
+        """
+        Validates that a N4 segment does not contain both a state_province_code and country_subdivision_code
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        state_fields: Tuple = values.get("state_province_code"), values.get(
+            "country_subdivision_code"
+        )
+
+        if all(state_fields):
+            raise ValueError(
+                "only one of state_province_code or country_subdivision_code is allowed"
+            )
+
+        return values
+
 
 class Nm1Segment(X12Segment):
     """
@@ -337,9 +571,27 @@ class Nm1Segment(X12Segment):
     name_middle: Optional[str] = Field(min_length=0, max_length=25)
     name_prefix: Optional[str]
     name_suffix: Optional[str] = Field(min_length=0, max_length=10)
-    identification_code_qualifier: str = Field(min_length=1, max_length=2)
-    identification_code: str = Field(min_length=2, max_length=80)
+    identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)
     # NM110 - NM112 are not used
+
+    @root_validator(pre=True)
+    def validate_identification_codes(cls, values):
+        """
+        Validates that both an identification code and qualifier are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        id_fields: Tuple = values.get("identification_code_qualifier"), values.get(
+            "identification_code"
+        )
+
+        if any(id_fields) and not all(id_fields):
+            raise ValueError(
+                "Identification code usage requires the code qualifier and code value"
+            )
+
+        return values
 
     @validator("name_first", "name_middle", "name_prefix", "name_suffix")
     def validate_organization_name_fields(cls, field_value, values):
@@ -372,6 +624,24 @@ class PrvSegment(X12Segment):
         min_length=2, max_length=3
     )
     reference_identification: Optional[str] = Field(min_length=1, max_length=50)
+
+    @root_validator(pre=True)
+    def validate_reference_id(cls, values):
+        """
+        Validates that both an identification value and qualifier are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        reference_fields: Tuple = values.get(
+            "reference_identification_qualifier"
+        ), values.get("reference_identification")
+
+        if any(reference_fields) and not all(reference_fields):
+            raise ValueError(
+                "only one of reference_identification_qualifier or reference_identification is allowed"
+            )
+
+        return values
 
 
 class RefSegment(X12Segment):

@@ -54,7 +54,8 @@ from .segments import (
     Loop2100DInsSegment,
 )
 from typing import List, Optional
-from pydantic import Field
+from pydantic import Field, root_validator
+from x12.validators import validate_duplicate_ref_codes
 
 
 class Header(X12SegmentGroup):
@@ -93,6 +94,10 @@ class Loop2100D(X12SegmentGroup):
     hi_segment: Optional[HiSegment]
     dtp_segment: Optional[Loop2100DtpSegment]
     loop_2110d: Loop2110D
+
+    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
 
 
 class Loop2000D(X12SegmentGroup):
@@ -133,6 +138,10 @@ class Loop2100C(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment]
     loop_2110c: Optional[Loop2110C]
 
+    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
 
 class Loop2000C(X12SegmentGroup):
     """
@@ -155,6 +164,10 @@ class Loop2100B(X12SegmentGroup):
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
     prv_segment: Optional[PrvSegment]
+
+    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
 
 
 class Loop2000B(X12SegmentGroup):
