@@ -204,3 +204,206 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         join_char: str = "\n" if use_new_lines else ""
         return join_char.join(x12_segments)
 ```
+
+### Data Model Validation
+
+The LinuxForHealth X12 Data Model supports broad and granular validations expressed at the transaction set, loop, segment,
+and field level with Pydantic's `@root_validator` and `@validator` functions.
+
+#### Field Level Validations
+
+Field level validations constrain values based on the underlying data type using Pydantic's Field model or constrained
+types.
+
+String field validations may enforce min and max field lengths and pattern conformance (regular expressions).
+
+```python
+from x12.models import X12SegmentName, X12Segment
+from pydantic import Field
+
+class HlSegment(X12Segment):
+    """
+    Defines a hierarchical organization used to relate one grouping of segments to another
+    Example:
+        HL*3*2*22*1~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.HL
+    hierarchical_id_number: str = Field(min_length=1, max_length=12)
+    hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
+    hierarchical_level_code: str = Field(min_length=1, max_length=2)
+    hierarchical_child_code: str = Field(min_length=1, max_length=1, regex="^0|1$")
+```
+
+Numeric field validations may enforce value ranges or utilize Pydantic constrained types such as `PositiveInt`.
+
+```python
+from x12.models import X12SegmentName, X12Segment
+from pydantic import Field, PositiveInt
+
+class IeaSegment(X12Segment):
+    """
+    Defines the interchange footer and is an EDI control segment.
+    Example:
+        IEA*1*000000907~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.IEA
+    number_of_included_functional_groups: PositiveInt
+    interchange_control_number: str = Field(min_length=9, max_length=9)
+```
+
+Code-table fields are expressed as string based enumerations within a X12Segment model. Code tables which are not specific
+to a given transaction set or loop are defined within the `x12.segments` module. Transaction specific code tables are
+defined within the `x12.transactions.<transaction package>.segments` module as "overrides".
+
+```python
+from enum import Enum
+from x12.segments import RefSegment
+
+class Loop2100RefSegment(RefSegment):
+    """
+    Conveys additional Subscriber or Dependent identification data.
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        PLAN_NUMBER = "18"
+        GROUP_POLICY_NUMBER = "1L"
+        MEMBER_IDENTIFICATION_NUMBER = "1W"
+        CASE_NUMBER = "3H"
+        GROUP_NUMBER = "6P"
+        CONTRACT_NUMBER = "CT"
+        MEDICAL_RECORD_IDENTIFICATION_NUMBER = "EA"
+        PATIENT_ACCOUNT_NUMBER = "EJ"
+        HEALTH_INSURANCE_CLAIM_NUMBER = "F6"
+        IDENTIFICATION_CARD_SERIAL_NUMBER = "GH"
+        IDENTITY_CARD_NUMBER = "HJ"
+        INSURANCE_POLICY_NUMBER = "IG"
+        PLAN_NETWORK_IDENTIFICATION_NUMBER = "N6"
+        MEDICARE_RECIPIENT_IDENTIFICATION_NUMBER = "NQ"
+        SOCIAL_SECURITY_NUMBER = "SY"
+        AGENCY_CLAIM_NUMBER = "Y4"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+```
+
+### Segment Level Validations
+
+Segment level validations are implemented within a `X12Segment` model using either Pydantic's `@root_validator` or `@validator`
+functions. The `@root_validator` provides access to all fields within the model, while the `@validator` may only access fields 
+"up to" the target field.
+
+The following example, the `Nm1Segment`, utilizes both validator types.
+
+```python
+from x12.models import X12Segment, X12SegmentName
+from enum import Enum
+from pydantic import Field, validator, root_validator
+from typing import Optional, Tuple
+
+class Nm1Segment(X12Segment):
+    """
+    Entity Name and Identification Number
+    Example:
+        NM1*PR*2*PAYER C*****PI*12345~
+    """
+
+    class EntityQualifierCode(str, Enum):
+        """
+        NM1.02 Entity Qualifier Code to specify the entity type
+        """
+
+        PERSON = "1"
+        NON_PERSON = "2"
+
+    segment_name: X12SegmentName = X12SegmentName.NM1
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    entity_type_qualifier: EntityQualifierCode
+    name_last_or_organization_name: str = Field(min_length=1, max_length=60)
+    name_first: Optional[str] = Field(min_length=0, max_length=35)
+    name_middle: Optional[str] = Field(min_length=0, max_length=25)
+    name_prefix: Optional[str]
+    name_suffix: Optional[str] = Field(min_length=0, max_length=10)
+    identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)
+    # NM110 - NM112 are not used
+
+    @root_validator(pre=True)
+    def validate_identification_codes(cls, values):
+        """
+        Validates that both an identification code and qualifier are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        id_fields: Tuple = values.get("identification_code_qualifier"), values.get(
+            "identification_code"
+        )
+
+        if any(id_fields) and not all(id_fields):
+            raise ValueError(
+                "Identification code usage requires the code qualifier and code value"
+            )
+
+        return values
+
+    @validator("name_first", "name_middle", "name_prefix", "name_suffix")
+    def validate_organization_name_fields(cls, field_value, values):
+        """
+        Validates that person name fields are not used within an organizational record context.
+
+        :param field_value: The person name field (first, middle, prefix, suffix) values
+        :param values: The previously validated field names and values
+        """
+        entity_type = values["entity_type_qualifier"]
+
+        if cls.EntityQualifierCode.NON_PERSON.value == entity_type:
+            if field_value:
+                raise ValueError(
+                    "Invalid field usage for Organization/Non-Person Entity"
+                )
+        return field_value
+```
+
+#### Reusable Validators with Loop and Transaction Set Models
+
+The `x12.validators` module contains common validation functions which are not specific to a transaction set. These
+validations are "wired" to the model using explicit syntax rather than decorator functions.
+
+```python
+from x12.models import X12SegmentGroup
+from x12.transactions.x12_270_005010X279A1.loops import (Loop2100DNm1Segment,
+                                                         Loop2100RefSegment,
+                                                         Loop2100DInsSegment,
+                                                         Loop2100DtpSegment,
+                                                         Loop2110D)
+from x12.segments import N3Segment, N4Segment, PrvSegment, DmgSegment,HiSegment
+from x12.validators import validate_duplicate_ref_codes
+from typing import Optional, List
+from pydantic import Field, root_validator
+
+class Loop2100D(X12SegmentGroup):
+    """
+    Loop 2100D - Dependent Name
+    """
+
+    nm1_segment: Loop2100DNm1Segment
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    prv_segment: Optional[PrvSegment]
+    dmg_segment: Optional[DmgSegment]
+    ins_segment: Optional[Loop2100DInsSegment]
+    hi_segment: Optional[HiSegment]
+    dtp_segment: Optional[Loop2100DtpSegment]
+    loop_2110d: Loop2110D
+
+    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+```
+
+For additional information on validator implementations, please refer to the [Pydantic documentation](https://pydantic-docs.helpmanual.io/usage/validators/).

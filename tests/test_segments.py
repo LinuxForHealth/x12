@@ -33,7 +33,7 @@ def test_bht_segment():
 
 def test_dmg_segment():
     segment_data = {
-        "date_time_format_qualifier": "D8",
+        "date_time_period_format_qualifier": "D8",
         "date_time_period": "19430917",
         "gender_code": "M",
     }
@@ -42,7 +42,7 @@ def test_dmg_segment():
     assert dmg_segment.x12() == "DMG*D8*19430917*M~"
 
 
-def test_dtp_segment():
+def test_dtp_segment_date_period():
     segment_data = {
         "date_time_qualifier": "291",
         "date_time_period_format_qualifier": "D8",
@@ -51,6 +51,17 @@ def test_dtp_segment():
 
     dtp_segment: DtpSegment = DtpSegment(**segment_data)
     assert dtp_segment.x12() == "DTP*291*D8*20051015~"
+
+
+def test_dtp_segment_date_range():
+    segment_data = {
+        "date_time_qualifier": "291",
+        "date_time_period_format_qualifier": "RD8",
+        "date_time_period": "20051015-20051201",
+    }
+
+    dtp_segment: DtpSegment = DtpSegment(**segment_data)
+    assert dtp_segment.x12() == "DTP*291*RD8*20051015-20051201~"
 
 
 def test_eq_segment():

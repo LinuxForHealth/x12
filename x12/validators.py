@@ -11,8 +11,10 @@ Field validators support a varying signature:
     - (cls, v, values, config) - where "config" is the model config
     - (cls, kwargs) - provides a key word arguments shorthand for the above parameters
 """
-from typing import Dict
+from typing import Dict, Union
 from collections import defaultdict
+from datetime import datetime
+from x12.support import parse_x12_date
 
 
 def validate_duplicate_ref_codes(cls, values: Dict):
@@ -20,6 +22,7 @@ def validate_duplicate_ref_codes(cls, values: Dict):
     Validates that a loop does not contain duplicate REF codes.
 
     :param values: The raw, unvalidated transaction data.
+    :raises: ValueError if duplicate REF codes are found.
     """
     ref_codes = defaultdict(int)
     for ref_segment in values.get("ref_segment", []):
@@ -30,3 +33,40 @@ def validate_duplicate_ref_codes(cls, values: Dict):
     if duplicate_codes:
         raise ValueError(f"Duplicate REF codes {duplicate_codes}")
     return values
+
+
+def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:
+    """
+    Validates a date field using the segment's date_time_period_format_qualifier (D8 or RD8).
+    The date_time_period_format_qualifier is used to indicate if a date field is a specific date or a date range.
+    Specific dates are have a "D8" qualifier value, while date ranges are qualified using "RD8".
+
+    :param v: The date field value
+    :param values: The segment's valid values.
+    :return: The validated date field value
+    :raises: ValueError if the date field value is an invalid format.
+    """
+    from x12.segments import DtpSegment
+
+    def handle_x12_date(date_string: str):
+        """Parses a x12 date string, raising a ValueError if an error occurs"""
+        try:
+            return parse_x12_date(date_string)
+        except ValueError:
+            raise ValueError(f"Invalid date value {date_string}")
+
+    qualifier = values.get("date_time_period_format_qualifier")
+
+    # the date field may be "optional" in which case the qualifier is not present
+    # if the qualifier field is required, it will be validated at the field level
+    if not qualifier:
+        return
+
+    if qualifier == DtpSegment.DateTimePeriodFormatQualifier.DATE_RANGE and "-" not in v:
+        raise ValueError(f"Invalid date range {v}")
+    elif qualifier == DtpSegment.DateTimePeriodFormatQualifier.DATE_RANGE:
+        for d in v.split("-"):
+            handle_x12_date(d)
+        return v
+    else:
+        return handle_x12_date(v)

@@ -8,7 +8,7 @@ and overriden as necessary to support a transaction's specific validation and us
 
 import datetime
 from enum import Enum
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
 import functools
 
@@ -16,8 +16,11 @@ from pydantic import Field, PositiveInt, condecimal, validator, root_validator
 
 from x12.models import X12Segment, X12SegmentName
 from x12.support import parse_x12_date, parse_x12_time, parse_interchange_date
+from x12.validators import validate_date_field
 
-transform_field = functools.partial(validator, pre=True, allow_reuse=True)
+# partial function used to "register" common field validator functions
+# common validator functions have the sigature (cls, v, values)
+field_validator = functools.partial(validator, pre=True, allow_reuse=True)
 
 
 class AmtSegment(X12Segment):
@@ -48,8 +51,8 @@ class BhtSegment(X12Segment):
     transaction_set_creation_time: datetime.time
     transaction_type_code: str = Field(min_length=2, max_length=2)
 
-    _parse_x12_date = transform_field("transaction_set_creation_date")(parse_x12_date)
-    _parse_x12_time = transform_field("transaction_set_creation_time")(parse_x12_time)
+    _validate_transaction_date = field_validator("transaction_set_creation_date")(parse_x12_date)
+    _validate_transaction_time = field_validator("transaction_set_creation_time")(parse_x12_time)
 
 
 class DmgSegment(X12Segment):
@@ -67,27 +70,33 @@ class DmgSegment(X12Segment):
         FEMALE = "F"
         MALE = "M"
 
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code value for DMG01
+        """
+        SPECIFIC_DATE = "D8"
+
     segment_name: X12SegmentName = X12SegmentName.DMG
-    date_time_format_qualifier: Optional[str] = Field(min_length=2, max_length=3)
+    date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     date_time_period: Optional[datetime.date]
     gender_code: Optional[GenderCode]
 
-    _parse_x12_date = transform_field("date_time_period")(parse_x12_date)
+    _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
     @root_validator(pre=True)
     def validate_date_time_fields(cls, values):
         """
-        Validates that both a date_time_format_qualifier and date_time_period are provided if one or the other is present
+        Validates that both a date_time_period_format_qualifier and date_time_period are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
+        date_fields: Tuple = values.get("date_time_period_format_qualifier"), values.get(
             "date_time_period"
         )
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
-                "DMG Segment requires both a date time format qualifier and date time period if one or the other is present"
+                "DMG Segment requires both a date_time_period_format_qualifier and date time period if one or the other is present"
             )
 
         return values
@@ -111,9 +120,9 @@ class DtpSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.DTP
     date_time_qualifier: str = Field(min_length=3, max_length=3)
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
-    date_time_period: datetime.date
+    date_time_period: Union[datetime.date, str]
 
-    _parse_x12_date = transform_field("date_time_period")(parse_x12_date)
+    _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
 
 class EqSegment(X12Segment):
@@ -178,8 +187,8 @@ class GsSegment(X12Segment):
     responsible_agency_code: Literal["X"]
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
-    _parse_x12_date = transform_field("functional_group_creation_date")(parse_x12_date)
-    _parse_x12_time = transform_field("functional_group_creation_time")(parse_x12_time)
+    _validate_creation_date = field_validator("functional_group_creation_date")(parse_x12_date)
+    _validate_creation_time = field_validator("functional_group_creation_time")(parse_x12_time)
 
 
 class HiSegment(X12Segment):
@@ -264,7 +273,7 @@ class InsSegment(X12Segment):
     employment_status_code: Optional[str] = Field(min_length=2, max_length=2)
     student_status_code: Optional[str] = Field(min_length=1, max_length=1)
     handicap_indicator: Optional[ResponseCode]
-    date_time_format_qualifier: Optional[str] = Field(min_length=2, max_length=3)
+    date_time_period_format_qualifier: Optional[str] = Field(min_length=2, max_length=3)
     member_death_date: Optional[datetime.date]
     confidentiality_code: Optional[str] = Field(min_length=1, max_length=1)
     city_name: Optional[str] = Field(min_length=2, max_length=30)
@@ -272,16 +281,16 @@ class InsSegment(X12Segment):
     country_code: Optional[str] = Field(min_length=2, max_length=3)
     birth_sequence_number: Optional[int]
 
-    _parse_x12_date = transform_field("member_death_date")(parse_x12_date)
+    _validate_death_date = field_validator("member_death_date")(validate_date_field)
 
     @root_validator(pre=True)
     def validate_member_death_datefields(cls, values):
         """
-        Validates that both a date_time_format_qualifier and member_death_date are provided if one or the other is present
+        Validates that both a date_time_period_format_qualifier and member_death_date are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
+        date_fields: Tuple = values.get("date_time_period_format_qualifier"), values.get(
             "member_death_date"
         )
 
@@ -319,10 +328,10 @@ class IsaSegment(X12Segment):
     interchange_usage_indicator: str = Field(min_length=1, max_length=1)
     component_element_separator: str = Field(min_length=1, max_length=1)
 
-    _parse_interchange_date = transform_field("interchange_date")(
+    _validate_interchange_date = field_validator("interchange_date")(
         parse_interchange_date
     )
-    _parse_x12_time = transform_field("interchange_time")(parse_x12_time)
+    _validate_interchange_time = field_validator("interchange_time")(parse_x12_time)
 
     def x12(self) -> str:
         """
