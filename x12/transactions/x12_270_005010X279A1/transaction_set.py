@@ -10,6 +10,7 @@ from x12.models import X12SegmentGroup
 
 from .loops import Footer, Header, Loop2000A
 from pydantic import root_validator
+from x12.validators import validate_segment_count
 
 
 class EligibilityInquiry(X12SegmentGroup):
@@ -20,6 +21,8 @@ class EligibilityInquiry(X12SegmentGroup):
     header: Header
     loop_2000a: List[Loop2000A]
     footer: Footer
+
+    _validate_segment_count = root_validator(pre=True, allow_reuse=True)(validate_segment_count)
 
     @root_validator(pre=True)
     def validate_subscriber_name(cls, values):

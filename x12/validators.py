@@ -14,7 +14,7 @@ Field validators support a varying signature:
 from typing import Dict, Union
 from collections import defaultdict
 from datetime import datetime
-from x12.support import parse_x12_date
+from x12.support import parse_x12_date, count_segments
 
 
 def validate_duplicate_ref_codes(cls, values: Dict):
@@ -70,3 +70,20 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
         return v
     else:
         return handle_x12_date(v)
+
+
+def validate_segment_count(cls, values) -> Dict:
+    """
+    Validates the segment count conveyed in the transaction set footer, or SE segment.
+    """
+    expected_count = int(values.get("footer", {}).get("se_segment", {}).get("transaction_segment_count"))
+
+    if not expected_count:
+        raise ValueError("Expected transaction count not found in SE segment")
+
+    actual_count = count_segments(values)
+
+    if expected_count != actual_count:
+        raise ValueError(f"SE segment count {expected_count} != actual count {actual_count}")
+
+    return values
