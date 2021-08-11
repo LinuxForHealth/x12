@@ -11,7 +11,7 @@ from x12.support import (
     parse_x12_date,
     parse_x12_time,
     parse_interchange_date,
-    count_segments
+    count_segments,
 )
 from x12.io import X12ModelReader
 
@@ -81,10 +81,7 @@ def test_parse_x12_time():
 
 @pytest.mark.parametrize(
     "test_input, expected_count",
-    [
-        ("x12_270_subscriber_input", 27),
-        ("x12_270_dependent_input", 24)
-    ],
+    [("x12_270_subscriber_input", 27), ("x12_270_dependent_input", 24)],
 )
 def test_count_segments(request, test_input, expected_count):
     """

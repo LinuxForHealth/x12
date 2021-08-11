@@ -95,7 +95,7 @@ class Loop2100D(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment]
     loop_2110d: Loop2110D
 
-    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
 
@@ -138,7 +138,7 @@ class Loop2100C(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment]
     loop_2110c: Optional[Loop2110C]
 
-    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
 
@@ -165,7 +165,7 @@ class Loop2100B(X12SegmentGroup):
     n4_segment: Optional[N4Segment]
     prv_segment: Optional[PrvSegment]
 
-    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
 

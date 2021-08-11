@@ -22,9 +22,9 @@ class EligibilityInquiry(X12SegmentGroup):
     loop_2000a: List[Loop2000A]
     footer: Footer
 
-    _validate_segment_count = root_validator(pre=True, allow_reuse=True)(validate_segment_count)
+    _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_subscriber_name(cls, values):
         """
         Validates that the subscriber mame is present if the subscriber is a patient
@@ -32,17 +32,10 @@ class EligibilityInquiry(X12SegmentGroup):
         :param values: The raw, unvalidated transaction data.
         """
         for info_source in values.get("loop_2000a", []):
-            for info_receiver in info_source.get("loop_2000b", []):
-                for subscriber in info_receiver.get("loop_2000c", []):
-                    child_code = subscriber.get("hl_segment", {}).get(
-                        "hierarchical_child_code"
-                    )
-
-                    first_name = (
-                        subscriber.get("loop_2100c", {})
-                        .get("nm1_segment", {})
-                        .get("name_first")
-                    )
+            for info_receiver in info_source.loop_2000b:
+                for subscriber in info_receiver.loop_2000c:
+                    child_code = subscriber.hl_segment.hierarchical_child_code
+                    first_name = subscriber.loop_2100c.nm1_segment.name_first
 
                     if child_code == "0" and not first_name:
                         raise ValueError(
@@ -51,7 +44,7 @@ class EligibilityInquiry(X12SegmentGroup):
 
         return values
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_subscriber_hierarchy_child_code(cls, values):
         """
         Validates that a subscriber's hierarchy child code is set correctly based on the presence of a dependent loop.
@@ -59,18 +52,17 @@ class EligibilityInquiry(X12SegmentGroup):
         :param values: The raw, unvalidated transaction data.
         """
         for info_source in values.get("loop_2000a", []):
-            for info_receiver in info_source.get("loop_2000b", []):
-                for subscriber in info_receiver.get("loop_2000c", []):
-                    child_code = subscriber.get("hl_segment", {}).get(
-                        "hierarchical_child_code"
-                    )
-                    if child_code == "1" and not subscriber.get("loop_2000d", []):
+            for info_receiver in info_source.loop_2000b:
+                for subscriber in info_receiver.loop_2000c:
+                    child_code = subscriber.hl_segment.hierarchical_child_code
+
+                    if child_code == "1" and not subscriber.loop_2000d:
                         raise ValueError(
                             f"Invalid subscriber hierarchy code {child_code} no dependent record is present"
                         )
         return values
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_hierarchy_ids(cls, values):
         """
         Validates the HL segments linkage in regards to the entire EligibilityInquiry transaction.
@@ -81,20 +73,18 @@ class EligibilityInquiry(X12SegmentGroup):
 
         def get_ids(hl_segment: Dict) -> Tuple[int, int]:
             """returns tuple of (id, parent_id)"""
-            id = hl_segment.get("hierarchical_id_number")
-            parent_id = hl_segment.get("hierarchical_parent_id_number")
+            id = hl_segment.hierarchical_id_number
+            parent_id = hl_segment.hierarchical_parent_id_number
             return int(id) if id else 0, int(parent_id) if parent_id else 0
 
         for info_source in values.get("loop_2000a", []):
             # info source does not have a parent id, since it starts a new hierarchy - this is validated at the
             # segment level
-            source_id, _ = get_ids(info_source.get("hl_segment", {}))
+            source_id, _ = get_ids(info_source.hl_segment)
             previous_id: int = source_id
 
-            for info_receiver in info_source.get("loop_2000b", []):
-                receiver_id, receiver_parent_id = get_ids(
-                    info_receiver.get("hl_segment", {})
-                )
+            for info_receiver in info_source.loop_2000b:
+                receiver_id, receiver_parent_id = get_ids(info_receiver.hl_segment)
 
                 if receiver_parent_id != previous_id:
                     raise ValueError(f"Invalid receiver parent id {receiver_parent_id}")
@@ -106,10 +96,8 @@ class EligibilityInquiry(X12SegmentGroup):
 
                 previous_id = receiver_id
 
-                for subscriber in info_receiver.get("loop_2000c", []):
-                    subscriber_id, subscriber_parent_id = get_ids(
-                        subscriber.get("hl_segment", {})
-                    )
+                for subscriber in info_receiver.loop_2000c:
+                    subscriber_id, subscriber_parent_id = get_ids(subscriber.hl_segment)
 
                     if subscriber_parent_id != previous_id:
                         raise ValueError(
@@ -123,9 +111,12 @@ class EligibilityInquiry(X12SegmentGroup):
 
                     previous_id = subscriber_id
 
-                    for dependent in subscriber.get("loop_2000d", []):
+                    if not subscriber.loop_2000d:
+                        continue
+
+                    for dependent in subscriber.loop_2000d:
                         dependent_id, dependent_parent_id = get_ids(
-                            dependent.get("hl_segment", {})
+                            dependent.hl_segment
                         )
 
                         if dependent_parent_id != previous_id:
@@ -139,7 +130,6 @@ class EligibilityInquiry(X12SegmentGroup):
                             )
 
                         previous_id = dependent_id
-
         return values
 
     @property

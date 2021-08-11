@@ -123,7 +123,7 @@ def test_loop_and_segment_validations(invalid_270_input):
             for _ in r.models():
                 pass
     except ValidationError as ve:
-        assert len(ve.raw_errors) == 1
+        assert len(ve.raw_errors) == 2
     else:
         assert False, "expected ValidationError"
 

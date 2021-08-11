@@ -10,17 +10,17 @@ import datetime
 from enum import Enum
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
-import functools
 
 from pydantic import Field, PositiveInt, condecimal, validator, root_validator
 
 from x12.models import X12Segment, X12SegmentName
-from x12.support import parse_x12_date, parse_x12_time, parse_interchange_date
+from x12.support import (
+    parse_x12_date,
+    parse_x12_time,
+    parse_interchange_date,
+    field_validator,
+)
 from x12.validators import validate_date_field
-
-# partial function used to "register" common field validator functions
-# common validator functions have the sigature (cls, v, values)
-field_validator = functools.partial(validator, pre=True, allow_reuse=True)
 
 
 class AmtSegment(X12Segment):
@@ -47,12 +47,16 @@ class BhtSegment(X12Segment):
     hierarchical_structure_code: str = Field(min_length=4, max_length=4)
     transaction_set_purpose_code: str = Field(min_length=2, max_length=2)
     submitter_transactional_identifier: str = Field(min_length=1, max_length=50)
-    transaction_set_creation_date: datetime.date
-    transaction_set_creation_time: datetime.time
+    transaction_set_creation_date: Union[str, datetime.date]
+    transaction_set_creation_time: Union[str, datetime.time]
     transaction_type_code: str = Field(min_length=2, max_length=2)
 
-    _validate_transaction_date = field_validator("transaction_set_creation_date")(parse_x12_date)
-    _validate_transaction_time = field_validator("transaction_set_creation_time")(parse_x12_time)
+    _validate_transaction_date = field_validator("transaction_set_creation_date")(
+        parse_x12_date
+    )
+    _validate_transaction_time = field_validator("transaction_set_creation_time")(
+        parse_x12_time
+    )
 
 
 class DmgSegment(X12Segment):
@@ -74,25 +78,26 @@ class DmgSegment(X12Segment):
         """
         Code value for DMG01
         """
+
         SPECIFIC_DATE = "D8"
 
     segment_name: X12SegmentName = X12SegmentName.DMG
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
-    date_time_period: Optional[datetime.date]
+    date_time_period: Optional[Union[str, datetime.date]]
     gender_code: Optional[GenderCode]
 
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_date_time_fields(cls, values):
         """
         Validates that both a date_time_period_format_qualifier and date_time_period are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get("date_time_period_format_qualifier"), values.get(
-            "date_time_period"
-        )
+        date_fields: Tuple = values.get(
+            "date_time_period_format_qualifier"
+        ), values.get("date_time_period")
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
@@ -120,7 +125,7 @@ class DtpSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.DTP
     date_time_qualifier: str = Field(min_length=3, max_length=3)
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
-    date_time_period: Union[datetime.date, str]
+    date_time_period: Union[str, datetime.date]
 
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
@@ -139,7 +144,7 @@ class EqSegment(X12Segment):
     insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
     diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_type_and_procedure_code(cls, values):
         """
         Validates that the EQ segment contains a service type code or a medical procedure id
@@ -181,14 +186,18 @@ class GsSegment(X12Segment):
     functional_identifier_code: str = Field(min_length=2, max_length=2)
     application_sender_code: str = Field(min_length=2, max_length=15)
     application_receiver_code: str = Field(min_length=2, max_length=15)
-    functional_group_creation_date: datetime.date
-    functional_group_creation_time: datetime.time
+    functional_group_creation_date: Union[str, datetime.date]
+    functional_group_creation_time: Union[str, datetime.time]
     group_control_number: str = Field(min_length=1, max_length=9)
     responsible_agency_code: Literal["X"]
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
-    _validate_creation_date = field_validator("functional_group_creation_date")(parse_x12_date)
-    _validate_creation_time = field_validator("functional_group_creation_time")(parse_x12_time)
+    _validate_creation_date = field_validator("functional_group_creation_date")(
+        parse_x12_date
+    )
+    _validate_creation_time = field_validator("functional_group_creation_time")(
+        parse_x12_time
+    )
 
 
 class HiSegment(X12Segment):
@@ -274,7 +283,7 @@ class InsSegment(X12Segment):
     student_status_code: Optional[str] = Field(min_length=1, max_length=1)
     handicap_indicator: Optional[ResponseCode]
     date_time_period_format_qualifier: Optional[str] = Field(min_length=2, max_length=3)
-    member_death_date: Optional[datetime.date]
+    member_death_date: Optional[Union[str, datetime.date]]
     confidentiality_code: Optional[str] = Field(min_length=1, max_length=1)
     city_name: Optional[str] = Field(min_length=2, max_length=30)
     state_province_code: Optional[str] = Field(min_length=2, max_length=2)
@@ -283,16 +292,16 @@ class InsSegment(X12Segment):
 
     _validate_death_date = field_validator("member_death_date")(validate_date_field)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_member_death_datefields(cls, values):
         """
         Validates that both a date_time_period_format_qualifier and member_death_date are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get("date_time_period_format_qualifier"), values.get(
-            "member_death_date"
-        )
+        date_fields: Tuple = values.get(
+            "date_time_period_format_qualifier"
+        ), values.get("member_death_date")
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
@@ -319,8 +328,8 @@ class IsaSegment(X12Segment):
     interchange_sender_id: str = Field(min_length=15, max_length=15)
     interchange_receiver_qualifier: str = Field(min_length=2, max_length=2)
     interchange_receiver_id: str = Field(min_length=15, max_length=15)
-    interchange_date: datetime.date
-    interchange_time: datetime.time
+    interchange_date: Union[str, datetime.date]
+    interchange_time: Union[str, datetime.time]
     repetition_separator: str = Field(min_length=1, max_length=1)
     interchange_control_version_number: str = Field(min_length=5, max_length=5)
     interchange_control_number: str = Field(min_length=9, max_length=9)
@@ -491,7 +500,7 @@ class MpiSegment(X12Segment):
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     date_time_period: Optional[str]
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_date_fields(cls, values):
         """
         Validates that both a date_time_format_qualifier and date_time_period are provided if one or the other is present
@@ -538,7 +547,7 @@ class N4Segment(X12Segment):
     location_identifier: Optional[str] = Field(min_length=1, max_length=30)
     country_subdivision_code: Optional[str] = Field(min_length=1, max_length=3)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_state_codes(cls, values):
         """
         Validates that a N4 segment does not contain both a state_province_code and country_subdivision_code
@@ -584,7 +593,7 @@ class Nm1Segment(X12Segment):
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
     # NM110 - NM112 are not used
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_identification_codes(cls, values):
         """
         Validates that both an identification code and qualifier are provided if one or the other is present
@@ -634,7 +643,7 @@ class PrvSegment(X12Segment):
     )
     reference_identification: Optional[str] = Field(min_length=1, max_length=50)
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_reference_id(cls, values):
         """
         Validates that both an identification value and qualifier are provided if one or the other is present

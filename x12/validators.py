@@ -21,11 +21,15 @@ def validate_duplicate_ref_codes(cls, values: Dict):
     """
     Validates that a loop does not contain duplicate REF codes.
 
-    :param values: The raw, unvalidated transaction data.
+    :param values: The validated transaction data.
     :raises: ValueError if duplicate REF codes are found.
     """
     ref_codes = defaultdict(int)
     for ref_segment in values.get("ref_segment", []):
+        # account for differing internal representation: model vs dict
+        if not isinstance(ref_segment, dict):
+            ref_segment = ref_segment.dict()
+
         ref_code = ref_segment.get("reference_identification_qualifier")
         ref_codes[ref_code] += 1
     duplicate_codes = {k for k, v in ref_codes.items() if v > 1}
@@ -60,9 +64,12 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
     # the date field may be "optional" in which case the qualifier is not present
     # if the qualifier field is required, it will be validated at the field level
     if not qualifier:
-        return
+        return v
 
-    if qualifier == DtpSegment.DateTimePeriodFormatQualifier.DATE_RANGE and "-" not in v:
+    if (
+        qualifier == DtpSegment.DateTimePeriodFormatQualifier.DATE_RANGE
+        and "-" not in v
+    ):
         raise ValueError(f"Invalid date range {v}")
     elif qualifier == DtpSegment.DateTimePeriodFormatQualifier.DATE_RANGE:
         for d in v.split("-"):
@@ -75,15 +82,20 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
 def validate_segment_count(cls, values) -> Dict:
     """
     Validates the segment count conveyed in the transaction set footer, or SE segment.
+    This function is only able to count "valid" segments since it is invoked as a "post" validator.
+
+    :param values: The valid transaction set values.
     """
-    expected_count = int(values.get("footer", {}).get("se_segment", {}).get("transaction_segment_count"))
+    expected_count: int = values["footer"].se_segment.transaction_segment_count
 
     if not expected_count:
         raise ValueError("Expected transaction count not found in SE segment")
 
-    actual_count = count_segments(values)
+    actual_count: int = count_segments(values)
 
     if expected_count != actual_count:
-        raise ValueError(f"SE segment count {expected_count} != actual count {actual_count}")
+        raise ValueError(
+            f"SE segment count {expected_count} != actual count {actual_count}"
+        )
 
     return values

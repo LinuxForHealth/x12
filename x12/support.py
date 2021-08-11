@@ -4,8 +4,11 @@ support.py
 Convenience functions for X12 Processing.
 """
 import datetime
+import functools
 import os
 from typing import Union, Dict
+
+from pydantic import validator, BaseModel
 
 from x12.config import IsaDelimiters
 
@@ -64,7 +67,7 @@ def parse_x12_time(time_string: str) -> Union[datetime.time, None]:
     return datetime.datetime.strptime(time_string, "%H%M").time()
 
 
-def count_segments(data_model: Dict) -> int:
+def count_segments(values: Dict) -> int:
     """
     Returns the number of segment records contained within a X12 data model.
 
@@ -75,20 +78,31 @@ def count_segments(data_model: Dict) -> int:
     The top level keys may contain additional nested structures which contain "segment" keys such as
     nm1_segment, st_segment, dtp_segment, se_segment, etc.
 
-    :param data_model: The input data model
+    :param values: The validated model values
     :returns: the total segment count
     """
     segment_count: int = 0
 
-    for k, v in data_model.items():
+    for k, v in values.items():
         if k.endswith("_segment") and isinstance(v, dict):
             segment_count += 1
         elif k.endswith("_segment") and isinstance(v, list):
             segment_count += len(v)
+        elif isinstance(v, BaseModel):
+            segment_count += count_segments(v.dict())
         elif isinstance(v, list):
             for item in v:
-                segment_count += count_segments(item)
+                segment_count += (
+                    count_segments(item.dict())
+                    if hasattr(item, "dict")
+                    else count_segments(item)
+                )
         elif isinstance(v, dict):
             segment_count += count_segments(v)
 
     return segment_count
+
+
+# partial function used to "register" common field validator functions
+# common validator functions have the signature (cls, v, values)
+field_validator = functools.partial(validator, allow_reuse=True)

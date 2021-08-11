@@ -208,7 +208,11 @@ class X12SegmentGroup(abc.ABC, BaseModel):
 ### Data Model Validation
 
 The LinuxForHealth X12 Data Model supports broad and granular validations expressed at the transaction set, loop, segment,
-and field level with Pydantic's `@root_validator` and `@validator` functions.
+and field level with Pydantic's `@root_validator` and `@validator` functions. 
+
+Pydantic's `post` validation behavior is used for each validation process to streamline implementations. An additional
+benefit of `post` validation behavior is that Pydantic will continue to execute validators rather than halting on the
+first exception found.
 
 #### Field Level Validations
 
@@ -254,7 +258,7 @@ class IeaSegment(X12Segment):
 ```
 
 Code-table fields are expressed as string based enumerations within a X12Segment model. Code tables which are not specific
-to a given transaction set or loop are defined within the `x12.segments` module. Transaction specific code tables are
+to a given transaction set or loop are defined within the `x12.segments` module. Transaction-specific code tables are
 defined within the `x12.transactions.<transaction package>.segments` module as "overrides".
 
 ```python
@@ -332,7 +336,7 @@ class Nm1Segment(X12Segment):
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
     # NM110 - NM112 are not used
 
-    @root_validator(pre=True)
+    @root_validator
     def validate_identification_codes(cls, values):
         """
         Validates that both an identification code and qualifier are provided if one or the other is present
@@ -401,7 +405,7 @@ class Loop2100D(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment]
     loop_2110d: Loop2110D
 
-    _validate_ref_segments = root_validator(pre=True, allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
 ```
