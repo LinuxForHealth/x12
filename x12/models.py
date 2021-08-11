@@ -46,6 +46,7 @@ class X12SegmentName(str, Enum):
     III = "III"
     INS = "INS"
     ISA = "ISA"
+    MPI = "MPI"
     N3 = "N3"
     N4 = "N4"
     NM1 = "NM1"

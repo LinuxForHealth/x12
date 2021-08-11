@@ -11,7 +11,7 @@ from x12.parsing import X12ParserContext
 
 
 @pytest.fixture
-def simple_270_with_new_lines():
+def simple_270_with_new_lines() -> str:
     return "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
@@ -40,12 +40,12 @@ def simple_270_with_new_lines():
 
 
 @pytest.fixture
-def simple_270_one_line(simple_270_with_new_lines):
+def simple_270_one_line(simple_270_with_new_lines) -> str:
     return simple_270_with_new_lines.replace("\n", "")
 
 
 @pytest.fixture
-def large_x12_message():
+def large_x12_message() -> str:
     """
     Generates a large x12 message by repeating a transaction set a fixed number of times.
     :return: large x12 message
@@ -92,19 +92,19 @@ def large_x12_message():
 
 
 @pytest.fixture
-def config():
+def config() -> X12Config:
     config: X12Config = X12Config()
     config.x12_reader_buffer_size = 1024000
     return config
 
 
 @pytest.fixture
-def x12_delimiters():
+def x12_delimiters() -> X12Delimiters:
     return X12Delimiters()
 
 
 @pytest.fixture
-def x12_parser_context():
+def x12_parser_context() -> X12ParserContext:
     return X12ParserContext()
 
 
@@ -197,7 +197,7 @@ def x12_270_dependent_transaction() -> str:
             "HI*BK:8901*BF:87200*BF:559~",
             "DTP*291*D8*20131031~",
             "EQ*30~",
-            "SE*18*0001~",
+            "SE*24*0001~",
         ]
     )
 
@@ -210,7 +210,7 @@ def x12_270_dependent_input(
 
 
 @pytest.fixture
-def x12_with_custom_delimiters():
+def x12_with_custom_delimiters() -> str:
     return "\n".join(
         [
             "ISA|03|9876543210|01|9876543210|30|000000005      |30|12345          |131031|1147|^|00501|000000907|1|T|:?",

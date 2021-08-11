@@ -6,7 +6,7 @@ Specialized segment models for the Eligibility 270 005010X279A1 transaction.
 from enum import Enum
 from typing import Literal, Optional, List
 
-from pydantic import Field
+from pydantic import Field, validator
 
 from x12.segments import (
     BhtSegment,
@@ -58,6 +58,18 @@ class Loop2000AHlSegment(HlSegment):
 
     hierarchical_parent_id_number: Optional[str]
     hierarchical_level_code: Literal["20"]
+    hierarchical_child_code: Literal["1"]
+
+    @validator("hierarchical_parent_id_number")
+    def validate_parent_id(cls, field_value):
+        """
+        Validates that the information source parent id is not set.
+        :param field_value: The hierarchical_parent_id_number value.
+        """
+
+        if field_value:
+            raise ValueError(f"invalid hierarchical_parent_id_number {field_value}")
+        return field_value
 
 
 class Loop2100ANm1Segment(Nm1Segment):
@@ -91,9 +103,6 @@ class Loop2100ANm1Segment(Nm1Segment):
 
     entity_identifier_code: EntityIdentifierCode
     identification_code_qualifier: IdentificationCodeQualifier
-    name_first: Optional[str]
-    name_middle: Optional[str]
-    name_suffix: Optional[str]
 
 
 class Loop2000BHlSegment(HlSegment):
@@ -102,6 +111,7 @@ class Loop2000BHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["21"]
+    hierarchical_child_code: Literal["1"]
 
 
 class Loop2100BNm1Segment(Nm1Segment):

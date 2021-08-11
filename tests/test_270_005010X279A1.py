@@ -3,6 +3,8 @@ Tests use-cases for the 005010X279A1 (Eligibility Inquiry and Response) transact
 """
 
 from x12.io import X12ModelReader
+import pytest
+from pydantic import ValidationError
 
 
 def test_270_subscriber(x12_270_subscriber_input, x12_270_subscriber_transaction):
@@ -108,3 +110,110 @@ def test_property_usage(x12_270_subscriber_input):
         ]
         assert info_source_name["name_last_or_organization_name"] == "PAYER C"
         assert info_source_name["identification_code"] == "12345"
+
+
+def test_hl_segment_id_increment_validation(x12_270_subscriber_input):
+    """
+    Validates the hl segment id validation where ids are expected to auto-increment
+    """
+    # increment the id to trigger a validation error
+    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*4*1*22*0~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_hl_segment_id_reference_validations(x12_270_subscriber_input):
+    """
+    Validates the hl segment id links throughout the transaction set
+    """
+    # update the parent id to an invalid value to trigger a validation error
+    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*3*10*22*0~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_subscriber_hierarchy_child_code(x12_270_subscriber_input):
+    # update the hierarchy child code to "1" to trigger a validation error
+    # update the parent id to an invalid value to trigger a validation error
+    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*3*2*22*1~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_subscriber_name(x12_270_subscriber_input):
+    # remove the first name from the subscriber segment to trigger a validation error
+    test_input = x12_270_subscriber_input.replace(
+        "NM1*IL*1*DOE*JOHN****MI*00000000001~", "NM1*IL*1*DOE*****MI*00000000001~"
+    )
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_information_source_id_codes(x12_270_subscriber_input):
+    # remote the id code value from the information source to trigger a validation error
+    test_input = x12_270_subscriber_input.replace(
+        "NM1*PR*2*PAYER C*****PI*12345~", "NM1*PR*2*PAYER C*****PI~"
+    )
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_ref_segment_usage(x12_270_subscriber_input):
+    # update the input to include duplicate REF segments
+    test_input = x12_270_subscriber_input.replace(
+        "REF*4A*000111222~", "REF*4A*000111222~REF*4A*444222999~"
+    )
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_n4_state_codes(x12_270_subscriber_input):
+    # update the input to include duplicate REF segments
+    test_input = x12_270_subscriber_input.replace(
+        "N4*SAN MATEO*CA*94401~", "N4*SAN MATEO*CA*94401****US-AS~"
+    )
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_prv_reference_codes(x12_270_subscriber_input):
+    # update the input to include duplicate REF segments
+    test_input = x12_270_subscriber_input.replace(
+        "PRV*PC*HPI*3435612668~", "PRV*PC*HPI~"
+    )
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_date_fields(x12_270_subscriber_input):
+    # update the input to remove the date_time_format_qualifier field
+    test_input = x12_270_subscriber_input.replace("DMG*D8*19700101~", "DMG**19700101~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
+
+
+def test_validate_eq_segment_coding(x12_270_subscriber_input):
+    # update the input to remove the date_time_format_qualifier field
+    test_input = x12_270_subscriber_input.replace("EQ*30~", "EQ~")
+    with X12ModelReader(test_input) as r:
+        with pytest.raises(ValidationError):
+            for _ in r.models():
+                pass
