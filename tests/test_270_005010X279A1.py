@@ -112,22 +112,6 @@ def test_property_usage(x12_270_subscriber_input):
         assert info_source_name["identification_code"] == "12345"
 
 
-def test_loop_and_segment_validations(invalid_270_input):
-    """
-    Validates the loop and segment based validations which are not executed via a root validator.
-    try/except is used, rather than pytest.raises, as we will execute assertions against the expected validations.
-    """
-
-    try:
-        with X12ModelReader(invalid_270_input) as r:
-            for _ in r.models():
-                pass
-    except ValidationError as ve:
-        assert len(ve.raw_errors) == 2
-    else:
-        assert False, "expected ValidationError"
-
-
 def test_hl_segment_id_increment_validation(x12_270_subscriber_input):
     """
     Validates the hl segment id validation where ids are expected to auto-increment
