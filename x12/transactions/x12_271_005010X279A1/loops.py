@@ -1,7 +1,7 @@
 """
 loops.py
 
-Models the loops, or logical segment groupings, for the Eligibility 270 005010X279A1 transaction set.
+Models the loops, or logical segment groupings, for the Eligibility 271 005010X279A1 transaction set.
 The Eligibility Transaction set organizes loops into a hierarchical and nested model.
 
 - Header
@@ -41,6 +41,7 @@ from .segments import (
     Loop2100BRefSegment,
     Loop2100ANm1Segment,
     Loop2000AHlSegment,
+    Loop2000AAaaSegment,
     Loop2100CNm1Segment,
     Loop2100RefSegment,
     Loop2100CInsSegment,
@@ -50,9 +51,9 @@ from .segments import (
     Loop2110IiiSegment,
     Loop2110RefSegment,
     Loop2110DtpSegment,
-    Loop2100DNm1Segment,
-    Loop2100DInsSegment,
-    Loop2100CPrvSegment,
+    Loop2100APerSegment,
+    Loop2100AAaaSegment,
+    Loop2100BAaaSegment
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -84,43 +85,21 @@ class Loop2100D(X12SegmentGroup):
     """
     Loop 2100D - Dependent Name
     """
-
-    nm1_segment: Loop2100DNm1Segment
-    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
-    n3_segment: Optional[N3Segment]
-    n4_segment: Optional[N4Segment]
-    prv_segment: Optional[Loop2100CPrvSegment]
-    dmg_segment: Optional[DmgSegment]
-    ins_segment: Optional[Loop2100DInsSegment]
-    hi_segment: Optional[HiSegment]
-    dtp_segment: Optional[Loop2100DtpSegment]
-    loop_2110d: Loop2110D
-
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
+    pass
 
 
 class Loop2000D(X12SegmentGroup):
     """
     Loop 2000D - Dependent
     """
-
-    hl_segment: Loop2000DHlSegment
-    trn_segment: Optional[List[TrnSegment]] = Field(min_items=0, max_items=2)
-    loop_2100d: Loop2100D
+    pass
 
 
 class Loop2110C(X12SegmentGroup):
     """
     Loop2110C - Subscriber Eligibility
     """
-
-    eq_segment: Optional[Loop2110EqSegment]
-    amt_segment: Optional[List[Loop2110AmtSegment]] = Field(min_items=0, max_items=2)
-    iii_segment: Optional[Loop2110IiiSegment]
-    ref_segment: Optional[Loop2110RefSegment]
-    dtp_segment: Optional[Loop2110DtpSegment]
+    pass
 
 
 class Loop2100C(X12SegmentGroup):
@@ -132,7 +111,9 @@ class Loop2100C(X12SegmentGroup):
     ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
-    prv_segment: Optional[Loop2100CPrvSegment]
+    # Loop2100C AAA is identical to Loop2100B AAA
+    aaa_segment: Optional[Loop2100BAaaSegment]
+    prv_segment: Optional[PrvSegment]
     dmg_segment: Optional[DmgSegment]
     ins_segment: Optional[Loop2100CInsSegment]
     hi_segment: Optional[HiSegment]
@@ -164,6 +145,7 @@ class Loop2100B(X12SegmentGroup):
     ref_segment: Optional[List[Loop2100BRefSegment]]
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
+    aaa_segment: Optional[Loop2100BAaaSegment]
     prv_segment: Optional[PrvSegment]
 
     _validate_ref_segments = root_validator(allow_reuse=True)(
@@ -187,6 +169,8 @@ class Loop2100A(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100ANm1Segment
+    per_segment: Loop2100APerSegment
+    aaa_segment: Loop2100AAaaSegment
 
 
 class Loop2000A(X12SegmentGroup):
@@ -197,6 +181,7 @@ class Loop2000A(X12SegmentGroup):
     """
 
     hl_segment: Loop2000AHlSegment
+    aaa_segment: Loop2000AAaaSegment
     loop_2100a: Loop2100A
     loop_2000b: List[Loop2000B] = Field(min_items=1)
 

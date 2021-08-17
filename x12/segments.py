@@ -23,6 +23,26 @@ from x12.support import (
 from x12.validators import validate_date_field
 
 
+class AaaSegment(X12Segment):
+    """
+    Request validation.
+    Example:
+        AAA*Y**42*Y~
+    """
+    class ResponseCode(str, Enum):
+        """
+        AAA01 code values
+        """
+        NO = "N"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.AAA
+    response_code: ResponseCode
+    agency_qualifier_code: Optional[str]
+    reject_reason_code: str
+    follow_up_action_code: str
+
+
 class AmtSegment(X12Segment):
     """
     Monetary Amount Information.
@@ -130,6 +150,405 @@ class DtpSegment(X12Segment):
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
 
+class EbSegment(X12Segment):
+    """
+    Eligibility Benefit Information
+    Example:
+        EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10*****Y~
+    """
+
+    class EligibilityBenefitInformationCode(str, Enum):
+        """
+        Code values for EB01
+        """
+        ACTIVE_COVERAGE = "1"
+        ACTIVE_FULL_RISK_CAPITATION = "2"
+        ACTIVE_SERVICES_CAPITATED = "3"
+        ACTIVE_SERVICES_CAPITATED_TO_PRIMARY_CARE = "4"
+        ACTIVE_PENDING_INVESTIGATION = "5"
+        INACTIVE = "6"
+        INACTIVE_PENDING_ELIGIBILITY_UPDATE = "7"
+        INACTIVE_PENDING_INVESTIGATION = "8"
+        CO_INSURANCE = "A"
+        CO_PAYMENT = "B"
+        DEDUCTIBLE = "C"
+        COVERAGE_BASIS = "CB"
+        BENEFIT_DESCRIPTION = "D"
+        EXCLUSIONS = "E"
+        LIMITATIONS = "F"
+        OUT_OF_POCKET_STOP_LOSS = "G"
+        UNLIMITED = "H"
+        NON_COVERED = "I"
+        COST_CONTAINMENT = "J"
+        REVERSE = "K"
+        PRIMARY_CARE_PROVIDER = "L"
+        PRE_EXISTING_CONDITION = "M"
+        MANAGED_CARE_COORDINATOR = "MC"
+        SERVICES_RESTRICTED_TO_FOLLOWING_PROVIDER = "N"
+        NOT_DEEMED_A_MEDICAL_NECESSITY = "O"
+        BENEFIT_DISCLAIMER = "P"
+        SECOND_SURGICAL_OPINION_REQUIRED = "Q"
+        OTHER_OR_ADDITIONAL_PAYOR = "R"
+        PRIOR_YEAR_HISTORY = "S"
+        CARD_REPORTED_LOST_STOLEN = "T"
+        CONTACT_FOLLOWING_FOR_BENEFIT_INFO = "U"
+        CANNOT_PROCESS = "V"
+        OTHER_SOURCE_OF_DATA = "W"
+        HEALTH_CARE_FACILITY = "X"
+        SPEND_DOWN = "Y"
+
+    class CoverageLevelCode(str, Enum):
+        """
+        Code values for EB02
+        """
+        CHILDREN_ONLY = "CHD"
+        DEPENDENTS_ONLY = "DEP"
+        EMPLOYEE_AND_CHILDREN = "ECH"
+        EMPLOYEE_ONLY = "EMP"
+        EMPLOYEE_AND_SPOUSE = "ESP"
+        FAMILY = "FAM"
+        INDIVIDUAL = "IND"
+        SPOUSE_AND_CHILDREN = "SPC"
+        SPOUSE_ONLY = "SPO"
+
+    class ServiceTypeCode(str, Enum):
+        """
+        Code values for EB03
+        """
+        MEDICAL_CARE = "1"
+        SURGICAL = "2"
+        CONSULTATION = "3"
+        DIAGNOSTIC_X_RAY = "4"
+        DIAGNOSTIC_LAB = "5"
+        RADIATION_THERAPY = "6"
+        ANESTHESIA = "7"
+        SURGICAL_ASSISTANCE = "8"
+        OTHER_MEDICAL = "9"
+        BLOOD_CHARGES = "10"
+        USED_DURABLE_MEDICAL_EQUIPMENT = "11"
+        DURABLE_MEDICAL_EQUIPMENT_PURCHASE = "12"
+        AMBULATORY_SERVICE_CENTER_FACILITY = "13"
+        RENAL_SUPPLIES_IN_THE_HOME = "14"
+        ALTERNATE_METHOD_DIALYSIS = "15"
+        CHRONIC_RENAL_DISEASE_EQUIPMENT = "16"
+        PRE_ADMISSION_TESTING = "17"
+        DURABLE_MEDICAL_EQUIPMENT_RENTAL = "18"
+        PNEUMONIA_VACCINE = "19"
+        SECOND_SURGICAL_OPINION = "20"
+        THIRD_SURGICAL_OPINION = "21"
+        SOCIAL_WORK = "22"
+        DIAGNOSTIC_DENTAL = "23"
+        PERIODONTICS = "24"
+        RESTORATIVE = "25"
+        ENDODONTICS = "26"
+        MAXILLOFACIAL_PROSTHETICS = "27"
+        ADJUNCTIVE_DENTAL_SERVICES = "28"
+        HEALTH_BENEFIT_PLAN_COVERAGE = "30"
+        PLAN_WAITING_PERIOD = "32"
+        CHIROPRACTIC = "33"
+        CHIROPRACTIC_OFFICE_VISITS = "34"
+        DENTAL_CARE = "35"
+        DENTAL_CROWNS = "36"
+        DENTAL_ACCIDENT = "37"
+        ORTHODONTICS = "38"
+        PROSTHODONTICS = "39"
+        ORAL_SURGERY = "40"
+        ROUTINE_PREVENTIVE_DENTAL = "41"
+        HOME_HEALTH_CARE = "42"
+        HOME_HEALTH_PRESCRIPTIONS = "43"
+        HOME_HEALTH_VISITS = "44"
+        HOSPICE = "45"
+        RESPITE_CARE = "46"
+        HOSPITAL = "47"
+        HOSPITAL_INPATIENT = "48"
+        HOSPITAL_ROOM_AND_BOARD = "49"
+        HOSPITAL_OUTPATIENT = "50"
+        HOSPITAL_EMERGENCY_ACCIDENT = "51"
+        HOSPITAL_EMERGENCY_MEDICAL = "52"
+        HOSPITAL_AMBULATORY_SURGICAL = "53"
+        LONG_TERM_CARE = "54"
+        MAJOR_MEDICAL = "55"
+        MEDICALLY_RELATED_TRANSPORTATION = "56"
+        AIR_TRANSPORTATION = "57"
+        CABULANCE = "58"
+        LICENSED_AMBULANCE = "59"
+        GENERAL_BENEFITS = "60"
+        INVITRO_FERTILIZATION = "61"
+        MRI_CAT_SCAN = "62"
+        DONOR_PROCEDURE = "63"
+        ACUPUNCTURE = "64"
+        NEWBORN_CARE = "65"
+        PATHOLOGY = "66"
+        SMOKING_CESSATION = "67"
+        WELL_BABY_CARE = "68"
+        MATERNITY = "69"
+        TRANSPLANTS = "70"
+        AUDIOLOGY_EXAM = "71"
+        INHALATION_THERAPY = "72"
+        DIAGNOSTIC_MEDICAL = "73"
+        PRIVATE_DUTY_NURSING = "74"
+        PROSTHETIC_DEVICE = "75"
+        DIALYSIS = "76"
+        OTOLOGICAL_EXAM = "77"
+        CHEMOTHERAPY = "78"
+        ALLERGY_TESTING = "79"
+        IMMUNIZATIONS = "80"
+        ROUTINE_PHYSICAL = "81"
+        FAMILY_PLANNING = "82"
+        INFERTILITY = "83"
+        ABORTION = "84"
+        AIDS = "85"
+        EMERGENCY_SERVICES = "86"
+        CANCER = "87"
+        PHARMACY = "88"
+        FREE_STANDING_PRESCRIPTION_DRUG = "89"
+        MAIL_ORDER_PRESCRIPTION_DRUG = "90"
+        BRAND_NAME_PRESCRIPTION_DRUG = "91"
+        GENERIC_PRESCRIPTION_DRUG = "92"
+        PDDIATRY = "93"
+        PDDIATRY_NURSING_HOME_VISITS = "94"
+        PROFESSIONAL_PHYSICIAN = "96"
+        ANESTHESIOLOGIST = "97"
+        PROFESSIONAL_PHYSICIAN_VISIT_OFFICE = "98"
+        PROFESSIONAL_PHYSICIAN_VISIT_INPATIENT = "99"
+        PROFESSIONAL_PHYSICIAN_VISIT_OUTPATIENT = "99"
+        PROFESSIONAL_PHYSICIAN_VISIT_NURSING_HOME = "A1"
+        PROFESSIONAL_PHYSICIAN_VISIT_SKILLED_NURSING_FACILITY = "A2"
+        PROFESSIONAL_PHYSICIAN_VISIT_HOME_PSYCHIATRIC = "A3"
+        PSYCHIATRIC_ROOM_AND_BOARD = "A4"
+        PSYCHOTHERAPY = "A5"
+        PSYCHIATRIC_INPATIENT = "A6"
+        PSYCHIATRIC_OUTPATIENT = "A7"
+        REHABILITATION = "A9"
+        REHABILITATION_ROOM_AND_BOARD = "AA"
+        REHABILITATION_INPATIENT = "AB"
+        REHABILITATION_OUTPATIENT = "AC"
+        OCCUPATIONAL_THERAPY = "AD"
+        PHYSICAL_MEDICINE = "AE"
+        SPEECH_THERAPY = "AF"
+        SKILLED_NURSING_CARE = "AG"
+        SKILLED_NURSING_CARE_ROOM_AND_BOARD = "AH"
+        SUBSTANCE_ABUSE = "AI"
+        ALCOHOLISM = "AJ"
+        DRUG_ADDICTION = "AK"
+        VISION_OPTOMETRY = "AL"
+        FRAMES = "AM"
+        ROUTINE_VISION_EXAM = "AN"
+        LENSES = "AO"
+        NONMEDICALLY_NECESSARY_PHYSICAL = "AQ"
+        EXPERIMENTAL_DRUG_THERAPY = "AR"
+        BURN_CARE = "B1"
+        BRAND_NAME_PRESCRIPTION_DRUG_FORMULARY = "B2"
+        BRAND_NAME_PRESCRIPTION_DRUG_NON_FORMULARY = "B3"
+        INDEPENDENT_MEDICAL_EVALUATION = "BA"
+        PARTIAL_HOSPITALIZATION_PSYCHIATRIC = "BB"
+        DAY_CARE_PSYCHIATRIC = "BC"
+        COGNITIVE_THERAPY = "BD"
+        MASSAGE_THERAPY = "BE"
+        PULMONARY_REHABILITATION = "BF"
+        CARDIAC_REHABILITATION = "BG"
+        PEDIATRIC = "BH"
+        NURSERY = "BI"
+        SKIN = "BJ"
+        ORTHOPEDIC = "BK"
+        CARDIAC = "BL"
+        LYMPHATIC = "BM"
+        GASTROINTESTINAL = "BN"
+        ENDOCRINE = "BP"
+        NEUROLOGY = "BQ"
+        EYE = "BR"
+        INVASIVE_PROCEDURE = "BS"
+        GYNECOLOGICAL = "BT"
+        OBSTETRICAL = "BU"
+        OBSTETRICAL_GYNECOLOGICAL = "BV"
+        MAIL_ORDER_PRESCRIPTION_DRUG_BRAND_NAME = "BW"
+        MAIL_ORDER_PRESCRIPTION_DRUG_GENERIC = "BX"
+        PHYSICIAN_VISIT_OFFICE_SICK = "BY"
+        PHYSICIAN_VISIT_OFFICE_WELL = "BZ"
+        CORONARY_CARE = "C1"
+        PRIVATE_DUTY_NURSING_INPATIENT = "CA"
+        PRIVATE_DUTY_NURSING_HOME = "CB"
+        SURGICAL_BENEFITS_PROFESSIONAL_PHYSICIAN = "CC"
+        SURGICAL_BENEFITS_FACILITY = "CD"
+        MENTAL_HEALTH_PROVIDER_INPATIENT = "CE"
+        MENTAL_HEALTH_PROVIDER_OUTPATIENT = "CF"
+        MENTAL_HEALTH_FACILITY_INPATIENT = "CG"
+        MENTAL_HEALTH_FACILITY_OUTPATIENT = "CH"
+        SUBSTANCE_ABUSE_FACILITY_INPATIENT = "C1"
+        SUBSTANCE_ABUSE_FACILITY_OUTPATIENT = "C2"
+        SCREENING_X_RAY = "CK"
+        SCREENING_LABORATORY = "CL"
+        MAMMOGRAM_HIGH_RISK_PATIENT = "CM"
+        MAMMOGRAM_LOW_RISK_PATIENT = "CN"
+        FLU_VACCINATION = "CO"
+        EYEWEAR_AND_EYEWEAR_ACCESSORIES = "CP"
+        CASE_MANAGEMENT = "CQ"
+        DERMATOLOGY = "DG"
+        DURABLE_MEDICAL_EQUIPMENT = "DM"
+        DIABETIC_SUPPLIES = "DS"
+        GENERIC_PRESCRIPTION_DRUG_FORMULARY = "GF"
+        GENERIC_PRESCRIPTION_DRUG_NON_FORMULARY = "GN"
+        ALLERGY = "GY"
+        INTENSIVE_CARE = "IC"
+        MENTAL_HEALTH = "MH"
+        NEONATAL_INTENSIVE_CARE = "NI"
+        ONCOLOGY = "ON"
+        PHYSICAL_THERAPY = "PT"
+        PULMONARY = "PU"
+        RENAL = "RN"
+        RESIDENTIAL_PSYCHIATRIC_TREATMENT = "RT"
+        TRANSITIONAL_CARE = "TC"
+        TRANSITION_NURSERY_CARE = "TN"
+        URGENT_CARE = "UC"
+
+    class InsuranceTypeCode(str, Enum):
+        """
+        code values for EB04
+        """
+        MEDICARE_SECONDARY_EMPLOYER_GROUP_PRIMARY = "12"
+        MEDICARE_SECONDARY_END_STAGE_RENAL_DISEASE = "13"
+        MEDICARE_SECONDARY_AUTO_PRIMARY = "14"
+        MEDICARE_SECONDARY_WORKERS_COMP = "15"
+        MEDICARE_SECONDARY_PUBLIC_HEALTH_SERVICE = "16"
+        MEDICARE_SECONDARY_BLACK_LUNG = "41"
+        MEDICARE_SECONDARY_VETERANS_ADMIN = "42"
+        MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
+        MEDICARE_SECONDARY_OTHER_LIABILITY = "47"
+        AUTO_INSURANCE_POLICY = "AP"
+        COMMERCIAL = "C1"
+        COBRA = "CO"
+        MEDICARE_CONDITIONALLY_PRIMARY = "CP"
+        DISABILITY = "D"
+        DISABILITY_BENEFITS = "DB"
+        EXCLUSIVE_PROVIDER_ORGANIZATION = "EP"
+        FAMILY_OR_FRIENDS = "FF"
+        GROUP_POLICY = "GP"
+        HMO = "HM"
+        HMO_MEDICARE_RISK = "HN"
+        SPECIAL_LOW_INCOME_MEDICARE_BENEFICIARY = "HS"
+        INDEMNITY = "IN"
+        INDIVIDUAL_POLICY = "IP"
+        LONG_TERM_CARE = "LC"
+        LONG_TERM_POLICY = "LD"
+        LIFE_INSURANCE = "LI"
+        LITIGATION = "LT"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        MEDIGAP_PART_A = "MH"
+        MEDIGAP_PART_B = "MI"
+        MEDICARE_PRIMARY = "MP"
+        OTHER = "OT"
+        PROPERTY_INSURANCE_PERSONAL = "PE"
+        PERSONAL = "PL"
+        PERSONAL_PAYMENT_CASH = "PP"
+        PREERRED_PROVIDER_ORGANIZATION = "PR"
+        POINT_OF_SERVICE = "POS"
+        QUALIFIED_MEDICARE_BENEFICIARY = "QM"
+        PROPERTY_INSURANCE_REAL = "RP"
+        SUPPLEMENTAL_POLICY = "SP"
+        TEFRA = "TF"
+        WORKERS_COMPENSATION = "WC"
+        WRAP_UP_POLICY = "WU"
+
+    class TimePeriodQualifier(str, Enum):
+        """
+        Code values for EB06
+        """
+        HOUR = "6"
+        DAY = "7"
+        TWENTY_FOUR_HOURS = "13"
+        YEARS = "21"
+        SERVICE_YEAR = "22"
+        CALENDAR_YEAR = "23"
+        YEAR_TO_DATE = "24"
+        CONTRACT = "25"
+        EPISODE = "26"
+        VISIT = "27"
+        OUTLIER = "28"
+        REMAINING = "29"
+        EXCEEDED = "30"
+        NOT_EXCEEDED = "31"
+        LIFETIME = "32"
+        LIFETIME_REMAINING = "33"
+        MONTH = "34"
+        WEEK = "35"
+        ADMISSION = "36"
+
+    class QuantityQualifier(str, Enum):
+        """
+        Code valus for EB09
+        """
+        MINIMUM = "8H"
+        QUANTITY_USED = "99"
+        COVERED_ACTUAL = "CA"
+        COVERED_ESTIMATED = "CE"
+        NUMBER_OF_COINSURANCE_DAYS = "D3"
+        DEDUCTIBLE_BLOOD_UNITS = "D8"
+        DAYS = "DY"
+        HOURS = "HS"
+        LIFETIME_RESERVE_ACTUAL = "LA"
+        LIFETIME_RESERVE_ESTIMATED = "LE"
+        MAXIMUM = "M2"
+        MONTH = "MN"
+        NUMBER_OF_SERVICES_OR_PROCEDURES = "P6"
+        QUANTITY_APPROVED = "QA"
+        AGE_HIGH_VALUE = "S7"
+        AGE_LOW_VALUE = "S8"
+        VISITS = "VS"
+        YEARS = "YY"
+
+    class AuthorizationCertificationIndicator(str, Enum):
+        """
+        Code values for EB11
+        """
+        NO = "N"
+        UNKNOWN = "U"
+        YES = "Y"
+
+    class InPlanNetworkIndicator(str, Enum):
+        """
+        Code values for EB12
+        """
+        NO = "N"
+        UNKNOWN = "U"
+        NOT_APPLICABLE = "W"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.EB
+    eligibility_benefit_information: EligibilityBenefitInformationCode
+    coverage_level_code: Optional[CoverageLevelCode]
+    service_type_code: Optional[List[ServiceTypeCode]]
+    insurance_type_code: Optional[InsuranceTypeCode]
+    plan_coverage_description: Optional[str]
+    time_period_qualifier: Optional[TimePeriodQualifier]
+    benefit_amount: Optional[Decimal]
+    benefit_percent: Optional[Decimal]
+    quantity_qualifier: Optional[Decimal]
+    quantity: Optional[Decimal]
+    authorization_certification_indicator: Optional[AuthorizationCertificationIndicator]
+    inplan_network_indicator: Optional[InPlanNetworkIndicator]
+    procedure_identifier: Optional[str]
+
+    @root_validator
+    def validate_quantity(cls, values):
+        """
+        Validates that both a quantity_qualifier and quantity are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        quantity_fields: Tuple = values.get(
+            "quantity_qualifier"
+        ), values.get("quantity")
+
+        if any(quantity_fields) and not all(quantity_fields):
+            raise ValueError(
+                "Quantity requires the quantity identifier and value."
+            )
+
+        return values
+
+
 class EqSegment(X12Segment):
     """
     Eligibility Inquiry Segment
@@ -230,6 +649,149 @@ class HlSegment(X12Segment):
     hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_level_code: str = Field(min_length=1, max_length=2)
     hierarchical_child_code: str = Field(min_length=1, max_length=1, regex="^0|1$")
+
+
+class HsdSegment(X12Segment):
+    """
+    Health Care Services Delivery
+    Example:
+        HSD*VS*12*WK*3*34*1~
+    """
+    class QuantityQualifier(str, Enum):
+        """
+        HSD01 code values
+        """
+        DAYS = "DY"
+        UNITS = "FL"
+        HOURS = "HS"
+        MONTH = "MN"
+        VISITS = "VS"
+
+    class MeasurementCode(str, Enum):
+        """
+        HSD03 code values
+        """
+        DAYS = "DA"
+        MONTHS = "MO"
+        VISIT = "VS"
+        WEEK = "WK"
+        YEARS = "YR"
+
+    class TimePeriodQualifier(str, Enum):
+        """
+        HD05 code values
+        """
+        HOURS = "6"
+        DAY = "7"
+        YEARS = "21"
+        SERVICE_YEAR = "22"
+        CALENDAR_YEAR = "23"
+        YEAR_TO_DATE = "24"
+        CONTRACT = "25"
+        EPISODE = "26"
+        VISIT = "27"
+        OUTLIER = "28"
+        REMAINING = "29"
+        EXCEEDED = "30"
+        NOT_EXCEEDED = "31"
+        LIFETIME = "32"
+        LIFETIME_RECURRING = "33"
+        MONTH = "34"
+        WEEK = "35"
+
+    class DeliveryFrequencyCode(str, Enum):
+        """
+        HSD07 code values
+        """
+        FIRST_WEEK_OF_MONTH = "1"
+        SECOND_WEEK_OF_MONTH = "2"
+        THIRD_WEEK_OF_MONTH = "3"
+        FOURTH_WEEK_OF_MONTH = "4"
+        FIFTH_WEEK_OF_MONTH = "5"
+        FIRST_AND_THIRD_WEEKS_OF_MONTH = "6"
+        SECOND_AND_FOURTH_WEEKS_OF_MONTH = "7"
+        FIRST_WORKING_DAY_OF_PERIOD = "8"
+        LAST_WORKING_DAY_OF_PERIOD = "9"
+        MONDAY_TO_FRIDAY = "A"
+        MONDAY_TO_SATURDAY = "B"
+        MONDAY_TO_SUNDAY = "C"
+        MONDAY = "D"
+        TUESDAY = "E"
+        WEDNESDAY = "F"
+        THURSDAY = "G"
+        FRIDAY = "H"
+        SATURDAY = "J"
+        SUNDAY = "K"
+        MONDAY_TO_THURSDAY = "L"
+        IMMEDIATELY = "M"
+        AS_DIRECTED = "N"
+        DAILY_MON_TO_FRI = "O"
+        HALF_MON_HALF_THURS = "P"
+        HALF_TUES_HALF_THURS = "Q"
+        HALF_WED_HALF_FRIDAY = "R"
+        ONCE_ANYTIME_MON_TO_FRI = "S"
+        TUESDAY_TO_FRIDAY = "SG"
+        MONDAY_TUESDAY_THURSDAY = "SL"
+        MONDAY_TUESDAY_FRIDAY = "SP"
+        WEDNESDAY_THURSDAY = "SX"
+        MONDAY_WEDNESDAY_THURSDAY = "SY"
+        TUESDAY_THURSDAY_FRIDAY = "SZ"
+        HALF_TUESDAY_HALF_FRIDAY = "T"
+        HALF_MONDAY_HALF_WEDNESDAY = "U"
+        THIRD_MONDAY_THIRD_WEDNESDAY_THIRD_FRIDAY = "V"
+        WHENEVER_NECESSARY = "W"
+        HALF_BY_WEDNESDAY_BALANCE_BY_FRIDAY = "X"
+        NONE_CANCEL_PREVIOUS_PATTERN = "Y"
+
+    class DeliveryPatternTimeCode(str, Enum):
+        """
+        HSD08 code values
+        """
+        FIRST_SHIFT = "A"
+        SECOND_SHIFT = "B"
+        THIRD_SHIFT = "C"
+        AM = "D"
+        PM = "E"
+        AS_DIRECTED = "F"
+        ANY_SHIFT = "G"
+        NONE_CANCEL_PREVIOUS_PATTERN = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.HSD
+    quantity_qualifier: Optional[QuantityQualifier]
+    quantity: Optional[Decimal]
+    measurement_code: Optional[MeasurementCode]
+    sample_selection_modulus: Optional[Decimal]
+    time_period_qualifier: Optional[TimePeriodQualifier]
+    period_count: Optional[Decimal]
+    delivery_frequency_code: Optional[DeliveryFrequencyCode]
+    delivery_pattern_time_code: Optional[DeliveryPatternTimeCode]
+
+    @root_validator
+    def validate_quantity(cls, values):
+        """
+        Validates that quantity values are conveyed with a qualifier and value.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
+            "quantity"
+        )
+
+        if not any(quantity_fields):
+            raise ValueError(
+                "Quantity requires a qualifier and value"
+            )
+
+        return values
+
+    @root_validator
+    def validate_periods(cls, values):
+        """
+        Validates that time periods are conveyed correctly
+        """
+        if values.get("period_count") and not values.get("time_period_qualifier"):
+            raise ValueError("Period requires a qualifier and value")
+        return values
 
 
 class IeaSegment(X12Segment):
@@ -355,6 +917,26 @@ class IsaSegment(X12Segment):
         segment_fields[9] = interchange_date.strftime("%y%m%d")
 
         return self.delimiters.element_separator.join(segment_fields)
+
+
+class LeSegment(X12Segment):
+    """
+    Loop trailer segment.
+    Used to "close" a loop grouping opened by a LS segment.
+    Example:
+        LE*2120~
+    """
+    loop_id_code: str
+
+
+class LsSegment(X12Segment):
+    """
+    Loop Header Segment.
+    The LS segment is used to disambiguate loops which start with the same segment.
+    Example:
+        LS*2120~
+    """
+    loop_id_code: str
 
 
 class MpiSegment(X12Segment):
@@ -519,6 +1101,14 @@ class MpiSegment(X12Segment):
         return values
 
 
+class MsgSegment(X12Segment):
+    """
+    Message segment - for free form text.
+    """
+    segment_name: X12SegmentName = X12SegmentName.MSG
+    free_form_text: str
+
+
 class N3Segment(X12Segment):
     """
     Party Location (Address)
@@ -627,6 +1217,56 @@ class Nm1Segment(X12Segment):
                     "Invalid field usage for Organization/Non-Person Entity"
                 )
         return field_value
+
+
+class PerSegment(X12Segment):
+    """
+    EDI Contact Information
+    Example:
+        PER*IC*JOHN SMITH*TE*5551114444*EX*123~
+    """
+    class ContactFunctionCode(str, Enum):
+        """
+        Code value for PER01
+        """
+        INFORMATION_CONTACT = "IC"
+
+    segment_name: X12SegmentName.PER
+    contact_function_code: ContactFunctionCode
+    name: Optional[str]
+    communication_number_qualifier_1: str
+    communication_number_1: str
+    communication_number_qualifier_2: Optional[str]
+    communication_number_2: Optional[str]
+    communication_number_qualifier_3: Optional[str]
+    communication_number_3: Optional[str]
+
+    @root_validator
+    def validate_communication(cls, values):
+        """
+        Validates that both a communication qualifier and number are provided if one or the other is present
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        communication_fields: Tuple = values.get(
+            "communication_number_qualifier_2"
+        ), values.get("communication_number_2")
+
+        if any(communication_fields) and not all(communication_fields):
+            raise ValueError(
+                "communication fields require a qualifier and number"
+            )
+
+        communication_fields = values.get(
+            "communication_number_qualifier_3"
+        ), values.get("communication_number_3")
+
+        if any(communication_fields) and not all(communication_fields):
+            raise ValueError(
+                "communication fields require a qualifier and number"
+            )
+
+        return values
 
 
 class PrvSegment(X12Segment):
