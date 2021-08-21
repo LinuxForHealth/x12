@@ -32,6 +32,7 @@ class X12SegmentName(str, Enum):
     """
     Supported X12 Segment Names
     """
+
     AAA = "AAA"
     AMT = "AMT"
     BHT = "BHT"

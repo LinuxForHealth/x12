@@ -13,9 +13,9 @@ from pydantic import root_validator
 from x12.validators import validate_segment_count
 
 
-class EligibilityInquiry(X12SegmentGroup):
+class EligibilityBenefit(X12SegmentGroup):
     """
-    The ASC X12 270 (EligibilityInquiry) transaction model.
+    The ASC X12 271` (EligibilityBenefit) transaction model.
     """
 
     header: Header

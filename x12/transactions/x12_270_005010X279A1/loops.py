@@ -26,7 +26,6 @@ from x12.segments import (
     SeSegment,
     N3Segment,
     N4Segment,
-    PrvSegment,
     TrnSegment,
     DmgSegment,
     HiSegment,
@@ -53,6 +52,7 @@ from .segments import (
     Loop2100DNm1Segment,
     Loop2100DInsSegment,
     Loop2100CPrvSegment,
+    Loop2100BPrvSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -164,7 +164,7 @@ class Loop2100B(X12SegmentGroup):
     ref_segment: Optional[List[Loop2100BRefSegment]]
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
-    prv_segment: Optional[PrvSegment]
+    prv_segment: Optional[Loop2100BPrvSegment]
 
     _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes

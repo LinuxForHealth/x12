@@ -12,8 +12,7 @@ def test_aaa_segment():
     segment_data = {
         "response_code": "Y",
         "reject_reason_code": "42",
-        "follow_up_action_code": "Y"
-
+        "follow_up_action_code": "Y",
     }
     aaa_segment: AaaSegment = AaaSegment(**segment_data)
     assert aaa_segment.x12() == "AAA*Y**42*Y~"
@@ -78,25 +77,30 @@ def test_dtp_segment_date_range():
 def test_eb_segment():
     segment_data = {
         "eligibility_benefit_information": "B",
-        "service_type_code": ["1",
-                              "33",
-                              "35",
-                              "47",
-                              "86",
-                              "88",
-                              "98",
-                              "AL",
-                              "MH",
-                              "UC"],
+        "service_type_code": [
+            "1",
+            "33",
+            "35",
+            "47",
+            "86",
+            "88",
+            "98",
+            "AL",
+            "MH",
+            "UC",
+        ],
         "insurance_type_code": "HM",
         "plan_coverage_description": "GOLD 123 PLAN",
         "time_period_qualifier": "27",
         "benefit_amount": "10.00",
-        "inplan_network_indicator": "Y"
+        "inplan_network_indicator": "Y",
     }
 
     eb_segment: EbSegment = EbSegment(**segment_data)
-    assert eb_segment.x12() == "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~"
+    assert (
+        eb_segment.x12()
+        == "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~"
+    )
 
 
 def test_eq_segment():
@@ -164,7 +168,7 @@ def test_hsd_segment():
         "measurement_code": "WK",
         "sample_selection_modulus": 3.00,
         "time_period_qualifier": "34",
-        "period_count": 1.00
+        "period_count": 1.00,
     }
     hsd_segment: HsdSegment = HsdSegment(**segment_data)
     assert hsd_segment.x12() == "HSD*VS*12.00*WK*3.00*34*1.00~"
@@ -227,25 +231,19 @@ def test_isa_segment():
 
 
 def test_le_segment():
-    segment_data = {
-        "loop_id_code": "2120"
-    }
+    segment_data = {"loop_id_code": "2120"}
     le_segment: LeSegment = LeSegment(**segment_data)
     assert le_segment.x12() == "LE*2120~"
 
 
 def test_ls_segment():
-    segment_data = {
-        "loop_id_code": "2120"
-    }
+    segment_data = {"loop_id_code": "2120"}
     ls_segment: LsSegment = LsSegment(**segment_data)
     assert ls_segment.x12() == "LS*2120~"
 
 
 def test_msg_segment():
-    segment_data = {
-        "free_form_text": "this is free form text"
-    }
+    segment_data = {"free_form_text": "this is free form text"}
     msg_segment: MsgSegment = MsgSegment(**segment_data)
     assert msg_segment.x12() == "MSG*this is free form text~"
 

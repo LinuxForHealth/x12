@@ -29,10 +29,12 @@ class AaaSegment(X12Segment):
     Example:
         AAA*Y**42*Y~
     """
+
     class ResponseCode(str, Enum):
         """
         AAA01 code values
         """
+
         NO = "N"
         YES = "Y"
 
@@ -161,6 +163,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB01
         """
+
         ACTIVE_COVERAGE = "1"
         ACTIVE_FULL_RISK_CAPITATION = "2"
         ACTIVE_SERVICES_CAPITATED = "3"
@@ -201,6 +204,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB02
         """
+
         CHILDREN_ONLY = "CHD"
         DEPENDENTS_ONLY = "DEP"
         EMPLOYEE_AND_CHILDREN = "ECH"
@@ -215,6 +219,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB03
         """
+
         MEDICAL_CARE = "1"
         SURGICAL = "2"
         CONSULTATION = "3"
@@ -405,6 +410,7 @@ class EbSegment(X12Segment):
         """
         code values for EB04
         """
+
         MEDICARE_SECONDARY_EMPLOYER_GROUP_PRIMARY = "12"
         MEDICARE_SECONDARY_END_STAGE_RENAL_DISEASE = "13"
         MEDICARE_SECONDARY_AUTO_PRIMARY = "14"
@@ -455,6 +461,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB06
         """
+
         HOUR = "6"
         DAY = "7"
         TWENTY_FOUR_HOURS = "13"
@@ -479,6 +486,7 @@ class EbSegment(X12Segment):
         """
         Code valus for EB09
         """
+
         MINIMUM = "8H"
         QUANTITY_USED = "99"
         COVERED_ACTUAL = "CA"
@@ -502,6 +510,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB11
         """
+
         NO = "N"
         UNKNOWN = "U"
         YES = "Y"
@@ -510,6 +519,7 @@ class EbSegment(X12Segment):
         """
         Code values for EB12
         """
+
         NO = "N"
         UNKNOWN = "U"
         NOT_APPLICABLE = "W"
@@ -537,14 +547,12 @@ class EbSegment(X12Segment):
 
         :param values: The raw, unvalidated transaction data.
         """
-        quantity_fields: Tuple = values.get(
-            "quantity_qualifier"
-        ), values.get("quantity")
+        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
+            "quantity"
+        )
 
         if any(quantity_fields) and not all(quantity_fields):
-            raise ValueError(
-                "Quantity requires the quantity identifier and value."
-            )
+            raise ValueError("Quantity requires the quantity identifier and value.")
 
         return values
 
@@ -657,10 +665,12 @@ class HsdSegment(X12Segment):
     Example:
         HSD*VS*12*WK*3*34*1~
     """
+
     class QuantityQualifier(str, Enum):
         """
         HSD01 code values
         """
+
         DAYS = "DY"
         UNITS = "FL"
         HOURS = "HS"
@@ -671,6 +681,7 @@ class HsdSegment(X12Segment):
         """
         HSD03 code values
         """
+
         DAYS = "DA"
         MONTHS = "MO"
         VISIT = "VS"
@@ -681,6 +692,7 @@ class HsdSegment(X12Segment):
         """
         HD05 code values
         """
+
         HOURS = "6"
         DAY = "7"
         YEARS = "21"
@@ -703,6 +715,7 @@ class HsdSegment(X12Segment):
         """
         HSD07 code values
         """
+
         FIRST_WEEK_OF_MONTH = "1"
         SECOND_WEEK_OF_MONTH = "2"
         THIRD_WEEK_OF_MONTH = "3"
@@ -747,6 +760,7 @@ class HsdSegment(X12Segment):
         """
         HSD08 code values
         """
+
         FIRST_SHIFT = "A"
         SECOND_SHIFT = "B"
         THIRD_SHIFT = "C"
@@ -778,9 +792,7 @@ class HsdSegment(X12Segment):
         )
 
         if not any(quantity_fields):
-            raise ValueError(
-                "Quantity requires a qualifier and value"
-            )
+            raise ValueError("Quantity requires a qualifier and value")
 
         return values
 
@@ -813,9 +825,47 @@ class IiiSegment(X12Segment):
         III*ZZ*21~
     """
 
+    class CodeListQualifierCode(str, Enum):
+        """
+        Code values for III01
+        """
+
+        NCCI_NATURE_OF_INJURY_CODE = "GR"
+        NATURE_OF_INJURY_CODE = "NI"
+        MUTUALLY_DEFINED = "ZZ"
+
     segment_name: X12SegmentName = X12SegmentName.III
-    code_list_qualifier_code: str = Field(min_length=1, max_length=3)
-    industry_code: str = Field(min_length=1, max_length=30)
+    code_list_qualifier_code: Optional[CodeListQualifierCode]
+    industry_code: Optional[str] = Field(min_length=1, max_length=30)
+    code_category: Optional[Literal["44"]]
+    injured_body_part_name: Optional[str] = Field(min_length=1, max_length=264)
+
+    @root_validator
+    def validate_industry_code(cls, values):
+        """
+        Validates that an industry code is conveyed with a qualifier and value, if sent at all.
+
+        :param values: The validated model values.
+        """
+        industry_codes = values.get("code_list_qualifier_code"), values.get(
+            "industry_code"
+        )
+        if any(industry_codes) and not all(industry_codes):
+            raise ValueError("Industry codes require a qualifier and value")
+        return values
+
+    @root_validator
+    def validate_nature_of_injury(cls, values):
+        """
+        Validates the nature of injury if present
+
+        :param values: The validated model values
+        """
+        if values.get("code_category") and not values.get("injured_body_part_name"):
+            raise ValueError(
+                "Nature of injury requires a category and value/description"
+            )
+        return values
 
 
 class InsSegment(X12Segment):
@@ -926,6 +976,8 @@ class LeSegment(X12Segment):
     Example:
         LE*2120~
     """
+
+    segment_name: X12SegmentName = X12SegmentName.LE
     loop_id_code: str
 
 
@@ -936,6 +988,8 @@ class LsSegment(X12Segment):
     Example:
         LS*2120~
     """
+
+    segment_name: X12SegmentName = X12SegmentName.LS
     loop_id_code: str
 
 
@@ -1105,6 +1159,7 @@ class MsgSegment(X12Segment):
     """
     Message segment - for free form text.
     """
+
     segment_name: X12SegmentName = X12SegmentName.MSG
     free_form_text: str
 
@@ -1225,13 +1280,15 @@ class PerSegment(X12Segment):
     Example:
         PER*IC*JOHN SMITH*TE*5551114444*EX*123~
     """
+
     class ContactFunctionCode(str, Enum):
         """
         Code value for PER01
         """
+
         INFORMATION_CONTACT = "IC"
 
-    segment_name: X12SegmentName.PER
+    segment_name: X12SegmentName = X12SegmentName.PER
     contact_function_code: ContactFunctionCode
     name: Optional[str]
     communication_number_qualifier_1: str
@@ -1253,18 +1310,14 @@ class PerSegment(X12Segment):
         ), values.get("communication_number_2")
 
         if any(communication_fields) and not all(communication_fields):
-            raise ValueError(
-                "communication fields require a qualifier and number"
-            )
+            raise ValueError("communication fields require a qualifier and number")
 
         communication_fields = values.get(
             "communication_number_qualifier_3"
         ), values.get("communication_number_3")
 
         if any(communication_fields) and not all(communication_fields):
-            raise ValueError(
-                "communication fields require a qualifier and number"
-            )
+            raise ValueError("communication fields require a qualifier and number")
 
         return values
 

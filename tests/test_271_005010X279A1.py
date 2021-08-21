@@ -13,6 +13,13 @@ def test_271_subscriber(x12_271_subscriber_input, x12_271_subscriber_transaction
         assert model_result[0].x12() == x12_271_subscriber_transaction
 
 
+def test_271_dependent(x12_271_dependent_input, x12_271_dependent_transaction):
+    with X12ModelReader(x12_271_dependent_input) as r:
+        model_result = [m for m in r.models()]
+        assert len(model_result) == 1
+        assert model_result[0].x12() == x12_271_dependent_transaction
+
+
 def test_271_properties_subscriber_use_case(x12_271_subscriber_input):
     """
     Tests the Eligibility Benefit property accessors with the subscriber use-case.
@@ -26,7 +33,7 @@ def test_271_properties_subscriber_use_case(x12_271_subscriber_input):
 
         information_source = transaction_model.information_source
         assert isinstance(information_source, dict)
-        assert len(information_source) == 2
+        assert len(information_source) == 3
         assert "hl_segment" in information_source
         assert "loop_2100a" in information_source
 
@@ -126,19 +133,8 @@ def test_validate_information_source_id_codes(x12_271_subscriber_input):
                 pass
 
 
-def test_validate_ref_segment_usage(x12_271_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_271_subscriber_input.replace(
-        "REF*4A*000111222~", "REF*4A*000111222~REF*4A*444222999~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
 def test_validate_n4_state_codes(x12_271_subscriber_input):
-    # update the input to include duplicate REF segments
+    # update the input to include an invalid country code
     test_input = x12_271_subscriber_input.replace(
         "N4*SAN MATEO*CA*94401~", "N4*SAN MATEO*CA*94401****US-AS~"
     )
@@ -148,31 +144,11 @@ def test_validate_n4_state_codes(x12_271_subscriber_input):
                 pass
 
 
-def test_validate_per_communication_fields(x12_271_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_271_subscriber_input.replace(
-        "PER*IC*JOHN SMITH*TE*5551114444*EX*123~", "PER*IC*JOHN SMITH*TE*5551114444*EX~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_prv_reference_codes(x12_271_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_271_subscriber_input.replace(
-        "PRV*PC*HPI*3435612668~", "PRV*PC*HPI~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
 def test_validate_date_fields(x12_271_subscriber_input):
     # update the input to remove the date_time_format_qualifier field
-    test_input = x12_271_subscriber_input.replace("DMG*D8*19700101~", "DMG**19700101~")
+    test_input = x12_271_subscriber_input.replace(
+        "DMG*D8*19700101*M~", "DMG**19700101~"
+    )
     with X12ModelReader(test_input) as r:
         with pytest.raises(ValidationError):
             for _ in r.models():
