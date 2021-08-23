@@ -292,7 +292,7 @@ class Loop2100A(X12SegmentGroup):
 class Loop2000A(X12SegmentGroup):
     """
     Loop 2000A - Information Source
-    The root node/loop for the 270 transaction
+    The root node/loop for the 271 transaction
 
     """
 

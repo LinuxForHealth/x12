@@ -109,11 +109,17 @@ def x12_parser_context() -> X12ParserContext:
 
 
 @pytest.fixture
-def x12_270_control_header() -> str:
+def x12_control_header() -> str:
+    """
+    Returns a general X12 control header containing ISA and GS segments.
+
+    The version identifiers in GS01 and GS08 are placeholders, set to "GS01" and "Gs08", and should be set as
+    appropriate within code that consumes this fixture.
+    """
     return "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~\n",
+            "GS*GS01*000000005*54321*20131031*1147*1*X*GS08~\n",
         ]
     )
 
@@ -165,11 +171,12 @@ def x12_270_subscriber_transaction() -> str:
 
 @pytest.fixture
 def x12_270_subscriber_input(
-    x12_270_control_header, x12_270_subscriber_transaction, x12_control_footer
+    x12_control_header, x12_270_subscriber_transaction, x12_control_footer
 ) -> str:
-    return (
-        f"{x12_270_control_header}{x12_270_subscriber_transaction}{x12_control_footer}"
+    x12_270_header: str = x12_control_header.replace("GS01", "HS").replace(
+        "GS08", "005010X279A1"
     )
+    return f"{x12_270_header}{x12_270_subscriber_transaction}{x12_control_footer}"
 
 
 @pytest.fixture
@@ -206,11 +213,13 @@ def x12_270_dependent_transaction() -> str:
 
 @pytest.fixture
 def x12_270_dependent_input(
-    x12_270_control_header, x12_270_dependent_transaction, x12_control_footer
+    x12_control_header, x12_270_dependent_transaction, x12_control_footer
 ) -> str:
-    return (
-        f"{x12_270_control_header}{x12_270_dependent_transaction}{x12_control_footer}"
+    x12_270_header: str = x12_control_header.replace("GS01", "HS").replace(
+        "GS08", "005010X279A1"
     )
+
+    return f"{x12_270_header}{x12_270_dependent_transaction}{x12_control_footer}"
 
 
 @pytest.fixture
@@ -238,16 +247,6 @@ def x12_with_custom_delimiters() -> str:
             "SE|17|0001?",
             "GE|1|1?",
             "IEA|1|000000907?",
-        ]
-    )
-
-
-@pytest.fixture
-def x12_271_control_header() -> str:
-    return "\n".join(
-        [
-            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HB*000000005*54321*20131031*1147*1*X*005010X279A1~\n",
         ]
     )
 
@@ -285,11 +284,13 @@ def x12_271_subscriber_transaction() -> str:
 
 @pytest.fixture
 def x12_271_subscriber_input(
-    x12_271_control_header, x12_271_subscriber_transaction, x12_control_footer
+    x12_control_header, x12_271_subscriber_transaction, x12_control_footer
 ) -> str:
-    return (
-        f"{x12_271_control_header}{x12_271_subscriber_transaction}{x12_control_footer}"
+
+    x12_271_header: str = x12_control_header.replace("GS01", "HB").replace(
+        "GS08", "005010X279A1"
     )
+    return f"{x12_271_header}{x12_271_subscriber_transaction}{x12_control_footer}"
 
 
 @pytest.fixture
@@ -330,8 +331,10 @@ def x12_271_dependent_transaction() -> str:
 
 @pytest.fixture
 def x12_271_dependent_input(
-    x12_271_control_header, x12_271_dependent_transaction, x12_control_footer
+    x12_control_header, x12_271_dependent_transaction, x12_control_footer
 ) -> str:
-    return (
-        f"{x12_271_control_header}{x12_271_dependent_transaction}{x12_control_footer}"
+    x12_271_header: str = x12_control_header.replace("GS01", "HB").replace(
+        "GS08", "005010X279A1"
     )
+
+    return f"{x12_271_header}{x12_271_dependent_transaction}{x12_control_footer}"

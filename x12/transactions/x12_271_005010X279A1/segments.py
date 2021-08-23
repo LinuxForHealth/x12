@@ -1,7 +1,7 @@
 """
 segments.py
 
-Specialized segment models for the Eligibility 270 005010X279A1 transaction.
+Specialized segment models for the Eligibility 271 005010X279A1 transaction.
 """
 from enum import Enum
 from typing import Literal, Optional, List
@@ -27,7 +27,7 @@ from x12.segments import (
 
 class HeaderStSegment(StSegment):
     """
-    Customized ST segment for 270 transaction header
+    Customized ST segment for 271 transaction header
     """
 
     transaction_set_identifier_code: Literal["271"]
@@ -36,7 +36,7 @@ class HeaderStSegment(StSegment):
 
 class HeaderBhtSegment(BhtSegment):
     """
-    Customized BHT Segment for 270 transaction header
+    Customized BHT Segment for 271 transaction header
     """
 
     class PurposeCode(str, Enum):

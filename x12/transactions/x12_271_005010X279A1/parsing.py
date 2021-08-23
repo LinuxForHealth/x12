@@ -1,9 +1,9 @@
 """
 parsing.py
 
-Parses X12 270 005010X279A1 segments into a transactional domain model.
+Parses X12 271 005010X279A1 segments into a transactional domain model.
 
-The parsing module includes a specific parser for the 270 transaction and loop parsing functions to create new loops
+The parsing module includes a specific parser for the 271 transaction and loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
 Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext).
@@ -16,7 +16,7 @@ from typing import Dict, Set
 
 class TransactionLoops(str, Enum):
     """
-    The loops used to support the 270 005010X279A1 format.
+    The loops used to support the 271 005010X279A1 format.
     """
 
     HEADER = "header"

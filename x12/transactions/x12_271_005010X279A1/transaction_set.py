@@ -1,7 +1,7 @@
 """
 transaction_set.py
 
-Defines the Eligibility 270 005010X279A1 transaction set model.
+Defines the Eligibility 271 005010X279A1 transaction set model.
 """
 
 from typing import List, Dict, Union, Tuple
@@ -15,7 +15,7 @@ from x12.validators import validate_segment_count
 
 class EligibilityBenefit(X12SegmentGroup):
     """
-    The ASC X12 271` (EligibilityBenefit) transaction model.
+    The ASC X12 271 (EligibilityBenefit) transaction model.
     """
 
     header: Header
