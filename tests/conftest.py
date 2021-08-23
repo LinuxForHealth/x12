@@ -109,17 +109,23 @@ def x12_parser_context() -> X12ParserContext:
 
 
 @pytest.fixture
-def x12_270_control_header() -> str:
+def x12_control_header() -> str:
+    """
+    Returns a general X12 control header containing ISA and GS segments.
+
+    The version identifiers in GS01 and GS08 are placeholders, set to "GS01" and "Gs08", and should be set as
+    appropriate within code that consumes this fixture.
+    """
     return "\n".join(
         [
             "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~\n",
+            "GS*GS01*000000005*54321*20131031*1147*1*X*GS08~\n",
         ]
     )
 
 
 @pytest.fixture
-def x12_270_control_footer() -> str:
+def x12_control_footer() -> str:
     return "\n".join(
         [
             "GE*1*1~",
@@ -165,9 +171,12 @@ def x12_270_subscriber_transaction() -> str:
 
 @pytest.fixture
 def x12_270_subscriber_input(
-    x12_270_control_header, x12_270_subscriber_transaction, x12_270_control_footer
+    x12_control_header, x12_270_subscriber_transaction, x12_control_footer
 ) -> str:
-    return f"{x12_270_control_header}{x12_270_subscriber_transaction}{x12_270_control_footer}"
+    x12_270_header: str = x12_control_header.replace("GS01", "HS").replace(
+        "GS08", "005010X279A1"
+    )
+    return f"{x12_270_header}{x12_270_subscriber_transaction}{x12_control_footer}"
 
 
 @pytest.fixture
@@ -204,9 +213,13 @@ def x12_270_dependent_transaction() -> str:
 
 @pytest.fixture
 def x12_270_dependent_input(
-    x12_270_control_header, x12_270_dependent_transaction, x12_270_control_footer
+    x12_control_header, x12_270_dependent_transaction, x12_control_footer
 ) -> str:
-    return f"{x12_270_control_header}{x12_270_dependent_transaction}{x12_270_control_footer}"
+    x12_270_header: str = x12_control_header.replace("GS01", "HS").replace(
+        "GS08", "005010X279A1"
+    )
+
+    return f"{x12_270_header}{x12_270_dependent_transaction}{x12_control_footer}"
 
 
 @pytest.fixture
@@ -236,3 +249,92 @@ def x12_with_custom_delimiters() -> str:
             "IEA|1|000000907?",
         ]
     )
+
+
+@pytest.fixture
+def x12_271_subscriber_transaction() -> str:
+    return "\n".join(
+        [
+            "ST*271*0001*005010X279A1~",
+            "BHT*0022*11*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "PRV*RF*PXC*207Q00000X~",
+            "HL*3*2*22*0~",
+            "TRN*2*930000000000*9800000004~",
+            "NM1*IL*1*DOE*JOHN****MI*00000000001~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*19700101*M~",
+            "DTP*346*D8*20210101~",
+            "EB*1**30**GOLD 123 PLAN~",
+            "EB*L~",
+            "LS*2120~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "LE*2120~",
+            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
+            "SE*23*0001~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_271_subscriber_input(
+    x12_control_header, x12_271_subscriber_transaction, x12_control_footer
+) -> str:
+
+    x12_271_header: str = x12_control_header.replace("GS01", "HB").replace(
+        "GS08", "005010X279A1"
+    )
+    return f"{x12_271_header}{x12_271_subscriber_transaction}{x12_control_footer}"
+
+
+@pytest.fixture
+def x12_271_dependent_transaction() -> str:
+    return "\n".join(
+        [
+            "ST*271*0001*005010X279A1~",
+            "BHT*0022*11*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "PRV*RF*PXC*207Q00000X~",
+            "HL*3*2*22*1~",
+            "NM1*IL*1*DOE*JAMES****MI*00000000001~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*19700101*M~",
+            "HL*4*3*23*0~",
+            "TRN*2*930000000000*9800000004~",
+            "NM1*IL*1*DOE*JAMES****MI*00000000002~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*20150101*M~",
+            "DTP*346*D8*20210101~",
+            "EB*1**30**GOLD 123 PLAN~",
+            "EB*L~",
+            "LS*2120~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "LE*2120~",
+            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
+            "SE*28*0001~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_271_dependent_input(
+    x12_control_header, x12_271_dependent_transaction, x12_control_footer
+) -> str:
+    x12_271_header: str = x12_control_header.replace("GS01", "HB").replace(
+        "GS08", "005010X279A1"
+    )
+
+    return f"{x12_271_header}{x12_271_dependent_transaction}{x12_control_footer}"

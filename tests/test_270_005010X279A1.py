@@ -1,5 +1,5 @@
 """
-Tests use-cases for the 005010X279A1 (Eligibility Inquiry and Response) transactions
+Tests use-cases for the 270 005010X279A1 (Eligibility Inquiry) transaction
 """
 
 from x12.io import X12ModelReader
