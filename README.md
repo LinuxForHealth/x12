@@ -35,7 +35,7 @@ The LinuxForHealth X12 development environment relies on the following software 
 
 ### Project Setup and Validation
 ```shell
-pip install --upgrade pip
+pip install --upgrade pip setuptools
 
 git clone https://github.com/LinuxForHealth/x12
 cd x12
@@ -180,7 +180,17 @@ Use the `--help` flag to view all available options for the black code formatter
 ### REST API
 Under Development
 
+## Building The Project
+LinuxForHealth X12 is aligned, to a degree, with the PEP-517 standard. `setup.cfg` stores build metadata/configuration.
+`pyproject.toml` contains the build toolchain specification and black formatter configurations.
 
-### Additional Resources
+The commands below creates a source and wheel distribution within a clean build environment.
+
+```shell
+python3 -m venv build-venv && source build-venv/bin/activate && pip install --upgrade pip setuptools build wheel twine
+python3 -m build --no-isolation
+```
+
+## Additional Resources
 - [Design Overview](repo-docs/DESIGN.md)
 - [New Transaction Support](repo-docs/NEW_TRANSACTION.md)
