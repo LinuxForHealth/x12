@@ -32,7 +32,6 @@ The LinuxForHealth X12 development environment relies on the following software 
 
 - [git](https://git-scm.com) for project version control
 - [Python 3.8 or higher](https://www.python.org/downloads/) for runtime/coding support
-- [Pipenv](https://pipenv.pypa.io) for Python dependency management  
 
 ### Project Setup and Validation
 ```shell
@@ -41,8 +40,9 @@ pip install --upgrade pip
 git clone https://github.com/LinuxForHealth/x12
 cd x12
 
-pipenv sync --dev 
-pipenv run pytest
+python3 -m venv venv && source venv/bin/activate && pip install --upgrade pip setuptools 
+pip install -e .[dev]
+pytest
 ```
 
 ### SDK
@@ -103,13 +103,12 @@ def test_property_usage(x12_270_subscriber_input):
 ```
 
 ### CLI
-The X12 CLI utility is implemented as a pipenv script. The script parses a X12 input file and returns either a list of
-X12 segments, or a list of X12 models based on the provided options.
+The X12 CLI parses a X12 input file and returns either a list of X12 segments, or a list of X12 models based on the provided options.
 
 To view help information
 ```shell
-user@mbp x12 % pipenv run cli --help
-Loading .env environment variables...
+user@mbp x12 % source venv/bin/activate
+(venv) user@mbp x12 % cli --help
 usage: LinuxForHealth X12 [-h] [-s | -m] [-x] [-p] file
 
 The LinuxForHealth X12 CLI parses and validates X12 messages.
@@ -128,8 +127,7 @@ optional arguments:
 
 To parse a X12 message into segments with pretty printing enabled
 ```shell
-pipenv run cli -s -p demo-file/demo.270
-Loading .env environment variables...
+(venv) user@mbp x12 % cli -s -p demo-file/demo.270
 [
     {
         "ISA00": "ISA",
@@ -140,8 +138,7 @@ Loading .env environment variables...
 
 To parse a X12 message into models with pretty printing enabled
 ```shell
-user@mbp x12 % pipenv run cli -m -p demo-file/demo.270
-Loading .env environment variables...
+(venv) user@mbp x12 % cli -m -p demo-file/demo.270
 [
     {
         "header": {
@@ -161,7 +158,24 @@ Loading .env environment variables...
               <etc, etc>
 ```
 
-In "model" mode fields that are set to None may be excluded from output using the `-x` option.
+In "model" mode, the `-x` option excludes `None` values from output.
+
+### Code Formatting
+
+LinuxForHealth X12 adheres to the [Black Code Style and Convention](https://black.readthedocs.io/en/stable/index.html)
+
+The following command executes the black formatter with default options
+
+```shell
+user@mbp x12 % source venv/bin/activate
+(venv) user@mbp x12 % black ./src
+```
+
+Use the `--help` flag to view all available options for the black code formatter
+
+```shell
+(venv) user@mbp x12 % black --help
+```
 
 ### REST API
 Under Development

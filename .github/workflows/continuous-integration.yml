@@ -19,12 +19,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Pipenv
-      run: pip install pipenv
-#    - name: Run tests
-#      run: |
-#        pipenv install --dev
-#        pipenv run pytest
-#    - name: Lint With Black
-#      run: |
-#        pipenv run check-format
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools
+        pip install -e .[dev]
+    - name: Check Formatting
+      run: |
+        black -t py38 --check --diff ./src
+    - name: Run Tests
+      run: |
+        pytest

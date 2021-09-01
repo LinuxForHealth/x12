@@ -92,7 +92,7 @@ def _parse_models(file_path: str, exclude_none: bool = False) -> List:
         return models
 
 
-if __name__ == "__main__":
+def main():
     """
     CLI module entrypoint
     """
