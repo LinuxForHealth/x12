@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Literal, Optional, List
 
 from pydantic import Field, validator
-
+from x12.transactions.validators import validate_hl_parent_id
 from x12.segments import (
     AaaSegment,
     BhtSegment,
@@ -62,16 +62,7 @@ class Loop2000AHlSegment(HlSegment):
     hierarchical_level_code: Literal["20"]
     hierarchical_child_code: Literal["1"]
 
-    @validator("hierarchical_parent_id_number")
-    def validate_parent_id(cls, field_value):
-        """
-        Validates that the information source parent id is not set.
-        :param field_value: The hierarchical_parent_id_number value.
-        """
-
-        if field_value:
-            raise ValueError(f"invalid hierarchical_parent_id_number {field_value}")
-        return field_value
+    _parent_id_validator = validate_hl_parent_id
 
 
 class Loop2000AAaaSegment(AaaSegment):
