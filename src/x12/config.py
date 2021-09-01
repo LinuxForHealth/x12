@@ -54,7 +54,7 @@ class X12Config(BaseSettings):
 
     class Config:
         case_sensitive = False
-        env_file = os.path.join(dirname(dirname(abspath(__file__))), ".env")
+        env_file = os.path.join(dirname(dirname(dirname(abspath(__file__)))), ".env")
 
 
 @lru_cache

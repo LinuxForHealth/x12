@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Literal, Optional, List
 
 from pydantic import Field, validator
-
+from x12.transactions.validators import validate_hl_parent_id
 from x12.segments import (
     AaaSegment,
     BhtSegment,
@@ -62,16 +62,7 @@ class Loop2000AHlSegment(HlSegment):
     hierarchical_level_code: Literal["20"]
     hierarchical_child_code: Literal["1"]
 
-    @validator("hierarchical_parent_id_number")
-    def validate_parent_id(cls, field_value):
-        """
-        Validates that the information source parent id is not set.
-        :param field_value: The hierarchical_parent_id_number value.
-        """
-
-        if field_value:
-            raise ValueError(f"invalid hierarchical_parent_id_number {field_value}")
-        return field_value
+    _parent_id_validator = validate_hl_parent_id
 
 
 class Loop2000AAaaSegment(AaaSegment):
@@ -154,11 +145,16 @@ class Loop2100APerSegment(PerSegment):
         TELEPHONE = "TE"
         UNIFORM_RESOURCE_LOCATOR = "UR"
 
-    class CommunicationNumberQualifier2(CommunicationNumberQualifier1, Enum):
+    class CommunicationNumberQualifier2(str, Enum):
         """
         Code values for PER05
         """
 
+        ELECTRONIC_DATA_INTERCHANGE_ACCESS_NUMBER = "ED"
+        ELECTRONIC_MAIL = "EM"
+        FACSIMILE = "FX"
+        TELEPHONE = "TE"
+        UNIFORM_RESOURCE_LOCATOR = "UR"
         TELEPHONE_EXTENSION = "EX"
 
     communication_number_qualifier_1: CommunicationNumberQualifier1
@@ -171,19 +167,29 @@ class Loop2100AAaaSegment(AaaSegment):
     Loop 2100A AAA segment is overriden to support information source custom code table values
     """
 
-    class RejectReasonCode(Loop2000AAaaSegment.RejectReasonCode, Enum):
+    class RejectReasonCode(str, Enum):
         """
         Code values for AAA03
         """
 
+        AUTHORIZED_QUANTITY_EXCEEDED = "04"
+        AUTHORIZATION_ACCESS_RESTRICTIONS = "41"
+        UNABLE_TO_RESPOND_AT_CURRENT_TIME = "42"
+        INVALID_PARTICIPANT_IDENTIFICATION = "79"
         NO_RESPONSE_RECEIVED_TRANSACTION_TERMINATED = "80"
         PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
 
-    class FollowUpActionCode(Loop2000AAaaSegment.FollowUpActionCode, Enum):
+    class FollowUpActionCode(str, Enum):
         """
         Code values for AAA04
         """
 
+        PLEASE_CORRECT_AND_RESUBMIT = "C"
+        RESUBMISSION_NOT_ALLOWED = "N"
+        PLEASE_RESUBMIT_ORIGINAL_TRANSACTION = "P"
+        RESUBMISSION_ALLOWED = "R"
+        DO_NOT_RESUBMIT_INQUIRY_SENT_THIRD_PARTY = "S"
+        DO_NOT_RESUBMIT_WE_WILL_RESPOND = "Y"
         PLEASE_WAIT_30_DAYS_RESUBMIT = "W"
         PLEASE_WAIT_10_DAYS_RESUBMIT = "X"
 
