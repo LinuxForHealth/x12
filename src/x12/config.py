@@ -3,11 +3,8 @@ config.py
 
 LinuxForHealth X12 Configuration Settings and specification/format "constants"
 """
-import os
 from enum import IntEnum
 from functools import lru_cache
-from os.path import abspath, dirname
-
 from pydantic import BaseSettings, Field
 
 
@@ -54,7 +51,6 @@ class X12Config(BaseSettings):
 
     class Config:
         case_sensitive = False
-        env_file = os.path.join(dirname(dirname(dirname(abspath(__file__)))), ".env")
 
 
 @lru_cache
