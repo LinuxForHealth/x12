@@ -49,3 +49,35 @@ The HealthCare Claims Professional set organizes loops into a hierarchical and n
 The Header and Footer components are not "loops" per the specification, but are included to standardize and simplify
 transactional modeling and processing.
 """
+from x12.models import X12SegmentGroup
+from .segments import HeaderStSegment, HeaderBhtSegment, Loop1000ANm1Segment, Loop1000APerSegment
+from x12.segments import SeSegment
+from typing import List
+from pydantic import Field
+
+
+class Loop1000A(X12SegmentGroup):
+    """
+    Loop 1000A - Submitter Name
+    """
+    nm1_segment: Loop1000ANm1Segment
+    per_segment: List[Loop1000APerSegment] = Field(min_items=1, max_items=2)
+
+
+class Header(X12SegmentGroup):
+    """
+    Transaction Header Information
+    """
+
+    st_segment: HeaderStSegment
+    bht_segment: HeaderBhtSegment
+    loop_1000a: Loop1000A
+
+
+class Footer(X12SegmentGroup):
+    """
+    Transaction Footer Information
+    """
+
+    se_segment: SeSegment
+

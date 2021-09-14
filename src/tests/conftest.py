@@ -348,7 +348,7 @@ def x12_837_commercial_health_insurance_transaction() -> str:
             "BHT*0019*00*244579*20061015*1023*CH~",
             "NM1*41*2*PREMIER BILLING SERVICE*****46*TGJ23~",
             "PER*IC*JERRY*TE*3055552222*EX*231~",
-            "NM1*40*2*KEY INSURANCE COMPANY*****46*66783JJT~",
+            "SE*5*0021~",
         ]
     )
 
@@ -363,4 +363,4 @@ def x12_837_commercial_health_insurance_input(
         "GS08", "005010X222A2"
     )
 
-    return f"{x12_837_header}{x12_271_dependent_transaction}{x12_control_footer}"
+    return f"{x12_837_header}{x12_837_commercial_health_insurance_transaction}{x12_control_footer}"

@@ -1,0 +1,136 @@
+"""
+parsing.py
+
+Parses X12 837 005010X222A2 segments into a transactional domain model.
+
+The parsing module includes a specific parser for the 837 transaction and loop parsing functions to create new loops
+as segments are streamed to the transactional data model.
+
+Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext).
+"""
+
+from enum import Enum
+from x12.parsing import match, X12ParserContext
+from typing import Dict
+
+
+class TransactionLoops(str, Enum):
+    """
+    The loops used to support the 837 005010X222A2 format.
+    """
+
+    HEADER = "header"
+    SUBMITTER_NAME = "loop_1000a"
+    RECEIVER_NAME = "loop_1000b"
+    BILLING_PROVIDER = "loop_2000a"
+    BILLING_PROVIDER_NAME = "loop_2010aa"
+    BILLING_PROVIDER_PAY_TO_ADDRESS = "loop_2010ab"
+    BILLING_PROVIDER_PAY_TO_PLAN_NAME = "loop_2010ac"
+    SUBSCRIBER = "loop_2000b"
+    SUBSCRIBER_NAME = "loop_2010ba"
+    SUBSCRIBER_PAYER_NAME = "loop_2010bb"
+    SUBSCRIBER_CLAIM_INFORMATION = "loop_2300"
+    SUBSCRIBER_REFERRING_PROVIDER_NAME = "loop_2310a"
+    SUBSCRIBER_RENDERING_PROVIDER_NAME = "loop_2310b"
+    SUBSCRIBER_SERVICE_FACILITY_LOCATION_NAME = "loop_2310c"
+    SUBSCRIBER_SUPERVISING_PROVIDER_NAME = "loop_2310d"
+    SUBSCRIBER_AMBULANCE_PICKUP_LOCATION = "loop_2310e"
+    SUBSCRIBER_AMBULANCE_DROPOFF_LOCATION = "loop_2310f"
+    SUBSCRIBER_OTHER_SUBSCRIBER_INFORMATION = "loop_2320"
+    SUBSCRIBER_OTHER_SUBSCRIBER_NAME = "loop_2330a"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_NAME = "loop_2330b"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME = "loop_2330c"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME = "loop_2330d"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION = "loop_2330e"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_SUPERVISING_PROVIDER_NAME = "loop_2330f"
+    SUBSCRIBER_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME = "loop_2330g"
+    SUBSCRIBER_SERVICE_LINE = "loop_2400"
+    SUBSCRIBER_SERVICE_LINE_DRUG_IDENTIFICATION_NAME = "loop_2410"
+    SUBSCRIBER_SERVICE_LINE_RENDERING_PROVIDER_NAME = "loop_2420a"
+    SUBSCRIBER_SERVICE_LINE_PURCHASED_SERVICE_PROVIDER_NAME = "loop_2420b"
+    SUBSCRIBER_SERVICE_LINE_SERVICE_FACILITY_LOCATION_NAME = "loop_2420c"
+    SUBSCRIBER_SERVICE_LINE_SUPERVISING_PROVIDER_NAME = "loop_2420d"
+    SUBSCRIBER_SERVICE_LINE_ORDERING_PROVIDER_NAME = "loop_2420e"
+    SUBSCRIBER_SERVICE_LINE_REFERRING_PROVIDER_NAME = "loop_2420f"
+    SUBSCRIBER_SERVICE_LINE_AMBULANCE_PICKUP_LOCATION = "loop_2420g"
+    SUBSCRIBER_SERVICE_LINE_AMBULANCE_DROPOFF_LOCATION = "loop_2420h"
+    SUBSCRIBER_SERVICE_LINE_LINE_AJUDICATION_INFORMATION = "loop_2430"
+    SUBSCRIBER_SERVICE_LINE_LINE_FORM_IDENTIFICATION = "loop_2440"
+    PATIENT_LOOP = "loop_2000c"
+    PATIENT_LOOP_NAME = "loop_2010ca"
+    PATIENT_CLAIM_INFORMATION = "loop_2300"
+    PATIENT_REFERRING_PROVIDER_NAME = "loop_2310a"
+    PATIENT_RENDERING_PROVIDER_NAME = "loop_2310b"
+    PATIENT_SERVICE_FACILITY_LOCATION_NAME = "loop_2310c"
+    PATIENT_SUPERVISING_PROVIDER_NAME = "loop_2310d"
+    PATIENT_AMBULANCE_PICKUP_LOCATION = "loop_2310e"
+    PATIENT_AMBULANCE_DROPOFF_LOCATION = "loop_2310f"
+    PATIENT_OTHER_SUBSCRIBER_INFORMATION = "loop_2320"
+    PATIENT_OTHER_SUBSCRIBER_NAME = "loop_2330a"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_NAME = "loop_2330b"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME = "loop_2330c"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME = "loop_2330d"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION = "loop_2330e"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_SUPERVISING_PROVIDER_NAME = "loop_2330f"
+    PATIENT_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME = "loop_2330g"
+    PATIENT_SERVICE_LINE = "loop_2400"
+    PATIENT_SERVICE_LINE_DRUG_IDENTIFICATION_NAME = "loop_2410"
+    PATIENT_SERVICE_LINE_RENDERING_PROVIDER_NAME = "loop_2420a"
+    PATIENT_SERVICE_LINE_PURCHASED_SERVICE_PROVIDER_NAME = "loop_2420b"
+    PATIENT_SERVICE_LINE_SERVICE_FACILITY_LOCATION_NAME = "loop_2420c"
+    PATIENT_SERVICE_LINE_SUPERVISING_PROVIDER_NAME = "loop_2420d"
+    PATIENT_SERVICE_LINE_ORDERING_PROVIDER_NAME = "loop_2420e"
+    PATIENT_SERVICE_LINE_REFERRING_PROVIDER_NAME = "loop_2420f"
+    PATIENT_SERVICE_LINE_AMBULANCE_PICKUP_LOCATION = "loop_2420g"
+    PATIENT_SERVICE_LINE_AMBULANCE_DROPOFF_LOCATION = "loop_2420h"
+    PATIENT_SERVICE_LINE_LINE_AJUDICATION_INFORMATION = "loop_2430"
+    PATIENT_SERVICE_LINE_LINE_FORM_IDENTIFICATION = "loop_2440"
+    FOOTER = "footer"
+
+
+def _get_header(context: X12ParserContext) -> Dict:
+    """Returns the 837 transaction header"""
+    return context.transaction_data[TransactionLoops.HEADER]
+
+
+@match("ST")
+def set_header_loop(context: X12ParserContext) -> None:
+    """
+    Sets the transaction set header loop for the 837 transaction set.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    context.set_loop_context(
+        TransactionLoops.HEADER, context.transaction_data[TransactionLoops.HEADER]
+    )
+
+
+@match("NM1")
+def set_submitter_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the submitter name loop for the 837 transaction set.
+    The submitter name loop is nested within the header loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name == TransactionLoops.HEADER:
+        header = _get_header(context)
+        header[TransactionLoops.SUBMITTER_NAME] = {
+            "per_segment": []
+        }
+        submitter_loop = context.transaction_data[TransactionLoops.HEADER][TransactionLoops.SUBMITTER_NAME]
+        context.set_loop_context(TransactionLoops.SUBMITTER_NAME, submitter_loop)
+
+
+@match("SE")
+def set_se_loop(context: X12ParserContext) -> None:
+    """
+    Sets the transaction set footer loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    context.set_loop_context(
+        TransactionLoops.FOOTER, context.transaction_data["footer"]
+    )
