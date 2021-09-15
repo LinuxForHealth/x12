@@ -14,6 +14,8 @@ The HealthCare Claims Professional set organizes loops into a hierarchical and n
         -- Loop 2000B (Subscriber)
             -- Loop 2010BA (Subscriber Name)
             -- Loop 2010BB (Payer Name)
+        -- Loop 2000C (Patient Loop)
+            -- Loop 2010CA (Patient Name)
             -- Loop 2300 (Claim Information)
                 -- Loop 2310A (Referring Provider Name)
                 -- Loop 2310B (Rendering Provider Name)
@@ -41,9 +43,6 @@ The HealthCare Claims Professional set organizes loops into a hierarchical and n
                     -- Loop 2420H (Ambulance Dropoff Location)
                     -- Loop 2430 (Line Adjudication Information)
                     -- Loop 2440 (Form Identification)
-            -- Loop 2000C (Patient Loop)
-                -- Loop 2010CA (Patient Name)
-                -- Loop 2300 (Claim Information)
 -- Footer
 
 The Header and Footer components are not "loops" per the specification, but are included to standardize and simplify
