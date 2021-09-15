@@ -12,5 +12,6 @@ class HealthCareClaimProfessional(X12SegmentGroup):
     """
     The HealthCare Claim - Professional transaction model (837)
     """
+
     header: Header
     footer: Footer

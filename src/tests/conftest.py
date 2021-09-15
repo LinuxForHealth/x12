@@ -348,7 +348,10 @@ def x12_837_commercial_health_insurance_transaction() -> str:
             "BHT*0019*00*244579*20061015*1023*CH~",
             "NM1*41*2*PREMIER BILLING SERVICE*****46*TGJ23~",
             "PER*IC*JERRY*TE*3055552222*EX*231~",
-            "SE*5*0021~",
+            "NM1*40*2*KEY INSURANCE COMPANY*****46*66783JJT~",
+            "HL*1**20*1~",
+            "PRV*BI*PXC*203BF0100Y~",
+            "SE*8*0021~",
         ]
     )
 

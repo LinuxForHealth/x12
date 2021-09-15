@@ -4,9 +4,17 @@ segments.py
 Specialized segment models for the HealthCare Claim Professional 837 005010X222A2 transaction.
 """
 
-from x12.segments import StSegment, BhtSegment, Nm1Segment, PerSegment
+from x12.segments import (
+    StSegment,
+    BhtSegment,
+    Nm1Segment,
+    PerSegment,
+    HlSegment,
+    PrvSegment,
+)
 from typing import Literal, Optional
 from enum import Enum
+from pydantic import Field
 
 
 class HeaderStSegment(StSegment):
@@ -22,10 +30,12 @@ class HeaderBhtSegment(BhtSegment):
     """
     Customized BHT segment for 837 transaction header
     """
+
     class PurposeCode(str, Enum):
         """
         BHT02 code values
         """
+
         ORIGINAL = "00"
         REISSUE = "18"
 
@@ -33,6 +43,7 @@ class HeaderBhtSegment(BhtSegment):
         """
         BHT06 code values
         """
+
         SUBROGATION_DEMAND = "31"
         CHARGABLE = "CH"
         REPORTING = "RP"
@@ -69,6 +80,7 @@ class Loop1000APerSegment(PerSegment):
         """
         Code values for PER05
         """
+
         ELECTRONIC_MAIL = "EM"
         TELEPHONE_EXTENSION = "EX"
         FACSIMILE = "FX"
@@ -77,3 +89,31 @@ class Loop1000APerSegment(PerSegment):
     communication_number_qualifier_1: CommunicationNumberQualifier1
     communication_number_qualifier_2: Optional[CommunicationNumberQualifier2]
     communication_number_qualifier_3: Optional[CommunicationNumberQualifier2]
+
+
+class Loop1000BNm1Segment(Nm1Segment):
+    """
+    Information Receiver Name
+    """
+
+    entity_identifier_code: Literal["40"]
+    identification_code_qualifier: Literal["46"]
+
+
+class Loop2000AHlSegment(HlSegment):
+    """
+    Billing Provider Hierarchical Level
+    """
+
+    hierarchical_parent_id_number: Optional[str]
+    hierarchical_level_code: Literal["20"]
+
+
+class Loop2000APrvSegment(PrvSegment):
+    """
+    Billing Provider Speciality Information
+    """
+
+    provider_code: Literal["BI"]
+    reference_identification_qualifier: Literal["PXC"]
+    reference_identification: str = Field(min_length=1, max_length=50)

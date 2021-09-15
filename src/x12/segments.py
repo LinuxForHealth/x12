@@ -81,6 +81,16 @@ class BhtSegment(X12Segment):
     )
 
 
+class CurSegment(X12Segment):
+    """
+    Foreign Currency Information
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CUR
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    currency_code: str = Field(min_length=3, max_length=3)
+
+
 class DmgSegment(X12Segment):
     """
     Demographic Information (birthdate, gender).

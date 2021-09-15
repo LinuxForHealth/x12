@@ -41,6 +41,13 @@ def test_bht_segment():
     )
 
 
+def test_cur_segment():
+    segment_data = {"entity_identifier_code": "85", "currency_code": "USD"}
+
+    cur_segment: CurSegment = CurSegment(**segment_data)
+    assert cur_segment.x12() == "CUR*85*USD~"
+
+
 def test_dmg_segment():
     segment_data = {
         "date_time_period_format_qualifier": "D8",
