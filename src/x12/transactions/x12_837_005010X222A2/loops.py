@@ -83,9 +83,9 @@ class Loop1000B(X12SegmentGroup):
     nm1_segment: Loop1000BNm1Segment
 
 
-class Loop2100A(X12SegmentGroup):
+class Loop2010AA(X12SegmentGroup):
     """
-    Loop 2100A - Billing Provider Name
+    Loop 2010AA - Billing Provider Name
     """
 
     nm1_segment: Loop2100ANm1Segment
@@ -102,7 +102,7 @@ class Loop2000A(X12SegmentGroup):
     hl_segment: Loop2000AHlSegment
     prv_segment: Loop2000APrvSegment
     cur_segment: Optional[CurSegment]
-    loop_2100a: Loop2100A
+    loop_2010aa: Loop2010AA
 
 
 class Header(X12SegmentGroup):

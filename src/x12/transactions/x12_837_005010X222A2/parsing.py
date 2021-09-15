@@ -164,8 +164,8 @@ def set_billing_provider_name_loop(context: X12ParserContext) -> None:
     """
     if context.loop_name == TransactionLoops.BILLING_PROVIDER:
         billing_provider = _get_billing_provider(context)
-        billing_provider["loop_2100a"] = {"ref_segment": []}
-        billing_provider_name = billing_provider["loop_2100a"]
+        billing_provider["loop_2010aa"] = {"ref_segment": []}
+        billing_provider_name = billing_provider["loop_2010aa"]
         context.set_loop_context(TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name)
 
 
