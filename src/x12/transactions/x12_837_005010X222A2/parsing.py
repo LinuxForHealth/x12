@@ -92,6 +92,10 @@ def _get_header(context: X12ParserContext) -> Dict:
     """Returns the 837 transaction header"""
     return context.transaction_data[TransactionLoops.HEADER]
 
+def _get_billing_provider(context: X12ParserContext) -> Dict:
+    """Returns the current billing provider record"""
+    return context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
+
 
 @match("ST")
 def set_header_loop(context: X12ParserContext) -> None:
@@ -115,9 +119,8 @@ def set_submitter_name_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
     if context.loop_name == TransactionLoops.HEADER:
-        header = _get_header(context)
-        header[TransactionLoops.SUBMITTER_NAME] = {"per_segment": []}
-        submitter_loop = header[TransactionLoops.SUBMITTER_NAME]
+        context.transaction_data[TransactionLoops.SUBMITTER_NAME] = {"per_segment": []}
+        submitter_loop = context.transaction_data[TransactionLoops.SUBMITTER_NAME]
         context.set_loop_context(TransactionLoops.SUBMITTER_NAME, submitter_loop)
 
 
@@ -130,9 +133,8 @@ def set_receiver_name_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
     if context.loop_name == TransactionLoops.SUBMITTER_NAME:
-        header = _get_header(context)
-        header[TransactionLoops.RECEIVER_NAME] = {}
-        receiver_loop = header[TransactionLoops.RECEIVER_NAME]
+        context.transaction_data[TransactionLoops.RECEIVER_NAME] = {}
+        receiver_loop = context.transaction_data[TransactionLoops.RECEIVER_NAME]
         context.set_loop_context(TransactionLoops.RECEIVER_NAME, receiver_loop)
 
 
@@ -143,15 +145,28 @@ def set_billing_provider_loop(context: X12ParserContext) -> None:
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
-    header = _get_header(context)
 
-    if TransactionLoops.BILLING_PROVIDER not in header:
-        header[TransactionLoops.BILLING_PROVIDER] = [{}]
+    if TransactionLoops.BILLING_PROVIDER not in context.transaction_data:
+        context.transaction_data[TransactionLoops.BILLING_PROVIDER] = [{}]
     else:
-        header[TransactionLoops.BILLING_PROVIDER].append({})
+        context.transaction_data[TransactionLoops.BILLING_PROVIDER].append({})
 
-    billing_provider = header[TransactionLoops.BILLING_PROVIDER][-1]
+    billing_provider = context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
     context.set_loop_context(TransactionLoops.BILLING_PROVIDER, billing_provider)
+
+
+@match("NM1", conditions={"entity_identifier_code": "85"})
+def set_billing_provider_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the billing provider name loop for the 837 transaction set.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name == TransactionLoops.BILLING_PROVIDER:
+        billing_provider = _get_billing_provider(context)
+        billing_provider["loop_2100a"] = {"ref_segment": []}
+        billing_provider_name = billing_provider["loop_2100a"]
+        context.set_loop_context(TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name)
 
 
 @match("SE")

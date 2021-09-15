@@ -351,7 +351,11 @@ def x12_837_commercial_health_insurance_transaction() -> str:
             "NM1*40*2*KEY INSURANCE COMPANY*****46*66783JJT~",
             "HL*1**20*1~",
             "PRV*BI*PXC*203BF0100Y~",
-            "SE*8*0021~",
+            "NM1*85*2*BEN KILDARE SERVICE*****XX*1912301953~",
+            "N3*234 SEAWAY ST~",
+            "N4*MIAMI*FL*331110000~",
+            "REF*EI*587654321~",
+            "SE*12*0021~",
         ]
     )
 

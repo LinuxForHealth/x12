@@ -11,6 +11,7 @@ from x12.segments import (
     PerSegment,
     HlSegment,
     PrvSegment,
+    RefSegment
 )
 from typing import Literal, Optional
 from enum import Enum
@@ -117,3 +118,28 @@ class Loop2000APrvSegment(PrvSegment):
     provider_code: Literal["BI"]
     reference_identification_qualifier: Literal["PXC"]
     reference_identification: str = Field(min_length=1, max_length=50)
+
+
+class Loop2100ANm1Segment(Nm1Segment):
+    """
+    Billing Provider Name and Identification
+    """
+    entity_identifier_code: Literal["85"]
+    identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2100ARefSegment(RefSegment):
+    """
+    Billing Provider Identification Codes
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        EMPLOYER_IDENTIFICATION_NUMBER = "EI"
+        SOCIAL_SECURITY_NUMBER = "SY"
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

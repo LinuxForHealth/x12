@@ -58,8 +58,10 @@ from .segments import (
     Loop1000BNm1Segment,
     Loop2000AHlSegment,
     Loop2000APrvSegment,
+    Loop2100ANm1Segment,
+    Loop2100ARefSegment
 )
-from x12.segments import SeSegment, CurSegment
+from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment
 from typing import List, Optional
 from pydantic import Field
 
@@ -81,6 +83,17 @@ class Loop1000B(X12SegmentGroup):
     nm1_segment: Loop1000BNm1Segment
 
 
+class Loop2100A(X12SegmentGroup):
+    """
+    Loop 2100A - Billing Provider Name
+    """
+
+    nm1_segment: Loop2100ANm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+    ref_segment: List[Loop2100ARefSegment] = Field(min_items=1, max_items=3)
+
+
 class Loop2000A(X12SegmentGroup):
     """
     Loop 2000A - Billing Provider
@@ -89,6 +102,7 @@ class Loop2000A(X12SegmentGroup):
     hl_segment: Loop2000AHlSegment
     prv_segment: Loop2000APrvSegment
     cur_segment: Optional[CurSegment]
+    loop_2100a: Loop2100A
 
 
 class Header(X12SegmentGroup):
@@ -98,9 +112,6 @@ class Header(X12SegmentGroup):
 
     st_segment: HeaderStSegment
     bht_segment: HeaderBhtSegment
-    loop_1000a: Loop1000A
-    loop_1000b: Loop1000B
-    loop_2000a: List[Loop2000A] = Field(min_items=1)
 
 
 class Footer(X12SegmentGroup):
