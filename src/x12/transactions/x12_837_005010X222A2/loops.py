@@ -58,8 +58,9 @@ from .segments import (
     Loop1000BNm1Segment,
     Loop2000AHlSegment,
     Loop2000APrvSegment,
-    Loop2100ANm1Segment,
-    Loop2100ARefSegment
+    Loop2010AaNm1Segment,
+    Loop2010AaRefSegment,
+    Loop2010AbNm1Segment
 )
 from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment
 from typing import List, Optional
@@ -83,15 +84,25 @@ class Loop1000B(X12SegmentGroup):
     nm1_segment: Loop1000BNm1Segment
 
 
-class Loop2010AA(X12SegmentGroup):
+class Loop2010Aa(X12SegmentGroup):
     """
     Loop 2010AA - Billing Provider Name
     """
 
-    nm1_segment: Loop2100ANm1Segment
+    nm1_segment: Loop2010AaNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: List[Loop2100ARefSegment] = Field(min_items=1, max_items=3)
+    ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=3)
+
+
+class Loop2010Ab(X12SegmentGroup):
+    """
+    Loop 2010AB - Pay to Address
+    """
+
+    nm1_segment: Loop2010AbNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
 
 
 class Loop2000A(X12SegmentGroup):
@@ -102,7 +113,8 @@ class Loop2000A(X12SegmentGroup):
     hl_segment: Loop2000AHlSegment
     prv_segment: Loop2000APrvSegment
     cur_segment: Optional[CurSegment]
-    loop_2010aa: Loop2010AA
+    loop_2010aa: Loop2010Aa
+    loop_2010ab: Loop2010Ab
 
 
 class Header(X12SegmentGroup):

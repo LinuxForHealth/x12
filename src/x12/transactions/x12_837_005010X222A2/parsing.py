@@ -169,6 +169,20 @@ def set_billing_provider_name_loop(context: X12ParserContext) -> None:
         context.set_loop_context(TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name)
 
 
+@match("NM1", conditions={"entity_identifier_code": "87"})
+def set_pay_to_address_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the pay to address name loop for the 837 transaction set.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name == TransactionLoops.BILLING_PROVIDER_NAME:
+        billing_provider = _get_billing_provider(context)
+        billing_provider["loop_2010ab"] = {}
+        pay_to_address = billing_provider["loop_2010ab"]
+        context.set_loop_context(TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address)
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """

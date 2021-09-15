@@ -355,7 +355,10 @@ def x12_837_commercial_health_insurance_transaction() -> str:
             "N3*234 SEAWAY ST~",
             "N4*MIAMI*FL*331110000~",
             "REF*EI*587654321~",
-            "SE*12*0021~",
+            "NM1*87*2~",
+            "N3*2345 OCEAN BLVD~",
+            "N4*MIAMI*FL*33111~",
+            "SE*15*0021~",
         ]
     )
 

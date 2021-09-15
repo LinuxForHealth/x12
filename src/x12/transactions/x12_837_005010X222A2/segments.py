@@ -120,7 +120,7 @@ class Loop2000APrvSegment(PrvSegment):
     reference_identification: str = Field(min_length=1, max_length=50)
 
 
-class Loop2100ANm1Segment(Nm1Segment):
+class Loop2010AaNm1Segment(Nm1Segment):
     """
     Billing Provider Name and Identification
     """
@@ -128,7 +128,7 @@ class Loop2100ANm1Segment(Nm1Segment):
     identification_code_qualifier: Optional[Literal["XX"]]
 
 
-class Loop2100ARefSegment(RefSegment):
+class Loop2010AaRefSegment(RefSegment):
     """
     Billing Provider Identification Codes
     """
@@ -143,3 +143,11 @@ class Loop2100ARefSegment(RefSegment):
         PROVIDER_UPIN_NUMBER = "1G"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2010AbNm1Segment(Nm1Segment):
+    """
+    Billing Provider Name and Identification
+    """
+    entity_identifier_code: Literal["87"]
+    name_last_or_organization_name: Optional[str]
