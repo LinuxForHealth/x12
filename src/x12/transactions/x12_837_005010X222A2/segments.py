@@ -151,3 +151,38 @@ class Loop2010AbNm1Segment(Nm1Segment):
     """
     entity_identifier_code: Literal["87"]
     name_last_or_organization_name: Optional[str]
+
+
+class Loop2010AcNm1Segment(Nm1Segment):
+    """
+    Pay to Plan Name and Identification
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+        PAYOR_IDENTIFICATION = "PI"
+        CMS_PLAN_ID = "XV"
+
+    entity_identifier_code: Literal["PE"]
+    entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
+    identification_code_qualifier: IdentificationCodeQualifier
+
+
+class Loop2010AcRefSegment(RefSegment):
+    """
+    Pay to Plan Identification Codes
+    """
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        PAYER_IDENTIFICATION_NUMBER = "2u"
+        CLAIM_OFFICE_NUMBER = "FY"
+        NAIC_CODE = "NF"
+        EMPLOYERS_IDENTIFICATION_NUMBER = "EI"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+

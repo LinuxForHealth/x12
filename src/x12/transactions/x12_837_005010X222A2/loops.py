@@ -60,11 +60,14 @@ from .segments import (
     Loop2000APrvSegment,
     Loop2010AaNm1Segment,
     Loop2010AaRefSegment,
-    Loop2010AbNm1Segment
+    Loop2010AbNm1Segment,
+    Loop2010AcNm1Segment,
+    Loop2010AcRefSegment
 )
 from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment
 from typing import List, Optional
-from pydantic import Field
+from pydantic import Field, root_validator
+from x12.validators import validate_duplicate_ref_codes
 
 
 class Loop1000A(X12SegmentGroup):
@@ -94,6 +97,10 @@ class Loop2010Aa(X12SegmentGroup):
     n4_segment: N4Segment
     ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=3)
 
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
 
 class Loop2010Ab(X12SegmentGroup):
     """
@@ -103,6 +110,20 @@ class Loop2010Ab(X12SegmentGroup):
     nm1_segment: Loop2010AbNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
+
+
+class Loop2010Ac(X12SegmentGroup):
+    """
+    Loop 2010AC - Pay to Plan
+    """
+    nm1_segment: Loop2010AcNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+    ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=2)
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
 
 
 class Loop2000A(X12SegmentGroup):
@@ -115,6 +136,7 @@ class Loop2000A(X12SegmentGroup):
     cur_segment: Optional[CurSegment]
     loop_2010aa: Loop2010Aa
     loop_2010ab: Loop2010Ab
+    loop_2010ac: Optional[Loop2010Ac]
 
 
 class Header(X12SegmentGroup):
