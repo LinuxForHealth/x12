@@ -305,6 +305,16 @@ def test_ref_segment():
     assert ref_segment.x12() == "REF*EO*477563928~"
 
 
+def test_sbr_segment():
+    segment_data = {
+        "payer_responsibility_code": "P",
+        "group_policy_number": "2222-SJ",
+        "claim_filing_indicator_code": "CI",
+    }
+    sbr_segment: SbrSegment = SbrSegment(**segment_data)
+    assert sbr_segment.x12() == "SBR*P**2222-SJ******CI~"
+
+
 def test_se_segment():
     segment_data = {
         "transaction_segment_count": 17,

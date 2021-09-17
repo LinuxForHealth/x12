@@ -60,6 +60,7 @@ class X12SegmentName(str, Enum):
     PER = "PER"
     PRV = "PRV"
     REF = "REF"
+    SBR = "SBR"
     SE = "SE"
     ST = "ST"
     TRN = "TRN"

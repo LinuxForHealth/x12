@@ -65,6 +65,7 @@ def _get_header(context: X12ParserContext) -> Dict:
     """Returns the 837 transaction header"""
     return context.transaction_data[TransactionLoops.HEADER]
 
+
 def _get_billing_provider(context: X12ParserContext) -> Dict:
     """Returns the current billing provider record"""
     return context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
@@ -139,7 +140,9 @@ def set_billing_provider_name_loop(context: X12ParserContext) -> None:
         billing_provider = _get_billing_provider(context)
         billing_provider["loop_2010aa"] = {"ref_segment": []}
         billing_provider_name = billing_provider["loop_2010aa"]
-        context.set_loop_context(TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name)
+        context.set_loop_context(
+            TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name
+        )
 
 
 @match("NM1", conditions={"entity_identifier_code": "87"})
@@ -153,7 +156,9 @@ def set_pay_to_address_name_loop(context: X12ParserContext) -> None:
         billing_provider = _get_billing_provider(context)
         billing_provider["loop_2010ab"] = {}
         pay_to_address = billing_provider["loop_2010ab"]
-        context.set_loop_context(TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address)
+        context.set_loop_context(
+            TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address
+        )
 
 
 @match("NM1", conditions={"entity_identifier_code": "PE"})
@@ -163,11 +168,29 @@ def set_pay_to_plan_name_loop(context: X12ParserContext) -> None:
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
-    if context.loop_name in (TransactionLoops.BILLING_PROVIDER_NAME, TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS):
+    if context.loop_name in (
+        TransactionLoops.BILLING_PROVIDER_NAME,
+        TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS,
+    ):
         billing_provider = _get_billing_provider(context)
         billing_provider["loop_2010ac"] = {"ref_segment": []}
         pay_to_plan = billing_provider["loop_2010ac"]
-        context.set_loop_context(TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME, pay_to_plan)
+        context.set_loop_context(
+            TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME, pay_to_plan
+        )
+
+
+@match("HL", conditions={"hierarchical_level_code": "22"})
+def set_subscriber_loop(context: X12ParserContext) -> None:
+    """
+    Sets the subscriber loop for the 837 transaction set.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    billing_provider = _get_billing_provider(context)
+    billing_provider["loop_2000b"] = {}
+    subscriber = billing_provider["loop_2000b"]
+    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
 
 
 @match("SE")

@@ -11,7 +11,8 @@ from x12.segments import (
     PerSegment,
     HlSegment,
     PrvSegment,
-    RefSegment
+    RefSegment,
+    SbrSegment,
 )
 from typing import Literal, Optional
 from enum import Enum
@@ -124,6 +125,7 @@ class Loop2010AaNm1Segment(Nm1Segment):
     """
     Billing Provider Name and Identification
     """
+
     entity_identifier_code: Literal["85"]
     identification_code_qualifier: Optional[Literal["XX"]]
 
@@ -137,6 +139,7 @@ class Loop2010AaRefSegment(RefSegment):
         """
         Code values for REF01
         """
+
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         SOCIAL_SECURITY_NUMBER = "SY"
         STATE_LICENSE_NUMBER = "0B"
@@ -149,6 +152,7 @@ class Loop2010AbNm1Segment(Nm1Segment):
     """
     Billing Provider Name and Identification
     """
+
     entity_identifier_code: Literal["87"]
     name_last_or_organization_name: Optional[str]
 
@@ -162,6 +166,7 @@ class Loop2010AcNm1Segment(Nm1Segment):
         """
         Code values for NM108
         """
+
         PAYOR_IDENTIFICATION = "PI"
         CMS_PLAN_ID = "XV"
 
@@ -175,10 +180,12 @@ class Loop2010AcRefSegment(RefSegment):
     """
     Pay to Plan Identification Codes
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         PAYER_IDENTIFICATION_NUMBER = "2u"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
@@ -186,3 +193,83 @@ class Loop2010AcRefSegment(RefSegment):
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
+
+class Loop2000BHlSegment(HlSegment):
+    """
+    Subscriber Hierarchy Segment
+    """
+
+    hierarchical_level_code: Literal["22"]
+
+
+class Loop2000BSbrSegment(SbrSegment):
+    """
+    Subscriber Information Segment
+
+    TODO: validation rules
+    """
+
+    class PayerResponsibilityCode(str, Enum):
+        """
+        SBR01 code values
+        """
+
+        PAYER_RESPONSIBILITY_FOUR = "A"
+        PAYER_RESPONSIBILITY_FIVE = "B"
+        PAYER_RESPONSIBILITY_SIX = "C"
+        PAYER_RESPONSIBILITY_SEVEN = "D"
+        PAYER_RESPONSIBILITY_EIGHT = "E"
+        PAYER_RESPONSIBILITY_NINE = "F"
+        PAYER_RESPONSIBILITY_TEN = "G"
+        PRIMARY = "P"
+        SECONDARY = "S"
+        TERTIARY = "T"
+        UNKNOWN = "U"
+
+    class InsuranceTypeCode(str, Enum):
+        """
+        SBR05 code values
+        """
+
+        MEDICARE_SECONDARY_WORKING = "12"
+        MEDICARE_SECONDARY_END_STAGE_RENAL = "13"
+        MEDICARE_SECONDARY_AUTO_PRIMARY = "14"
+        MEDICARE_SECONDARY_WORKERS_COMPENSATION = "15"
+        MEDICARE_SECONDARY_PUBLIC_HEALTH_SERVICE = "16"
+        MEDICARE_SECONDARY_BLACK_LUNG = "41"
+        MEDICARE_SECONDARY_VETERANS_ADMINISTRATION = "42"
+        MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
+        MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"
+
+    class ClaimFilingIndicatorCode(str, Enum):
+        """
+        SBR09 code values
+        """
+
+        OTHER_NON_FEDERAL_PROGRAMS = "11"
+        PREFERRED_PROVIDER_ORGANIZATION = "12"
+        POINT_OF_SERVICE = "13"
+        EXCLUSIVE_PROVIDER_ORGANIZATION = "14"
+        INDEMNITY_INSURANCE = "15"
+        HEALTH_MAINTENANCE_ORGANIZATION_MEDICARE_RISK = "16"
+        DENTAL_MAINTENANCE_ORGANIZATION = "17"
+        AUTOMOBILE_MEDICAL = "AM"
+        BLUE_CROSS_BLUE_SHIELD = "BL"
+        CHAMPUS = "CH"
+        COMMERICIAL_INSURANCE_COMPANY = "CI"
+        DISABILITY = "DS"
+        FEDERAL_EMPLOYEES_PROGRAM = "FI"
+        HEALTH_MAINTENANCE_ORGANIZATION = "HM"
+        LIABILITY_MEDICAL = "LM"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        OTHER_FEDERAL_PROGRAM = "OF"
+        TITLE_V = "TV"
+        VETERANS_AFFAIR_PLAN = "VA"
+        WORKERS_COMPENSATION_HEALTH_CLAIM = "WC"
+        MUTUALLY_DEFINED = "ZZ"
+
+    payer_responsibility_code: PayerResponsibilityCode
+    individual_relationship_code: Optional[Literal["18"]]
+    insurance_type_code: Optional[InsuranceTypeCode]

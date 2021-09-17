@@ -61,7 +61,8 @@ from .segments import (
     Loop2010AaRefSegment,
     Loop2010AbNm1Segment,
     Loop2010AcNm1Segment,
-    Loop2010AcRefSegment
+    Loop2000BHlSegment,
+    Loop2000BSbrSegment,
 )
 from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment
 from typing import List, Optional
@@ -115,6 +116,7 @@ class Loop2010Ac(X12SegmentGroup):
     """
     Loop 2010AC - Pay to Plan
     """
+
     nm1_segment: Loop2010AcNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
@@ -123,6 +125,15 @@ class Loop2010Ac(X12SegmentGroup):
     _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
+
+
+class Loop2000B(X12SegmentGroup):
+    """
+    Loop 2000B - Subscriber
+    """
+
+    hl_segment: Loop2000BHlSegment
+    sbr_segment: Loop2000BSbrSegment
 
 
 class Loop2000A(X12SegmentGroup):
@@ -136,6 +147,7 @@ class Loop2000A(X12SegmentGroup):
     loop_2010aa: Loop2010Aa
     loop_2010ab: Loop2010Ab
     loop_2010ac: Optional[Loop2010Ac]
+    loop_2000b: Loop2000B
 
 
 class Header(X12SegmentGroup):

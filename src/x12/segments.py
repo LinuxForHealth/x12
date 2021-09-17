@@ -1378,6 +1378,25 @@ class RefSegment(X12Segment):
     description: Optional[str] = Field(min_length=1, max_length=80)
 
 
+class SbrSegment(X12Segment):
+    """
+    Subscriber Information
+    Example:
+        SBR*P**2222-SJ******CI~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SBR
+    payer_responsibility_code: str
+    individual_relationship_code: Optional[str]
+    group_policy_number: Optional[str] = Field(min_length=1, max_length=50)
+    group_name: Optional[str] = Field(min_length=1, max_length=60)
+    insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
+    coordination_of_benefits_code: Optional[str]
+    condition_response_code: Optional[str]
+    employment_status_code: Optional[str]
+    claim_filing_indicator_code: str = Field(min_length=1, max_length=2)
+
+
 class SeSegment(X12Segment):
     """
     Transaction Set Footer
