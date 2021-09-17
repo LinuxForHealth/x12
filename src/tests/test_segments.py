@@ -286,6 +286,15 @@ def test_nm1_segment():
     assert nm1_segment.x12() == "NM1*PR*2*ACME*****PI*12345~"
 
 
+def test_pat_segment():
+    segment_data = {
+        "unit_basis_measurement_code": "01",
+        "patient_weight": "146.00",
+    }
+    pat_segment: PatSegment = PatSegment(**segment_data)
+    assert pat_segment.x12() == "PAT******01*146.00~"
+
+
 def test_prv_segment():
     segment_data = {
         "provider_code": "RF",

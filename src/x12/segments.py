@@ -1284,6 +1284,69 @@ class Nm1Segment(X12Segment):
         return field_value
 
 
+class PatSegment(X12Segment):
+    """
+    Patient Information:
+    Example:
+        PAT******01*146~
+    """
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code value for PAT04
+        """
+
+        SPECIFIC_DATE = "D8"
+
+    segment_name: X12SegmentName = X12SegmentName.PAT
+    individual_relationship_code: Optional[str]
+    patient_location_code: Optional[str]
+    student_status_code: Optional[str]
+    date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
+    patient_death_date: Optional[Union[str, datetime.date]]
+    unit_basis_measurement_code: Optional[Literal["01"]]
+    patient_weight: Optional[Decimal]
+    pregnancy_indicator: Optional[Literal["Y"]]
+
+    _validate_transaction_date = field_validator("patient_death_date")(parse_x12_date)
+
+    @root_validator
+    def validate_death_date(cls, values):
+        """
+        Validates that both a date format qualifier and the patient death date are both present, if one or the other is
+        present.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        date_fields: Tuple = values.get(
+            "date_time_period_format_qualifier"
+        ), values.get("patient_death_date")
+
+        if any(date_fields) and not all(date_fields):
+            raise ValueError(
+                "Patient Death Date requires format qualifier and date value"
+            )
+
+        return values
+
+    @root_validator
+    def validate_weight(cls, values):
+        """
+        Validates that both a weight unit and value are present, if one or the other is
+        present.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        weight_fields: Tuple = values.get("unit_basis_measurement_code"), values.get(
+            "patient_weight"
+        )
+
+        if any(weight_fields) and not all(weight_fields):
+            raise ValueError("Patient weight requires units and value")
+
+        return values
+
+
 class PerSegment(X12Segment):
     """
     EDI Contact Information

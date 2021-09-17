@@ -64,7 +64,7 @@ from .segments import (
     Loop2000BHlSegment,
     Loop2000BSbrSegment,
 )
-from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment
+from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment, PatSegment
 from typing import List, Optional
 from pydantic import Field, root_validator
 from x12.validators import validate_duplicate_ref_codes
@@ -134,6 +134,7 @@ class Loop2000B(X12SegmentGroup):
 
     hl_segment: Loop2000BHlSegment
     sbr_segment: Loop2000BSbrSegment
+    pat_segment: Optional[PatSegment]
 
 
 class Loop2000A(X12SegmentGroup):
