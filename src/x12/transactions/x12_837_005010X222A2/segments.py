@@ -279,10 +279,12 @@ class Loop2010BaNm1Segment(Nm1Segment):
     """
     Subscriber Name Segment
     """
+
     class IdentificationCodeQualifier(str, Enum):
         """
         Code values for NM108
         """
+
         STANDARD_HEALTH_ID_US = "II"
         MEMBER_IDENTIFICATION_NUMBER = "MI"
 

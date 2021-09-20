@@ -41,6 +41,21 @@ def test_bht_segment():
     )
 
 
+def test_clm_segment():
+    segment_data = {
+        "patient_control_number": "26463774",
+        "total_claim_charge_amount": "100.00",
+        "health_care_service_location_information": "11:B:1",
+        "provider_or_supplier_signature_indicator": "Y",
+        "provider_accept_assignment_code": "A",
+        "benefit_assignment_certification_indicator": "Y",
+        "release_of_information_code": "I",
+    }
+
+    clm_segment: ClmSegment = ClmSegment(**segment_data)
+    assert clm_segment.x12() == "CLM*26463774*100.00***11:B:1*Y*A*Y*I~"
+
+
 def test_cur_segment():
     segment_data = {"entity_identifier_code": "85", "currency_code": "USD"}
 

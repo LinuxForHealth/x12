@@ -171,6 +171,14 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2300(X12SegmentGroup):
+    """
+    Loop 2300 - Claims
+    """
+
+    pass
+
+
 class Loop2000B(X12SegmentGroup):
     """
     Loop 2000B - Subscriber
@@ -181,6 +189,8 @@ class Loop2000B(X12SegmentGroup):
     pat_segment: Optional[PatSegment]
     loop_2010ba: Loop2010Ba
     loop_2010bb: Loop2010Bb
+    # todo: validate 2300 based on 2010ba nm1 member id and patient loop
+    loop_2300: Optional[List[Loop2300]] = Field(min_items=0, max_items=100)
 
 
 class Loop2000A(X12SegmentGroup):

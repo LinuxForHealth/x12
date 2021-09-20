@@ -81,6 +81,98 @@ class BhtSegment(X12Segment):
     )
 
 
+class ClmSegment(X12Segment):
+    """
+    Claim Information Segment
+    Example:
+        CLM*26463774*100***11:B:1*Y*A*Y*I~
+    """
+
+    class ProviderOrSupplierSignatureIndicator(str, Enum):
+        """
+        Code values for CLM06
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class ProviderAcceptAssignmentCode(str, Enum):
+        """
+        Code values for CLM07
+        """
+
+        ASSIGNED = "A"
+        ASSIGNMENT_ACCEPTED_CLINICAL_LAB_ONLY = "B"
+        NOT_ASSIGNED = "C"
+
+    class BenefitsAssignmentCertificationIndicator(str, Enum):
+        """
+        Code values for CLM08
+        """
+
+        NO = "N"
+        NOT_APPLICABLE = "W"
+        YES = "Y"
+
+    class ReleaseOfInformationCode(str, Enum):
+        """
+        Code values for CLM09
+        """
+
+        INFORMED_CONSENT_NO_SIGNATURE = "I"
+        SIGNED_STATEMENT = "Y"
+
+    class SpecialProgramCode(str, Enum):
+        """
+        Code values for CLM12
+        """
+
+        PHYSICALLY_HANDICAPPED_CHILDRENS_PROGAM = "02"
+        SPECIAL_FEDERAL_FUNDING = "03"
+        DISABILITY = "05"
+        SECOND_OPINION_OR_SURGERY = "09"
+
+    class DelayReasonCode(str, Enum):
+        """
+        Code values for CLM20
+        """
+
+        PROOF_OF_ELIGIBILITY_UNKNOWN_UNAVAILABLE = "1"
+        LITIGATION = "2"
+        AUTHORIZATION_DELAYS = "3"
+        DELAY_IN_CERTIFYING_PROVIDER = "4"
+        DELAY_IN_SUPPLYING_BILLING_FORMS = "5"
+        DELAY_IN_DELIVERY_OF_CUSTOM_APPLIANCES = "6"
+        THIRD_PARTY_PROCESSING_DELAY = "7"
+        DELAY_IN_ELIGIBILITY_DETERMINATION = "8"
+        ORIGINAL_CLAIM_REJECTED_DENIED_UNRELATED_TO_BILLING = "9"
+        ADMINISTRATION_DELAY_PRIOR_APPROVAL = "10"
+        OTHER = "11"
+        NATURAL_DISASTER = "15"
+
+    segment_name: X12SegmentName = X12SegmentName.CLM
+    patient_control_number: str = Field(min_length=1, max_length=38)
+    total_claim_charge_amount: Decimal = Decimal("0.00")
+    claim_filing_indicator_code: Optional[str] = Field(min_length=1, max_length=2)
+    non_institutional_claim_type_code: Optional[str] = Field(min_length=1, max_length=2)
+    health_care_service_location_information: str
+    provider_or_supplier_signature_indicator: ProviderOrSupplierSignatureIndicator
+    provider_accept_assignment_code: ProviderAcceptAssignmentCode
+    benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
+    release_of_information_code: ReleaseOfInformationCode
+    patient_signature_source_code: Optional[Literal["P"]]
+    related_causes_code: Optional[str]
+    special_program_code: Optional[SpecialProgramCode]
+    yes_no_condition_response_code_1: Optional[str]
+    level_of_service_code: Optional[str]
+    yes_no_condition_response_code_2: Optional[str]
+    provider_agreement_code: Optional[str]
+    claim_status_code: Optional[str]
+    yes_no_condition_response_code_3: Optional[str]
+    claim_submission_reason_code: Optional[str]
+    delay_reason_code: Optional[DelayReasonCode]
+
+
 class CurSegment(X12Segment):
     """
     Foreign Currency Information
