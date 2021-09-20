@@ -63,8 +63,18 @@ from .segments import (
     Loop2010AcNm1Segment,
     Loop2000BHlSegment,
     Loop2000BSbrSegment,
+    Loop2010BaNm1Segment,
+    Loop2010BaPerSegment
 )
-from x12.segments import SeSegment, CurSegment, N3Segment, N4Segment, PatSegment
+from x12.segments import (
+    SeSegment,
+    CurSegment,
+    N3Segment,
+    N4Segment,
+    PatSegment,
+    DmgSegment,
+    RefSegment
+)
 from typing import List, Optional
 from pydantic import Field, root_validator
 from x12.validators import validate_duplicate_ref_codes
@@ -127,6 +137,23 @@ class Loop2010Ac(X12SegmentGroup):
     )
 
 
+class Loop2010Ba(X12SegmentGroup):
+    """
+    Loop 2010BA - Subscriber Name
+    """
+
+    nm1_segment: Loop2010BaNm1Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    dmg_segment: Optional[DmgSegment]
+    ref_segment: List[Optional[RefSegment]] = Field(min_items=0, max_items=2)
+    per_segment: Optional[Loop2010BaPerSegment]
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2000B(X12SegmentGroup):
     """
     Loop 2000B - Subscriber
@@ -135,6 +162,7 @@ class Loop2000B(X12SegmentGroup):
     hl_segment: Loop2000BHlSegment
     sbr_segment: Loop2000BSbrSegment
     pat_segment: Optional[PatSegment]
+    loop_2010ba: Loop2010Ba
 
 
 class Loop2000A(X12SegmentGroup):

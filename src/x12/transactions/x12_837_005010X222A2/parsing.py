@@ -71,6 +71,12 @@ def _get_billing_provider(context: X12ParserContext) -> Dict:
     return context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
 
 
+def _get_subscriber(context: X12ParserContext) -> Dict:
+    """Returns the current subscriber record"""
+    billing_provider = _get_billing_provider(context)
+    return billing_provider[TransactionLoops.SUBSCRIBER]
+
+
 @match("ST")
 def set_header_loop(context: X12ParserContext) -> None:
     """
@@ -138,8 +144,8 @@ def set_billing_provider_name_loop(context: X12ParserContext) -> None:
     """
     if context.loop_name == TransactionLoops.BILLING_PROVIDER:
         billing_provider = _get_billing_provider(context)
-        billing_provider["loop_2010aa"] = {"ref_segment": []}
-        billing_provider_name = billing_provider["loop_2010aa"]
+        billing_provider[TransactionLoops.BILLING_PROVIDER_NAME] = {"ref_segment": []}
+        billing_provider_name = billing_provider[TransactionLoops.BILLING_PROVIDER_NAME]
         context.set_loop_context(
             TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name
         )
@@ -154,8 +160,10 @@ def set_pay_to_address_name_loop(context: X12ParserContext) -> None:
     """
     if context.loop_name == TransactionLoops.BILLING_PROVIDER_NAME:
         billing_provider = _get_billing_provider(context)
-        billing_provider["loop_2010ab"] = {}
-        pay_to_address = billing_provider["loop_2010ab"]
+        billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS] = {}
+        pay_to_address = billing_provider[
+            TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS
+        ]
         context.set_loop_context(
             TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address
         )
@@ -173,8 +181,12 @@ def set_pay_to_plan_name_loop(context: X12ParserContext) -> None:
         TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS,
     ):
         billing_provider = _get_billing_provider(context)
-        billing_provider["loop_2010ac"] = {"ref_segment": []}
-        pay_to_plan = billing_provider["loop_2010ac"]
+        billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME] = {
+            "ref_segment": []
+        }
+        pay_to_plan = billing_provider[
+            TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME
+        ]
         context.set_loop_context(
             TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME, pay_to_plan
         )
@@ -188,9 +200,23 @@ def set_subscriber_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
     billing_provider = _get_billing_provider(context)
-    billing_provider["loop_2000b"] = {}
-    subscriber = billing_provider["loop_2000b"]
+    billing_provider[TransactionLoops.SUBSCRIBER] = {}
+    subscriber = billing_provider[TransactionLoops.SUBSCRIBER]
     context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
+
+
+@match("NM1", conditions={"entity_identifier_code": "IL"})
+def set_subscriber_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the subscriber name for the 837 transaction set
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name == TransactionLoops.SUBSCRIBER:
+        subscriber = _get_subscriber(context)
+        subscriber[TransactionLoops.SUBSCRIBER_NAME] = {"ref_segment": []}
+        subscriber_name = subscriber[TransactionLoops.SUBSCRIBER_NAME]
+        context.set_loop_context(TransactionLoops.SUBMITTER_NAME, subscriber_name)
 
 
 @match("SE")

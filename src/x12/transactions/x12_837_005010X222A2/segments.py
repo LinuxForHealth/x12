@@ -273,3 +273,34 @@ class Loop2000BSbrSegment(SbrSegment):
     payer_responsibility_code: PayerResponsibilityCode
     individual_relationship_code: Optional[Literal["18"]]
     insurance_type_code: Optional[InsuranceTypeCode]
+
+
+class Loop2010BaNm1Segment(Nm1Segment):
+    """
+    Subscriber Name Segment
+    """
+
+    entity_identifier_code: Literal["IL"]
+
+
+class Loop2010BaRefSegment(RefSegment):
+    """
+    Subscriber Name Reference Identification
+    """
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        SOCIAL_SECURITY_NUMBER = "SY"
+        AGENCY_CLAIM_NUMBER = "Y4"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2010BaPerSegment(PerSegment):
+    """
+    Subscriber Name Contact Information
+    """
+
+    communication_number_qualifier_1: Literal["TE"]
+    communication_number_qualifier_2: Optional[Literal["EX"]]
