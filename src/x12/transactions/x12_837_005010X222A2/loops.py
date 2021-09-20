@@ -64,7 +64,9 @@ from .segments import (
     Loop2000BHlSegment,
     Loop2000BSbrSegment,
     Loop2010BaNm1Segment,
-    Loop2010BaPerSegment
+    Loop2010BaPerSegment,
+    Loop2010BbNm1Segment,
+    Loop2010BbRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -73,7 +75,7 @@ from x12.segments import (
     N4Segment,
     PatSegment,
     DmgSegment,
-    RefSegment
+    RefSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -154,6 +156,21 @@ class Loop2010Ba(X12SegmentGroup):
     )
 
 
+class Loop2010Bb(X12SegmentGroup):
+    """
+    Loop 2010Bb - Payer Name
+    """
+
+    nm1_segment: Loop2010BbNm1Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    ref_segment: Optional[List[Loop2010BbRefSegment]]
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2000B(X12SegmentGroup):
     """
     Loop 2000B - Subscriber
@@ -163,6 +180,7 @@ class Loop2000B(X12SegmentGroup):
     sbr_segment: Loop2000BSbrSegment
     pat_segment: Optional[PatSegment]
     loop_2010ba: Loop2010Ba
+    loop_2010bb: Loop2010Bb
 
 
 class Loop2000A(X12SegmentGroup):

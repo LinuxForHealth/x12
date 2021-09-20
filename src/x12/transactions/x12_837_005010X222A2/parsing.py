@@ -216,7 +216,21 @@ def set_subscriber_name_loop(context: X12ParserContext) -> None:
         subscriber = _get_subscriber(context)
         subscriber[TransactionLoops.SUBSCRIBER_NAME] = {"ref_segment": []}
         subscriber_name = subscriber[TransactionLoops.SUBSCRIBER_NAME]
-        context.set_loop_context(TransactionLoops.SUBMITTER_NAME, subscriber_name)
+        context.set_loop_context(TransactionLoops.SUBSCRIBER_NAME, subscriber_name)
+
+
+@match("NM1", conditions={"entity_identifier_code": "PR"})
+def set_payer_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the payer name for the 837 transaction set
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
+        subscriber = _get_subscriber(context)
+        subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
+        payer_name = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
+        context.set_loop_context(TransactionLoops.SUBSCRIBER_PAYER_NAME, payer_name)
 
 
 @match("SE")

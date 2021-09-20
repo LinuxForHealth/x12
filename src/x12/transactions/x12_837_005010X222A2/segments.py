@@ -287,10 +287,12 @@ class Loop2010BaRefSegment(RefSegment):
     """
     Subscriber Name Reference Identification
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         SOCIAL_SECURITY_NUMBER = "SY"
         AGENCY_CLAIM_NUMBER = "Y4"
 
@@ -304,3 +306,41 @@ class Loop2010BaPerSegment(PerSegment):
 
     communication_number_qualifier_1: Literal["TE"]
     communication_number_qualifier_2: Optional[Literal["EX"]]
+
+
+class Loop2010BbNm1Segment(Nm1Segment):
+    """
+    Subscriber Name Segment
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        PAYOR_IDENTIFICATION = "PI"
+        CMS_PLAN_ID = "XV"
+
+    entity_identifier_code: Literal["PR"]
+    entity_type_qualifier: Literal["2"]
+    identification_code_qualifier: IdentificationCodeQualifier
+
+
+class Loop2010BbRefSegment(RefSegment):
+    """
+    Payer Name Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        PAYER_IDENTIFICATION_NUMBER = "2U"
+        EMPLOYERS_IDENTIFICATION_NUMBER = "EI"
+        CLAIM_OFFICER_NUMBER = "FY"
+        NAIC_CODE = "NF"
+        PROVIDER_CONTROL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

@@ -361,7 +361,9 @@ def x12_837_commercial_health_insurance_transaction() -> str:
             "HL*2*1*22*1~",
             "SBR*P**2222-SJ******CI~",
             "NM1*IL*1*SMITH*JANE****MI*JS00111223333~",
-            "SE*16*0021~",
+            "NM1*PR*2*KEY INSURANCE COMPANY*****PI*999996666~",
+            "REF*G2*KA6663~",
+            "SE*20*0021~",
         ]
     )
 
