@@ -67,6 +67,13 @@ from .segments import (
     Loop2010BaPerSegment,
     Loop2010BbNm1Segment,
     Loop2010BbRefSegment,
+    Loop2300DtpSegment,
+    Loop2300PwkSegment,
+    Loop2300Cn1Segment,
+    Loop2300AmtSegment,
+    Loop2300RefSegment,
+    Loop2300NteSegment,
+    Loop2300CrcSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -76,10 +83,18 @@ from x12.segments import (
     PatSegment,
     DmgSegment,
     RefSegment,
+    ClmSegment,
+    K3Segment,
+    Cr1Segment,
+    Cr2Segment,
+    HiSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
-from x12.validators import validate_duplicate_ref_codes
+from x12.validators import (
+    validate_duplicate_ref_codes,
+    validate_duplicate_date_qualifiers,
+)
 
 
 class Loop1000A(X12SegmentGroup):
@@ -176,6 +191,33 @@ class Loop2300(X12SegmentGroup):
     Loop 2300 - Claims
     """
 
+    clm_segment: ClmSegment
+    dtp_segment: Optional[List[Loop2300DtpSegment]] = Field(min_items=0, max_items=17)
+    pwk_segment: Optional[List[Loop2300PwkSegment]] = Field(min_items=0, max_items=10)
+    cn1_segment: Optional[Loop2300Cn1Segment]
+    amt_segment: Optional[Loop2300AmtSegment]
+    ref_segment: Optional[List[Loop2300RefSegment]] = Field(min_items=0, max_items=14)
+    k3_segment: Optional[List[K3Segment]] = Field(min_items=0, max_items=10)
+    nte_segment: Optional[Loop2300NteSegment]
+    cr1_segment: Optional[Cr1Segment]
+    cr2_segment: Optional[Cr2Segment]
+    crc_segment: Optional[List[Loop2300CrcSegment]] = Field(min_items=0, max_items=8)
+    hi_segment: Optional[List[HiSegment]] = Field(min_items=1, max_items=4)
+
+    _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
+        validate_duplicate_date_qualifiers
+    )
+
+    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
+class Loop2000C(X12SegmentGroup):
+    """
+    Loop 2000C - Patient
+    """
+
     pass
 
 
@@ -191,6 +233,7 @@ class Loop2000B(X12SegmentGroup):
     loop_2010bb: Loop2010Bb
     # todo: validate 2300 based on 2010ba nm1 member id and patient loop
     loop_2300: Optional[List[Loop2300]] = Field(min_items=0, max_items=100)
+    loop_2000c: Optional[List[Loop2000C]]
 
 
 class Loop2000A(X12SegmentGroup):

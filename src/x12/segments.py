@@ -173,9 +173,109 @@ class ClmSegment(X12Segment):
     delay_reason_code: Optional[DelayReasonCode]
 
 
+class Cn1Segment(X12Segment):
+    """
+    Contract information.
+    Example:
+        CN1*02*550~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CN1
+    contract_type_code: str
+    contract_amount: Optional[Decimal]
+    contract_percentage: Optional[Decimal]
+    contract_code: Optional[str]
+    terms_discount_percentage: Optional[Decimal]
+    contract_version_identifier: Optional[str]
+
+
+class CrcSegment(X12Segment):
+    """
+    Conditions Indicator
+    Example:
+        CRC*E1*Y*L1~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CRC
+    code_category: str = Field(min_length=2, max_length=2)
+    certification_condition_indicator: str = Field(min_length=1, max_length=1)
+    condition_code_1: str
+    condition_code_2: Optional[str]
+    condition_code_3: Optional[str]
+    condition_code_4: Optional[str]
+    condition_code_5: Optional[str]
+
+
+class Cr1Segment(X12Segment):
+    """
+    Ambulance Transport Information
+    Example:
+        CR1*LB*140**A*DH*12****UNCONSCIOUS~
+    """
+
+    class AmbulanceTransportReasonCode(str, Enum):
+        """
+        Code values for CR104
+        """
+
+        PATIENT_TRANSPORTED_CARE_OF_SYMPTOMS = "A"
+        PATIENT_TRANSPORTED_FOR_PHYSICIAN = "B"
+        PATIENT_TRANSPORTED_FOR_FAMILY = "C"
+        PATIENT_TRANSPORTED_FOR_SPECIALIST = "D"
+        PATIENT_TRANSPORTED_FOR_REHABILITATION = "E"
+
+    segment_name: X12SegmentName = X12SegmentName.CR1
+    weight_measurement_code: Optional[Literal["LB"]]
+    patient_weight: Optional[Decimal]
+    ambulance_transport_code: Optional[str]
+    ambulance_transport_reason_code: AmbulanceTransportReasonCode
+    mileage_measurement_code: Literal["DH"]
+    transport_distance: Decimal
+    address_information_1: Optional[str]
+    address_information_2: Optional[str]
+    round_trip_purpose_description: Optional[str]
+    stretcher_purpose_description: Optional[str]
+
+
+class Cr2Segment(X12Segment):
+    """
+    Chiropractic Certification
+    Example:
+        CR2********M~
+    """
+
+    class PatientConditionCode(str, Enum):
+        """
+        Code values for CR208
+        """
+
+        ACUTE_CONDITION = "A"
+        CHRONIC_CONDITION = "C"
+        NON_ACUTE = "D"
+        NON_LIFE_THREATENING = "E"
+        ROUTINE = "F"
+        SYMPTOMATIC = "G"
+        ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "M"
+
+    segment_name: X12SegmentName = X12SegmentName.CR2
+    count: Optional[str]
+    quantity: Optional[str]
+    subluxation_level_code_1: Optional[str]
+    subluxation_level_code_2: Optional[str]
+    unit_basis_measurement_code: Optional[str]
+    quantity_1: Optional[Decimal]
+    quantity_2: Optional[Decimal]
+    patient_condition_code: PatientConditionCode
+    patient_condition_description_1: Optional[str]
+    patient_condition_description_2: Optional[str]
+    yes_no_condition_response_code: Optional[str]
+
+
 class CurSegment(X12Segment):
     """
     Foreign Currency Information
+    Example:
+        CUR*85*USD~
     """
 
     segment_name: X12SegmentName = X12SegmentName.CUR
@@ -729,6 +829,33 @@ class GsSegment(X12Segment):
     )
 
 
+class HcpSegment(X12Segment):
+    """
+    Health Care Pricing
+    Example:
+        HCP*03*100*10*RPO12345~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.HCP
+    pricing_methodology: str
+    repriced_allowed_amount: Decimal
+    repriced_saving_amount: Optional[Decimal]
+    repricing_organization_identifier: Optional[str] = Field(
+        min_length=1, max_length=50
+    )
+    per_diem_flat_rate_amount: Optional[Decimal]
+    repriced_apg_code: Optional[str] = Field(min_length=1, max_length=50)
+    repriced_apg_amount: Optional[Decimal]
+    product_service_id_1: Optional[str]
+    product_service_id_1_qualifier: Optional[str]
+    product_service_id_2: Optional[str]
+    unit_basis_measurement_code: Optional[str]
+    quantity: Optional[Decimal]
+    reject_reason_code: Optional[str] = Field(min_length=2, max_length=2)
+    policy_compliance_code: Optional[str] = Field(min_length=1, max_length=2)
+    exception_code: Optional[str] = Field(min_length=1, max_length=2)
+
+
 class HiSegment(X12Segment):
     """
     Health Care Information/Diagnostic Codes
@@ -1071,6 +1198,19 @@ class IsaSegment(X12Segment):
         return self.delimiters.element_separator.join(segment_fields)
 
 
+class K3Segment(X12Segment):
+    """
+    File information
+    Example:
+        K3*STATE DATA REQUIREMENT~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.K3
+    fixed_format_information: str
+    record_format_code: Optional[str]
+    composite_unit_of_measurement: Optional[str]
+
+
 class LeSegment(X12Segment):
     """
     Loop trailer segment.
@@ -1376,6 +1516,18 @@ class Nm1Segment(X12Segment):
         return field_value
 
 
+class NteSegment(X12Segment):
+    """
+    Note/Special Instruction
+    Example:
+        NTE*ADD*SURGERY WAS UNUSUALLY LONG BECAUSE [FILL IN REASON]~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.NTE
+    note_reference_code: str
+    description: str
+
+
 class PatSegment(X12Segment):
     """
     Patient Information:
@@ -1516,6 +1668,42 @@ class PrvSegment(X12Segment):
             raise ValueError(
                 "only one of reference_identification_qualifier or reference_identification is allowed"
             )
+
+        return values
+
+
+class PwkSegment(X12Segment):
+    """
+    Paperwork
+    Example:
+        PWK*OZ*BM***AC*DMN0012~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PWK
+    report_type_code: str
+    report_transmission_code: str
+    report_copies_needed: Optional[str]
+    entity_identifier_code: Optional[str]
+    identification_code_qualifier: Optional[str]
+    identification_code: Optional[str]
+    description: Optional[str]
+    actions_indicated: Optional[str]
+    request_category_code: Optional[str]
+
+    @root_validator
+    def validate_identification_code(cls, values):
+        """
+        Validates that both an identification code and code qualifier are present if either exists.
+        :param values: The model values
+        :return: The model values
+        """
+        fields = (
+            values.get("identification_code_qualifier"),
+            values.get("identification_code"),
+        )
+
+        if any(fields) and not all(fields):
+            raise ValueError("Identification code requires a qualifier and code value")
 
         return values
 

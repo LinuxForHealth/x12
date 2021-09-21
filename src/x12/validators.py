@@ -39,6 +39,28 @@ def validate_duplicate_ref_codes(cls, values: Dict):
     return values
 
 
+def validate_duplicate_date_qualifiers(cls, values: Dict):
+    """
+    Validates that a loop does not contain duplicate DTP date qualifiers.
+
+    :param values: The validated transaction data.
+    :raises: ValueError if duplicate DTP date qualifiers are found.
+    """
+    dtp_codes = defaultdict(int)
+    for dtp_segment in values.get("dtp_segment", []):
+        # account for differing internal representation: model vs dict
+        if not isinstance(dtp_segment, dict):
+            dtp_segment = dtp_segment.dict()
+
+        dtp_qualifier = dtp_segment.get("date_time_qualifier")
+        dtp_codes[dtp_qualifier] += 1
+    duplicate_codes = {k for k, v in dtp_codes.items() if v > 1}
+
+    if duplicate_codes:
+        raise ValueError(f"Duplicate REF codes {duplicate_codes}")
+    return values
+
+
 def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:
     """
     Validates a date field using the segment's date_time_period_format_qualifier (D8 or RD8).

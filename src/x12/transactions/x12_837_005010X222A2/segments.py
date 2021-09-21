@@ -13,10 +13,16 @@ from x12.segments import (
     PrvSegment,
     RefSegment,
     SbrSegment,
+    DtpSegment,
+    PwkSegment,
+    Cn1Segment,
+    AmtSegment,
+    NteSegment,
+    CrcSegment,
 )
-from typing import Literal, Optional
+from typing import Literal, Optional, Dict
 from enum import Enum
-from pydantic import Field
+from pydantic import Field, root_validator
 
 
 class HeaderStSegment(StSegment):
@@ -353,3 +359,379 @@ class Loop2010BbRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2300DtpSegment(DtpSegment):
+    """
+    Claim information DTP segments
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTP01
+        """
+
+        ONSET_OF_CURRENT_SYMPTOM_OR_ILLNESS = "431"
+        INITIAL_TREATMENT = "454"
+        LAST_VISIT_OR_CONSULTATION = "304"
+        ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "453"
+        ACCIDENT = "439"
+        LAST_MENSTRUAL_PERIOD = "484"
+        LAST_XRAY = "455"
+        PRESCRIPTION = "471"
+        DISABILITY = "314"
+        INITIAL_DISABILITY_START = "360"
+        INITIAL_DISABILITY_END = "361"
+        INITIAL_DISABILITY_LAST_DATE_WORKED = "297"
+        INITIAL_DISABILITY_RETURN_TO_WORK = "296"
+        ADMISSION = "435"
+        DISCHARGE = "096"
+        ASSUMED_CARE_DATE = "090"
+        RELINQUISHED_CARE_DATE = "091"
+        FIRST_VISIT_CONSULTATION = "444"
+        REPRICER_RECEIVED_DATE = "050"
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code values for DTP02
+        """
+
+        DATE = "D8"
+        DATE_RANGE = "RD8"
+
+    date_time_qualifier: DateTimeQualifier
+    date_time_period_format_qualifier: DateTimePeriodFormatQualifier
+
+    @root_validator
+    def validate_disability_dates(cls, values: Dict):
+        """
+        Validates that a date range qualifier is used for disability dates.
+
+        :param values: The model's values
+        :return: The model's values
+        """
+        date_qualifier = values.get("date_time_qualifier")
+        period_qualifier = values.get("date_time_period_format_qualifier")
+
+        if date_qualifier == "314" and period_qualifier != "RD8":
+            raise ValueError(
+                "RD8 Date Time Period is required for Disability Dates (314)"
+            )
+        return values
+
+
+class Loop2300PwkSegment(PwkSegment):
+    """
+    Claim information Paperwork Segment
+    """
+
+    class AttachmentReportTypeCode(str, Enum):
+        """
+        PWK01 code values
+        """
+
+        REPORT_JUSTIFYING_TREATMENT_BEYOND_UTILIZATION_GUIDELINES = "03"
+        DRUGS_ADMINISTERED = "04"
+        TREATMENT_DIAGNOSIS = "05"
+        INITIAL_ASSESSMENT = "06"
+        FUNCTIONAL_GOALS = "07"
+        PLAN_OF_TREATMENT = "08"
+        PROGRESS_REPORT = "09"
+        CONTINUED_TREATMENT = "10"
+        CHEMICAL_ANALYSIS = "11"
+        CERTIFIED_TEST_REPORT = "13"
+        JUSTIFICATION_FOR_ADMISSION = "15"
+        RECOVERY_PLAN = "21"
+        ALLERGIES_SENSITIVITIES_DOCUMENT = "A3"
+        AUTOPSY_REPORT = "A4"
+        AMBULANCE_CERTIFICATION = "AM"
+        ADMISSION_SUMMARY = "AS"
+        PHYSICIAN_ORDER = "B3"
+        REFERRAL_FORM = "B4"
+        BENCHMARK_TESTING_RESULTS = "BR"
+        BASELINE = "BS"
+        BLANKET_TESTING_RESULTS = "BT"
+        CHIROPRACTIC_JUSTIFICATION = "CB"
+        CONSENT_FORM = "CK"
+        CERTIFICATION = "CT"
+        DRUG_PROFILE_DOCUMENT = "D2"
+        DENTAL_MODELS = "DA"
+        DURABLE_MEDICAL_EQUIPMENT_PRESCRIPTION = "DB"
+        DIAGNOSTIC_REPORT = "DG"
+        DISCHARGE_MONITORING_REPORT = "DJ"
+        DISCHARGE_SUMMARY = "DS"
+        EXPLANATION_OF_BENEFITS = "EB"
+        HEALTH_CERTIFICATE = "HC"
+        HEALTH_CLINIC_RECORDS = "HR"
+        IMMUNIZATION_RECORD = "I5"
+        STATE_SCHOOL_IMMUNIZATION_RECORDS = "IR"
+        LABORATORY_RESULTS = "LA"
+        MEDICAL_RECORD_ATTACHMENT = "M1"
+        MODELS = "MT"
+        NURSING_NOTES = "NN"
+        OPERATIVE_NOTE = "OB"
+        OXYGEN_CONTENT_AVERAGING_REPORT = "OC"
+        ORDERS_AND_TREATMENTS_DOCUMENT = "OD"
+        OBJECTIVE_PHYSICAL_EXAMINATION = "OE"
+        OXYGEN_THERAPY_CERTIFICATION = "OX"
+        SUPPORT_DATA_FOR_CLAIM = "OZ"
+        PATHOLOGY_REPORT = "P4"
+        PATIENT_MEDICAL_HISTORY_DOCUMENT = "P5"
+        PARENTAL_OR_ENTERAL_CERTIFICATION = "PE"
+        PHYSICAL_THERAPY_NOTES = "PN"
+        PROSTHETICS_OR_ORTHOTIC_CERTIFICATION = "PO"
+        PARAMEDICAL_RESULTS = "PQ"
+        PHYSICIANS_REPORT = "PY"
+        PHYSICAL_THERAPY_CERTIFICATION = "PZ"
+        RADIOLOGY_FILMS = "RB"
+        RADIOLOGY_REPORTS = "RR"
+        REPORT_OF_TESTS_AND_ANALYSIS_REPORT = "RT"
+        RENEWABLE_OXYGEN_CONTENT_AVERAGING_REPORT = "RX"
+        SYMPTOMS_DOCUMENT = "SG"
+        DEATH_NOTIFICATION = "V5"
+        PHOTOGRAPHS = "XP"
+
+    class AttachmentTransmissionCode(str, Enum):
+        """
+        Code values for PWK02
+        """
+
+        AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
+        BY_MAIL = "BM"
+        ELECTRONICALLY_ONLY = "EL"
+        EMAIL = "EM"
+        FILE_TRANSFER = "FT"
+        BY_FAX = "FX"
+
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
+
+
+class Loop2300Cn1Segment(Cn1Segment):
+    """
+    Claim information contract information
+    """
+
+    class ContractTypeCode(str, Enum):
+        """
+        Code values for CN101
+        """
+
+        DIAGNOSIS_RELATED_GROUP = "01"
+        PER_DIEM = "02"
+        VARIABLE_PER_DIEM = "03"
+        FIAT = "04"
+        CAPITATED = "05"
+        PERCENT = "06"
+        OTHER = "09"
+
+    contract_type_code: ContractTypeCode
+
+
+class Loop2300AmtSegment(AmtSegment):
+    """
+    Monetary Amount
+    """
+
+    amount_qualifier_code: Literal["F5"]
+
+
+class Loop2300RefSegment(RefSegment):
+    """
+    Claim information reference identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        SPECIAL_PAYMENT_REFERENCE_NUMBER = "4N"
+        MEDICARE_VERSION_CODE = "F5"
+        MAMMOGRAPHY_CERTIFICATION_NUMBER = "EW"
+        REFERRAL_NUMBER = "9F"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        ORIGINAL_REFERENCE_NUMBER = "F8"
+        CLINICAL_LABORATORY_IMPROVEMENT_AMENDMENT_NUMBER = "X4"
+        REPRICED_CLAIM_REFERENCE_NUMBER = "9A"
+        ADJUSTED_REPRICED_CLAIM_REFERENCE_NUMBER = "9C"
+        QUALIFIED_PRODUCTS_LIST = "LX"
+        CLAIM_NUMBER = "D9"
+        MEDICAL_RECORD_IDENTIFICATION_NUMBER = "EA"
+        PROJECT_CODE = "P4"
+        FACILITY_ID_NUMBER = "1J"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2300NteSegment(NteSegment):
+    """
+    Claim information note segment
+    """
+
+    class NoteReferenceCode(str, Enum):
+        """
+        Code values for NTE01
+        """
+
+        ADDITIONAL_INFORMATION = "ADD"
+        CERTIFICATION_NARRATIVE = "CER"
+        GOALS_REHAB_POTENTIAL_DISCHARGE_PLANS = "DCP"
+        DIAGNOSIS_DESCRIPTION = "DGN"
+        THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
+
+
+class Loop2300CrcAmbulanceCertification(CrcSegment):
+    """
+    Claim Information - Ambulance Certification
+    """
+
+    class YesNoResponseCode(str, Enum):
+        """
+        Code values for CRC02
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class ConditionsIndicator(str, Enum):
+        """
+        Code values for CRC03 - CRC07
+        """
+
+        PATIENT_ADMITTED_TO_HOSPITAL = "01"
+        PATIENT_MOVED_BY_STRETCHER = "04"
+        PATIENT_UNCONSCIOUS_IN_SHOCK = "05"
+        PATIENT_EMERGENCY_TRANSPORT = "06"
+        PATIENT_RESTRAINED = "07"
+        PATIENT_HEMORRHAGING = "08"
+        AMBULANCE_MEDICALLY_NECESSARY = "09"
+        PATIENT_CONFINED_BED_CHAIR = "12"
+
+    code_category: Literal["07"]
+    certification_condition_indicator: YesNoResponseCode
+    condition_code_1: ConditionsIndicator
+    condition_code_2: Optional[ConditionsIndicator]
+    condition_code_3: Optional[ConditionsIndicator]
+    condition_code_4: Optional[ConditionsIndicator]
+    condition_code_5: Optional[ConditionsIndicator]
+
+
+class Loop2300CrcPatientConditionVision(CrcSegment):
+    """
+    Claim Information - Patient Vision Condition
+    """
+
+    class CodeCategoryValues(str, Enum):
+        """
+        Code values for CRC01
+        """
+
+        SPECTACLE_LENSES = "E1"
+        CONTACT_LENSES = "E2"
+        SPECTACLE_FRAMES = "E3"
+
+    class YesNoResponseCode(str, Enum):
+        """
+        Code values for CRC02
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class ConditionsIndicator(str, Enum):
+        """
+        Code values for CRC03 - CRC07
+        """
+
+        GENERAL_STANDARD_20_DEGREE = "L1"
+        REPLACEMENT_LOSS_THEFT = "L2"
+        REPLACEMENT_BREAKAGE_DAMAGE = "L3"
+        REPLACEMENT_PATIENT_PREFERENCE = "L4"
+        REPLACEMENT_MEDICAL_REASON = "L5"
+
+    code_category: CodeCategoryValues
+    certification_condition_indicator: YesNoResponseCode
+    condition_code_1: ConditionsIndicator
+    condition_code_2: Optional[ConditionsIndicator]
+    condition_code_3: Optional[ConditionsIndicator]
+    condition_code_4: Optional[ConditionsIndicator]
+    condition_code_5: Optional[ConditionsIndicator]
+
+
+class Loop2300CrcHomeboundIndicator(CrcSegment):
+    """
+    Claim Information - Homebound indicator
+    """
+
+    class ConditionsIndicator(str, Enum):
+        """
+        Code values for CRC03 - CRC07
+        """
+
+        INDEPENDENT_AT_HOME = "IH"
+
+    code_category: Literal["75"]
+    certification_condition_indicator: Literal["Y"]
+    condition_code_1: ConditionsIndicator
+    condition_code_2: Optional[ConditionsIndicator]
+    condition_code_3: Optional[ConditionsIndicator]
+    condition_code_4: Optional[ConditionsIndicator]
+    condition_code_5: Optional[ConditionsIndicator]
+
+
+class Loop2300CrcEpSdtRefferal(CrcSegment):
+    """
+    Claim Information - Homebound indicator
+    """
+
+    class YesNoResponseCode(str, Enum):
+        """
+        Code values for CRC02
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class ConditionsIndicator(str, Enum):
+        """
+        Code values for CRC03 - CRC07
+        """
+
+        AVAILABLE_NOT_USED = "AV"
+        NOT_USED = "NU"
+        UNDER_TREATMENT = "S2"
+        NEW_SERVICES_REQUESTED = "ST"
+
+    code_category: Literal["ZZ"]
+    certification_condition_indicator: YesNoResponseCode
+    condition_code_1: ConditionsIndicator
+    condition_code_2: Optional[ConditionsIndicator]
+    condition_code_3: Optional[ConditionsIndicator]
+    condition_code_4: Optional[ConditionsIndicator]
+    condition_code_5: Optional[ConditionsIndicator]
+
+
+class Loop2300CrcSegment(CrcSegment):
+    """
+    Claim information conditions indicators
+    """
+
+    @root_validator
+    def validate_specialized_crc_segment(cls, values):
+        """
+        Parses the CRC segments code category to determine which model is used for validation.
+        """
+        code_category = values.get("code_category")
+
+        if code_category == "07":
+            Loop2300CrcAmbulanceCertification(**values)
+        elif code_category in ("E1", "E2", "E3"):
+            Loop2300CrcPatientConditionVision(**values)
+        elif code_category == "75":
+            Loop2300CrcHomeboundIndicator(**values)
+        elif code_category == "ZZ":
+            Loop2300CrcEpSdtRefferal(**values)
+        else:
+            raise ValueError(f"Unknown CRC01 code category value {code_category}")
+        return values

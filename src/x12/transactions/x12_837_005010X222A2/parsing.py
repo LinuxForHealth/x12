@@ -31,7 +31,7 @@ class TransactionLoops(str, Enum):
     SUBSCRIBER_PAYER_NAME = "loop_2010bb"
     PATIENT_LOOP = "loop_2000c"
     PATIENT_LOOP_NAME = "loop_2010ca"
-    PATIENT_CLAIM_INFORMATION = "loop_2300"
+    CLAIM_INFORMATION = "loop_2300"
     CLAIM_REFERRING_PROVIDER_NAME = "loop_2310a"
     CLAIM_RENDERING_PROVIDER_NAME = "loop_2310b"
     CLAIM_SERVICE_FACILITY_LOCATION_NAME = "loop_2310c"
@@ -231,6 +231,32 @@ def set_payer_name_loop(context: X12ParserContext) -> None:
         subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
         payer_name = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
         context.set_loop_context(TransactionLoops.SUBSCRIBER_PAYER_NAME, payer_name)
+
+
+@match("CLM")
+def set_claim_information_loop(context: X12ParserContext) -> None:
+    """
+    Sets the claim information loop for a subscriber or dependent
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name in (
+        TransactionLoops.SUBSCRIBER_NAME,
+        TransactionLoops.SUBSCRIBER_PAYER_NAME,
+    ):
+        patient = _get_subscriber(context)
+    else:
+        raise NotImplemented("Patient is subscriber is not currently implemented")
+
+    patient[TransactionLoops.CLAIM_INFORMATION] = {
+        "dtp_segment": [],
+        "ref_segment": [],
+        "pwk_segment": [],
+        "k3_segment": [],
+        "crc_segment": [],
+        "hi_segment": [],
+    }
+    context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, patient)
 
 
 @match("SE")
