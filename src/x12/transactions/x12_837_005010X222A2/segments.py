@@ -20,6 +20,7 @@ from x12.segments import (
     NteSegment,
     CrcSegment,
     PatSegment,
+    HcpSegment,
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -738,10 +739,112 @@ class Loop2300CrcSegment(CrcSegment):
         return values
 
 
+class Loop2300HcpSegment(HcpSegment):
+    """
+    Claim Information Price Adjustments
+    """
+
+    class PricingMethodology(str, Enum):
+        """
+        Code values for HCP01
+        """
+
+        ZERO_PRICING_NOT_COVERED = "00"
+        PRICED_AS_BILLED_100_PERCENT = "01"
+        PRICED_AT_STANDARD_FEE_SCHEDULE = "02"
+        PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
+        BUNDLED_PRICING = "04"
+        PEER_REVIEW_PRICING = "05"
+        FLAT_RATE_PRICING = "07"
+        COMBINATION_PRICING = "08"
+        MATERNITY_PRICING = "09"
+        OTHER_PRICING = "10"
+        LOWER_OF_COST = "11"
+        RATIO_OF_COST = "12"
+        COST_REIMBURSED = "13"
+        ADJUSTMENT_PRICING = "14"
+
+    class RejectReasonCode(str, Enum):
+        """
+        Code values for HCP13
+        """
+
+        CANNOT_IDENTIFY_PROVIDER_AS_TPO = "T1"
+        CANNOT_IDENTIFY_PAYER_AS_TPO = "T2"
+        CANNOT_IDENTIFY_INSURED_AS_TPO = "T3"
+        PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
+        CERTIFICATION_INFORMATION_MISSING = "T5"
+        CLAIM_DOES_NOT_CONTAIN_INFO_FOR_REPRICING = "T6"
+
+    class PolicyComplianceCode(str, Enum):
+        """
+        Code values for HCP14
+        """
+
+        PROCEDURE_FOLLOWED = "1"
+        NOT_FOLLOWED_CALL_NOT_MADE = "2"
+        NOT_MEDICALLY_NECESSARY = "3"
+        NOT_FOLLOWED_OTHER = "4"
+        EMERGENCY_ADMIT_NON_NETWORK_HOSPITAL = "5"
+
+    class ExceptionCode(str, Enum):
+        """
+        Code values for HCP15
+        """
+
+        NON_NETWORK_PROFESSIONAL_PROVIDER_IN_NETWORK_HOSPITAL = "1"
+        EMERGENCY_CARE = "2"
+        SERVICES_SPECIALIST_NOT_IN_NETWORK = "3"
+        OUT_OF_SERVICE_AREA = "4"
+        STATE_MAnDATES = "5"
+        OTHER = "6"
+
+    pricing_methodology: PricingMethodology
+    reject_reason_code: Optional[RejectReasonCode]
+    policy_compliance_code: Optional[PolicyComplianceCode]
+    exception_code: Optional[ExceptionCode]
+
+
+class Loop2310ANm1Segment(Nm1Segment):
+    """
+    Claim Referring Provider Name
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        REFERRING_PROVIDER = "DN"
+        PRIMARY_CARE_PROVIDER = "P3"
+
+    entity_identifier_code: EntityIdentifierCode
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2310ARefSegment(RefSegment):
+    """
+    Claim Referring Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
 class Loop2000CHlSegment(HlSegment):
     """
     The HL segment for Loop 2000C (Patient)
     """
+
     hierarchical_level_code: Literal["23"]
 
 
@@ -749,10 +852,12 @@ class Loop2000CPatSegment(PatSegment):
     """
     The PAT, patient, segment for Loop2000C
     """
+
     class IndividualRelationshipCode(str, Enum):
         """
         Code values for PAT01
         """
+
         SPOUSE = "01"
         CHILD = "19"
         EMPLOYEE = "20"
@@ -769,6 +874,7 @@ class Loop2010CaNm1Segment(Nm1Segment):
     """
     Loop2010CA NM1 segment for Patient
     """
+
     entity_identifier_code: Literal["QC"]
     entity_type_qualifier: Literal["1"]
 
@@ -777,10 +883,12 @@ class Loop2010CaRefSegment(RefSegment):
     """
     Loop 2010CA (Patient Name) REF Segment
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         AGENCY_CLAIM_NUMBER = "Y4"
         MEMBER_IDENTIFICATION_NUMBER = "1W"
         SOCIAL_SECURITY_NUMBER = "SY"
@@ -790,5 +898,6 @@ class Loop2010CaPerSegment(PerSegment):
     """
     Loop2010CA (Patient Name) Per (Contact) segment
     """
+
     communication_number_qualifier_1: Literal["TE"]
     communication_number_qualifier_2: Optional[Literal["EX"]]

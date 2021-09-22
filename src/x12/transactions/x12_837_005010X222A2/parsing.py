@@ -11,7 +11,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 
 from enum import Enum
 from x12.parsing import match, X12ParserContext
-from typing import Dict
+from typing import Dict, Optional
 
 
 class TransactionLoops(str, Enum):
@@ -74,13 +74,27 @@ def _get_billing_provider(context: X12ParserContext) -> Dict:
 def _get_subscriber(context: X12ParserContext) -> Dict:
     """Returns the current subscriber record"""
     billing_provider = _get_billing_provider(context)
-    return billing_provider[TransactionLoops.SUBSCRIBER]
+    return billing_provider[TransactionLoops.SUBSCRIBER][-1]
 
 
-def _get_patient(context: X12ParserContext) -> Dict:
-    """Returns the current patient record"""
+def _get_patient(context: X12ParserContext) -> Optional[Dict]:
+    """Returns the current patient record (not subscriber)"""
     subscriber = _get_subscriber(context)
-    return subscriber[TransactionLoops.PATIENT_LOOP][-1]
+    if TransactionLoops.PATIENT_LOOP in subscriber:
+        return subscriber[TransactionLoops.PATIENT_LOOP][-1]
+    else:
+        return None
+
+
+def _get_claim(context: X12ParserContext) -> Dict:
+    """Returns the current claim record for the patient (either subscriber or dependent)"""
+    patient = _get_patient(context)
+    if patient:
+        claim = patient[TransactionLoops.CLAIM_INFORMATION][-1]
+    else:
+        subscriber = _get_subscriber(context)
+        claim = subscriber[TransactionLoops.CLAIM_INFORMATION][-1]
+    return claim
 
 
 @match("ST")
@@ -206,8 +220,13 @@ def set_subscriber_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
     billing_provider = _get_billing_provider(context)
-    billing_provider[TransactionLoops.SUBSCRIBER] = {}
-    subscriber = billing_provider[TransactionLoops.SUBSCRIBER]
+
+    if TransactionLoops.SUBSCRIBER not in billing_provider:
+        billing_provider[TransactionLoops.SUBSCRIBER] = [{}]
+    else:
+        billing_provider[TransactionLoops.SUBSCRIBER].append({})
+
+    subscriber = billing_provider[TransactionLoops.SUBSCRIBER][-1]
     context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
 
 
@@ -306,6 +325,21 @@ def set_claim_information_loop(context: X12ParserContext) -> None:
 
     patient_claim = patient[TransactionLoops.CLAIM_INFORMATION][-1]
     context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, patient_claim)
+
+
+@match("NM1", conditions={"entity_identifier_code": "82"})
+def set_rendering_provider_name_loop(context: X12ParserContext):
+    """
+    Sets the rendering provider for the claim.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    claim = _get_claim(context)
+    claim[TransactionLoops.CLAIM_RENDERING_PROVIDER_NAME] = {"ref_segment": []}
+    rendering_provider = claim[TransactionLoops.CLAIM_RENDERING_PROVIDER_NAME]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_RENDERING_PROVIDER_NAME, rendering_provider
+    )
 
 
 @match("SE")

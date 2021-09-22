@@ -79,6 +79,9 @@ from .segments import (
     Loop2010CaNm1Segment,
     Loop2010CaRefSegment,
     Loop2010CaPerSegment,
+    Loop2300HcpSegment,
+    Loop2310ANm1Segment,
+    Loop2310ARefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -191,6 +194,19 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2310A(X12SegmentGroup):
+    """
+    Claim Referring Provider
+    """
+
+    nm1_segment: Loop2310ANm1Segment
+    ref_segment: Optional[List[Loop2310ARefSegment]] = Field(min_items=0, max_items=3)
+
+    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2300(X12SegmentGroup):
     """
     Loop 2300 - Claims
@@ -208,6 +224,8 @@ class Loop2300(X12SegmentGroup):
     cr2_segment: Optional[Cr2Segment]
     crc_segment: Optional[List[Loop2300CrcSegment]] = Field(min_items=0, max_items=8)
     hi_segment: Optional[List[HiSegment]] = Field(min_items=1, max_items=4)
+    hcp_segment: Optional[Loop2300HcpSegment]
+    loop_2310A: Optional[Loop2310A]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers
@@ -222,6 +240,7 @@ class Loop2010Ca(X12SegmentGroup):
     """
     Loop 2010CA Patient Name
     """
+
     nm1_segment: Loop2010CaNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
@@ -234,6 +253,7 @@ class Loop2000C(X12SegmentGroup):
     """
     Loop 2000C - Patient
     """
+
     hl_segment: Loop2000CHlSegment
     pat_segment: Loop2000CPatSegment
     loop_2010ca: Loop2010Ca
@@ -266,7 +286,7 @@ class Loop2000A(X12SegmentGroup):
     loop_2010aa: Loop2010Aa
     loop_2010ab: Loop2010Ab
     loop_2010ac: Optional[Loop2010Ac]
-    loop_2000b: Loop2000B
+    loop_2000b: List[Loop2000B]
 
 
 class Header(X12SegmentGroup):
