@@ -288,9 +288,9 @@ def set_claim_information_loop(context: X12ParserContext) -> None:
     ):
         patient = _get_subscriber(context)
     else:
-        raise NotImplemented("Patient is subscriber is not currently implemented")
+        patient = _get_patient(context)
 
-    patient[TransactionLoops.CLAIM_INFORMATION] = {
+    patient_claim = {
         "dtp_segment": [],
         "ref_segment": [],
         "pwk_segment": [],
@@ -298,7 +298,14 @@ def set_claim_information_loop(context: X12ParserContext) -> None:
         "crc_segment": [],
         "hi_segment": [],
     }
-    context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, patient)
+
+    if TransactionLoops.CLAIM_INFORMATION not in patient:
+        patient[TransactionLoops.CLAIM_INFORMATION] = [patient_claim]
+    else:
+        patient[TransactionLoops.CLAIM_INFORMATION].append(patient_claim)
+
+    patient_claim = patient[TransactionLoops.CLAIM_INFORMATION][-1]
+    context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, patient_claim)
 
 
 @match("SE")

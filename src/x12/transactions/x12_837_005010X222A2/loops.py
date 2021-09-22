@@ -237,6 +237,7 @@ class Loop2000C(X12SegmentGroup):
     hl_segment: Loop2000CHlSegment
     pat_segment: Loop2000CPatSegment
     loop_2010ca: Loop2010Ca
+    loop_2300: Optional[List[Loop2300]] = Field(min_items=0, max_items=100)
 
 
 class Loop2000B(X12SegmentGroup):
