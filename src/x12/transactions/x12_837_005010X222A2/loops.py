@@ -91,6 +91,7 @@ from .segments import (
     Loop2310DNm1Segment,
     Loop2310DRefSegment,
     Loop2310ENm1Segment,
+    Loop2310FNm1Segment,
 )
 from x12.segments import (
     SeSegment,
@@ -203,6 +204,16 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2310F(X12SegmentGroup):
+    """
+    Claim ambulance drop-off location
+    """
+
+    nm1_segment: Loop2310FNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
 class Loop2310E(X12SegmentGroup):
     """
     Claim ambulance pickup location
@@ -284,6 +295,7 @@ class Loop2300(X12SegmentGroup):
     loop_2310c: Optional[Loop2310C]
     loop_2310d: Optional[Loop2310D]
     loop_2310e: Optional[Loop2310E]
+    loop_2310f: Optional[Loop2310F]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

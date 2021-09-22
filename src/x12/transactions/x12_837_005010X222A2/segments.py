@@ -1020,3 +1020,12 @@ class Loop2310ENm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["PW"]
     entity_type_qualifier: Literal["2"]
+
+
+class Loop2310FNm1Segment(Nm1Segment):
+    """
+    Claim ambulance pickup location
+    """
+
+    entity_identifier_code: Literal["45"]
+    entity_type_qualifier: Literal["2"]

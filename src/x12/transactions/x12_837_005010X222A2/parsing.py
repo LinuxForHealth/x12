@@ -387,6 +387,21 @@ def set_ambulance_pickup_loop(context: X12ParserContext):
     )
 
 
+@match("NM1", conditions={"entity_identifier_code": "45"})
+def set_ambulance_pickup_loop(context: X12ParserContext):
+    """
+    Sets the claim ambulance pickup location
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    claim = _get_claim(context)
+    claim[TransactionLoops.CLAIM_AMBULANCE_DROPOFF_LOCATION] = {}
+    ambulance_dropoff = claim[TransactionLoops.CLAIM_AMBULANCE_DROPOFF_LOCATION]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_AMBULANCE_DROPOFF_LOCATION, ambulance_dropoff
+    )
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """
