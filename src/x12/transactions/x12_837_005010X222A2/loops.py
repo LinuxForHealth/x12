@@ -88,6 +88,8 @@ from .segments import (
     Loop2310CNm1Segment,
     Loop2310CRefSegment,
     Loop2310CPerSegment,
+    Loop2310DNm1Segment,
+    Loop2310DRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -198,6 +200,15 @@ class Loop2010Bb(X12SegmentGroup):
     _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
     )
+
+
+class Loop2310D(X12SegmentGroup):
+    """
+    Claim Supervising Provider
+    """
+
+    nm1_segment: Loop2310DNm1Segment
+    ref_segment: Optional[List[Loop2310DRefSegment]]
 
 
 class Loop2310C(X12SegmentGroup):

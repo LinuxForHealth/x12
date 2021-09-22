@@ -983,3 +983,38 @@ class Loop2310CPerSegment(PerSegment):
 
     communication_number_qualifier_1: Literal["TE"]
     communication_number_qualifier_2: Optional[Literal["EX"]]
+
+
+class Loop2310DNm1Segment(Nm1Segment):
+    """
+    Claim Supervising Provider Name
+    """
+
+    entity_identifier_code: Literal["DQ"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Literal["XX"]
+
+
+class Loop2310DRefSegment(Nm1Segment):
+    """
+    Claim Supervising Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+"""
+    Loop2310DNm1Segment,
+    Loop2310DRefSegment,
+
+"""

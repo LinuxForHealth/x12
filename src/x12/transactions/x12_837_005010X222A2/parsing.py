@@ -357,6 +357,21 @@ def set_service_facility_location_name(context: X12ParserContext):
     )
 
 
+@match("NM1", conditions={"entity_identifier_code": "DQ"})
+def set_supervising_provider_name(context: X12ParserContext):
+    """
+    Sets the claim supervising provider
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    claim = _get_claim(context)
+    claim[TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME] = {"ref_segment": []}
+    supervising_provider = claim[TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME, supervising_provider
+    )
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """
