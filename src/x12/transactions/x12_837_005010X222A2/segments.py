@@ -840,6 +840,43 @@ class Loop2310ARefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
+class Loop2310BNm1Segment(Nm1Segment):
+    """
+    Claim Rendering Provider Name
+    """
+
+    entity_identifier_code: Literal["82"]
+    identification_code_qualifier: Literal["XX"]
+
+
+class Loop2310BPrvSegment(PrvSegment):
+    """
+    Claim Rendering Provider Specialty
+    """
+
+    provider_code: Literal["PE"]
+    reference_identification_qualifier: Literal["PXC"]
+    reference_identification: str = Field(min_length=1, max_length=50)
+
+
+class Loop2310BRefSegment(RefSegment):
+    """
+    Claim Rendering Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
 class Loop2000CHlSegment(HlSegment):
     """
     The HL segment for Loop 2000C (Patient)

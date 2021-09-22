@@ -82,6 +82,9 @@ from .segments import (
     Loop2300HcpSegment,
     Loop2310ANm1Segment,
     Loop2310ARefSegment,
+    Loop2310BNm1Segment,
+    Loop2310BPrvSegment,
+    Loop2310BRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -194,6 +197,20 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2310B(X12SegmentGroup):
+    """
+    Claim Rendering Provider
+    """
+
+    nm1_segment: Loop2310BNm1Segment
+    prv_segment: Optional[Loop2310BPrvSegment]
+    ref_segment: Optional[List[Loop2310BRefSegment]] = Field(min_items=0, max_items=4)
+
+    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2310A(X12SegmentGroup):
     """
     Claim Referring Provider
@@ -225,7 +242,8 @@ class Loop2300(X12SegmentGroup):
     crc_segment: Optional[List[Loop2300CrcSegment]] = Field(min_items=0, max_items=8)
     hi_segment: Optional[List[HiSegment]] = Field(min_items=1, max_items=4)
     hcp_segment: Optional[Loop2300HcpSegment]
-    loop_2310A: Optional[Loop2310A]
+    loop_2310a: Optional[Loop2310A]
+    loop_2310b: Optional[Loop2310B]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers
