@@ -77,6 +77,12 @@ def _get_subscriber(context: X12ParserContext) -> Dict:
     return billing_provider[TransactionLoops.SUBSCRIBER]
 
 
+def _get_patient(context: X12ParserContext) -> Dict:
+    """Returns the current patient record"""
+    subscriber = _get_subscriber(context)
+    return subscriber[TransactionLoops.PATIENT_LOOP][-1]
+
+
 @match("ST")
 def set_header_loop(context: X12ParserContext) -> None:
     """
@@ -231,6 +237,42 @@ def set_payer_name_loop(context: X12ParserContext) -> None:
         subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
         payer_name = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
         context.set_loop_context(TransactionLoops.SUBSCRIBER_PAYER_NAME, payer_name)
+
+
+@match("HL", conditions={"hierarchical_level_code": "23"})
+def set_patient_loop(context: X12ParserContext) -> None:
+    """
+    Sets the patient loop.
+    The patient loop is used when the patient is not the subscriber, or cannot be identified as a subscriber.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    subscriber = _get_subscriber(context)
+    patient_loops = subscriber.get(TransactionLoops.PATIENT_LOOP)
+
+    if not patient_loops:
+        subscriber[TransactionLoops.PATIENT_LOOP] = [{}]
+    else:
+        subscriber[TransactionLoops.PATIENT_LOOP].append({})
+
+    patient_loop = subscriber[TransactionLoops.PATIENT_LOOP][-1]
+    context.set_loop_context(TransactionLoops.PATIENT_LOOP, patient_loop)
+
+
+@match("NM1", conditions={"entity_identifier_code": "QC"})
+def set_patient_name_loop(context: X12ParserContext) -> None:
+    """
+    Sets the patient name loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    patient = _get_patient(context)
+
+    if TransactionLoops.PATIENT_LOOP_NAME not in patient:
+        patient[TransactionLoops.PATIENT_LOOP_NAME] = {}
+
+    patient_name = patient[TransactionLoops.PATIENT_LOOP_NAME]
+    context.set_loop_context(TransactionLoops.PATIENT_LOOP_NAME, patient_name)
 
 
 @match("CLM")

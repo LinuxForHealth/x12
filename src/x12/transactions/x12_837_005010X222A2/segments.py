@@ -19,6 +19,7 @@ from x12.segments import (
     AmtSegment,
     NteSegment,
     CrcSegment,
+    PatSegment,
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -735,3 +736,59 @@ class Loop2300CrcSegment(CrcSegment):
         else:
             raise ValueError(f"Unknown CRC01 code category value {code_category}")
         return values
+
+
+class Loop2000CHlSegment(HlSegment):
+    """
+    The HL segment for Loop 2000C (Patient)
+    """
+    hierarchical_level_code: Literal["23"]
+
+
+class Loop2000CPatSegment(PatSegment):
+    """
+    The PAT, patient, segment for Loop2000C
+    """
+    class IndividualRelationshipCode(str, Enum):
+        """
+        Code values for PAT01
+        """
+        SPOUSE = "01"
+        CHILD = "19"
+        EMPLOYEE = "20"
+        UNKNOWN = "21"
+        ORGAN_DONOR = "39"
+        CADAVER_DONOR = "40"
+        LIFE_PARTNER = "53"
+        OTHER_RELATIONSHIP = "G8"
+
+    individual_relationship_code: IndividualRelationshipCode
+
+
+class Loop2010CaNm1Segment(Nm1Segment):
+    """
+    Loop2010CA NM1 segment for Patient
+    """
+    entity_identifier_code: Literal["QC"]
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2010CaRefSegment(RefSegment):
+    """
+    Loop 2010CA (Patient Name) REF Segment
+    """
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        AGENCY_CLAIM_NUMBER = "Y4"
+        MEMBER_IDENTIFICATION_NUMBER = "1W"
+        SOCIAL_SECURITY_NUMBER = "SY"
+
+
+class Loop2010CaPerSegment(PerSegment):
+    """
+    Loop2010CA (Patient Name) Per (Contact) segment
+    """
+    communication_number_qualifier_1: Literal["TE"]
+    communication_number_qualifier_2: Optional[Literal["EX"]]

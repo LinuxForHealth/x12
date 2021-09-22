@@ -74,6 +74,11 @@ from .segments import (
     Loop2300RefSegment,
     Loop2300NteSegment,
     Loop2300CrcSegment,
+    Loop2000CHlSegment,
+    Loop2000CPatSegment,
+    Loop2010CaNm1Segment,
+    Loop2010CaRefSegment,
+    Loop2010CaPerSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -213,12 +218,25 @@ class Loop2300(X12SegmentGroup):
     )
 
 
+class Loop2010Ca(X12SegmentGroup):
+    """
+    Loop 2010CA Patient Name
+    """
+    nm1_segment: Loop2010CaNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+    dmg_segment: DmgSegment
+    ref_segment: Optional[List[Loop2010CaRefSegment]] = Field(min_items=0, max_items=2)
+    per_segment: Optional[Loop2010CaPerSegment]
+
+
 class Loop2000C(X12SegmentGroup):
     """
     Loop 2000C - Patient
     """
-
-    pass
+    hl_segment: Loop2000CHlSegment
+    pat_segment: Loop2000CPatSegment
+    loop_2010ca: Loop2010Ca
 
 
 class Loop2000B(X12SegmentGroup):
