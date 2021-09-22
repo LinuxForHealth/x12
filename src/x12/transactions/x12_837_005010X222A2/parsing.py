@@ -342,6 +342,21 @@ def set_rendering_provider_name_loop(context: X12ParserContext):
     )
 
 
+@match("NM1", conditions={"entity_identifier_code": "77"})
+def set_service_facility_location_name(context: X12ParserContext):
+    """
+    Sets the claim service facility location
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    claim = _get_claim(context)
+    claim[TransactionLoops.CLAIM_SERVICE_FACILITY_LOCATION_NAME] = {"ref_segment": []}
+    service_facility = claim[TransactionLoops.CLAIM_SERVICE_FACILITY_LOCATION_NAME]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_SERVICE_FACILITY_LOCATION_NAME, service_facility
+    )
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """

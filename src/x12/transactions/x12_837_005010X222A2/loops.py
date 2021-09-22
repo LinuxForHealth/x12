@@ -85,6 +85,9 @@ from .segments import (
     Loop2310BNm1Segment,
     Loop2310BPrvSegment,
     Loop2310BRefSegment,
+    Loop2310CNm1Segment,
+    Loop2310CRefSegment,
+    Loop2310CPerSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -197,6 +200,18 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2310C(X12SegmentGroup):
+    """
+    Claim Service Facility Location
+    """
+
+    nm1_segment: Optional[Loop2310CNm1Segment]
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+    ref_segment: Optional[List[Loop2310CRefSegment]] = Field(min_items=0, max_items=3)
+    per_segment: Loop2310CPerSegment
+
+
 class Loop2310B(X12SegmentGroup):
     """
     Claim Rendering Provider
@@ -244,6 +259,7 @@ class Loop2300(X12SegmentGroup):
     hcp_segment: Optional[Loop2300HcpSegment]
     loop_2310a: Optional[Loop2310A]
     loop_2310b: Optional[Loop2310B]
+    loop_2310c: Optional[Loop2310C]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

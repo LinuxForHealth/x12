@@ -129,79 +129,6 @@ class Loop2000APrvSegment(PrvSegment):
     reference_identification: str = Field(min_length=1, max_length=50)
 
 
-class Loop2010AaNm1Segment(Nm1Segment):
-    """
-    Billing Provider Name and Identification
-    """
-
-    entity_identifier_code: Literal["85"]
-    identification_code_qualifier: Optional[Literal["XX"]]
-
-
-class Loop2010AaRefSegment(RefSegment):
-    """
-    Billing Provider Identification Codes
-    """
-
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        EMPLOYER_IDENTIFICATION_NUMBER = "EI"
-        SOCIAL_SECURITY_NUMBER = "SY"
-        STATE_LICENSE_NUMBER = "0B"
-        PROVIDER_UPIN_NUMBER = "1G"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2010AbNm1Segment(Nm1Segment):
-    """
-    Billing Provider Name and Identification
-    """
-
-    entity_identifier_code: Literal["87"]
-    name_last_or_organization_name: Optional[str]
-
-
-class Loop2010AcNm1Segment(Nm1Segment):
-    """
-    Pay to Plan Name and Identification
-    """
-
-    class IdentificationCodeQualifier(str, Enum):
-        """
-        Code values for NM108
-        """
-
-        PAYOR_IDENTIFICATION = "PI"
-        CMS_PLAN_ID = "XV"
-
-    entity_identifier_code: Literal["PE"]
-    entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
-    identification_code_qualifier: IdentificationCodeQualifier
-
-
-class Loop2010AcRefSegment(RefSegment):
-    """
-    Pay to Plan Identification Codes
-    """
-
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        PAYER_IDENTIFICATION_NUMBER = "2u"
-        CLAIM_OFFICE_NUMBER = "FY"
-        NAIC_CODE = "NF"
-        EMPLOYERS_IDENTIFICATION_NUMBER = "EI"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
 class Loop2000BHlSegment(HlSegment):
     """
     Subscriber Hierarchy Segment
@@ -283,6 +210,109 @@ class Loop2000BSbrSegment(SbrSegment):
     insurance_type_code: Optional[InsuranceTypeCode]
 
 
+class Loop2000CHlSegment(HlSegment):
+    """
+    The HL segment for Loop 2000C (Patient)
+    """
+
+    hierarchical_level_code: Literal["23"]
+
+
+class Loop2000CPatSegment(PatSegment):
+    """
+    The PAT, patient, segment for Loop2000C
+    """
+
+    class IndividualRelationshipCode(str, Enum):
+        """
+        Code values for PAT01
+        """
+
+        SPOUSE = "01"
+        CHILD = "19"
+        EMPLOYEE = "20"
+        UNKNOWN = "21"
+        ORGAN_DONOR = "39"
+        CADAVER_DONOR = "40"
+        LIFE_PARTNER = "53"
+        OTHER_RELATIONSHIP = "G8"
+
+    individual_relationship_code: IndividualRelationshipCode
+
+
+class Loop2010AaNm1Segment(Nm1Segment):
+    """
+    Billing Provider Name and Identification
+    """
+
+    entity_identifier_code: Literal["85"]
+    identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2010AaRefSegment(RefSegment):
+    """
+    Billing Provider Identification Codes
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        EMPLOYER_IDENTIFICATION_NUMBER = "EI"
+        SOCIAL_SECURITY_NUMBER = "SY"
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2010AbNm1Segment(Nm1Segment):
+    """
+    Billing Provider Name and Identification
+    """
+
+    entity_identifier_code: Literal["87"]
+    name_last_or_organization_name: Optional[str]
+
+
+class Loop2010AcNm1Segment(Nm1Segment):
+    """
+    Pay to Plan Name and Identification
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        PAYOR_IDENTIFICATION = "PI"
+        CMS_PLAN_ID = "XV"
+
+    entity_identifier_code: Literal["PE"]
+    entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
+    identification_code_qualifier: IdentificationCodeQualifier
+
+
+class Loop2010AcRefSegment(RefSegment):
+    """
+    Pay to Plan Identification Codes
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        PAYER_IDENTIFICATION_NUMBER = "2u"
+        CLAIM_OFFICE_NUMBER = "FY"
+        NAIC_CODE = "NF"
+        EMPLOYERS_IDENTIFICATION_NUMBER = "EI"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
 class Loop2010BaNm1Segment(Nm1Segment):
     """
     Subscriber Name Segment
@@ -361,6 +391,39 @@ class Loop2010BbRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2010CaNm1Segment(Nm1Segment):
+    """
+    Loop2010CA NM1 segment for Patient
+    """
+
+    entity_identifier_code: Literal["QC"]
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2010CaPerSegment(PerSegment):
+    """
+    Loop2010CA (Patient Name) Per (Contact) segment
+    """
+
+    communication_number_qualifier_1: Literal["TE"]
+    communication_number_qualifier_2: Optional[Literal["EX"]]
+
+
+class Loop2010CaRefSegment(RefSegment):
+    """
+    Loop 2010CA (Patient Name) REF Segment
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        AGENCY_CLAIM_NUMBER = "Y4"
+        MEMBER_IDENTIFICATION_NUMBER = "1W"
+        SOCIAL_SECURITY_NUMBER = "SY"
 
 
 class Loop2300DtpSegment(DtpSegment):
@@ -877,48 +940,28 @@ class Loop2310BRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2000CHlSegment(HlSegment):
+class Loop2310CaPerSegment(PerSegment):
     """
-    The HL segment for Loop 2000C (Patient)
-    """
-
-    hierarchical_level_code: Literal["23"]
-
-
-class Loop2000CPatSegment(PatSegment):
-    """
-    The PAT, patient, segment for Loop2000C
+    Loop2310CA (Patient Name) Per (Contact) segment
     """
 
-    class IndividualRelationshipCode(str, Enum):
-        """
-        Code values for PAT01
-        """
-
-        SPOUSE = "01"
-        CHILD = "19"
-        EMPLOYEE = "20"
-        UNKNOWN = "21"
-        ORGAN_DONOR = "39"
-        CADAVER_DONOR = "40"
-        LIFE_PARTNER = "53"
-        OTHER_RELATIONSHIP = "G8"
-
-    individual_relationship_code: IndividualRelationshipCode
+    communication_number_qualifier_1: Literal["TE"]
+    communication_number_qualifier_2: Optional[Literal["EX"]]
 
 
-class Loop2010CaNm1Segment(Nm1Segment):
+class Loop2310CNm1Segment(Nm1Segment):
     """
-    Loop2010CA NM1 segment for Patient
+    Claim Service Facility Location Name
     """
 
-    entity_identifier_code: Literal["QC"]
-    entity_type_qualifier: Literal["1"]
+    entity_identifier_code: Literal["77"]
+    entity_type_qualifier: Literal["2"]
+    identification_code_qualifier: Literal["XX"]
 
 
-class Loop2010CaRefSegment(RefSegment):
+class Loop2310CRefSegment(RefSegment):
     """
-    Loop 2010CA (Patient Name) REF Segment
+    Claim Service Facility Location Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -926,14 +969,16 @@ class Loop2010CaRefSegment(RefSegment):
         Code values for REF01
         """
 
-        AGENCY_CLAIM_NUMBER = "Y4"
-        MEMBER_IDENTIFICATION_NUMBER = "1W"
-        SOCIAL_SECURITY_NUMBER = "SY"
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2010CaPerSegment(PerSegment):
+class Loop2310CPerSegment(PerSegment):
     """
-    Loop2010CA (Patient Name) Per (Contact) segment
+    Claim Service Facility Contact Segment
     """
 
     communication_number_qualifier_1: Literal["TE"]
