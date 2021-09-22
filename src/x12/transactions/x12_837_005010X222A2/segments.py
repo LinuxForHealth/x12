@@ -1013,8 +1013,10 @@ class Loop2310DRefSegment(Nm1Segment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-"""
-    Loop2310DNm1Segment,
-    Loop2310DRefSegment,
+class Loop2310ENm1Segment(Nm1Segment):
+    """
+    Claim ambulance pickup location
+    """
 
-"""
+    entity_identifier_code: Literal["PW"]
+    entity_type_qualifier: Literal["2"]

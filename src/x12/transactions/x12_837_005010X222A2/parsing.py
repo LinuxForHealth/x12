@@ -343,7 +343,7 @@ def set_rendering_provider_name_loop(context: X12ParserContext):
 
 
 @match("NM1", conditions={"entity_identifier_code": "77"})
-def set_service_facility_location_name(context: X12ParserContext):
+def set_service_facility_location_name_loop(context: X12ParserContext):
     """
     Sets the claim service facility location
 
@@ -358,7 +358,7 @@ def set_service_facility_location_name(context: X12ParserContext):
 
 
 @match("NM1", conditions={"entity_identifier_code": "DQ"})
-def set_supervising_provider_name(context: X12ParserContext):
+def set_supervising_provider_name_loop(context: X12ParserContext):
     """
     Sets the claim supervising provider
 
@@ -369,6 +369,21 @@ def set_supervising_provider_name(context: X12ParserContext):
     supervising_provider = claim[TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME]
     context.set_loop_context(
         TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME, supervising_provider
+    )
+
+
+@match("NM1", conditions={"entity_identifier_code": "PW"})
+def set_ambulance_pickup_loop(context: X12ParserContext):
+    """
+    Sets the claim ambulance pickup location
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    claim = _get_claim(context)
+    claim[TransactionLoops.CLAIM_AMBULANCE_PICKUP_LOCATION] = {}
+    ambulance_pickup = claim[TransactionLoops.CLAIM_AMBULANCE_PICKUP_LOCATION]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_AMBULANCE_PICKUP_LOCATION, ambulance_pickup
     )
 
 
