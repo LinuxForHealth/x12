@@ -402,6 +402,35 @@ def set_ambulance_pickup_loop(context: X12ParserContext):
     )
 
 
+# TODO: finish up loop parser
+@match("SBR", conditions={"individual_relationship_code": ""})
+def set_other_subscriber(context: X12ParserContext):
+    """
+    Sets the claim other subscriber loop used to coordinate payment and other insurance carriers.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if context.loop_name != TransactionLoops.SUBSCRIBER:
+        claim = _get_claim(context)
+        other_subscriber = {"cas_segment": [], "amt_segment": []}
+
+        if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION not in claim:
+            claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION] = [
+                other_subscriber
+            ]
+        else:
+            claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION].append(
+                other_subscriber
+            )
+
+        other_subscriber = claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION][
+            -1
+        ]
+        context.set_loop_context(
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, other_subscriber
+        )
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """

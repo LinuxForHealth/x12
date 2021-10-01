@@ -41,6 +41,17 @@ def test_bht_segment():
     )
 
 
+def test_cas_segment():
+    segment_data = {
+        "adjustment_reason_code_1": "PR",
+        "monetary_amount_1": 1.0,
+        "quantity_1": 7.93,
+    }
+
+    cas_segment: CasSegment = CasSegment(**segment_data)
+    assert cas_segment.x12() == "CAS*PR*1.00*7.93~"
+
+
 def test_clm_segment():
     segment_data = {
         "patient_control_number": "26463774",
@@ -318,6 +329,12 @@ def test_ls_segment():
     assert ls_segment.x12() == "LS*2120~"
 
 
+def test_moa_segment():
+    segment_data = {"claim_payment_remark_code_1": "A4"}
+    moa_segment: MoaSegment = MoaSegment(**segment_data)
+    assert moa_segment.x12() == "MOA***A4~"
+
+
 def test_msg_segment():
     segment_data = {"free_form_text": "this is free form text"}
     msg_segment: MsgSegment = MsgSegment(**segment_data)
@@ -365,6 +382,17 @@ def test_nte_segment():
         nte_segment.x12()
         == "NTE*ADD*SURGERY WAS UNUSUALLY LONG BECAUSE [FILL IN REASON]~"
     )
+
+
+def test_oi_segment():
+    segment_data = {
+        "benefits_assignment_certification": "Y",
+        "patient_signature_source_code": "P",
+        "release_of_information_code": "Y",
+    }
+
+    oi_segment: OiSegment = OiSegment(**segment_data)
+    assert oi_segment.x12() == "OI***Y*P**Y~"
 
 
 def test_pat_segment():

@@ -17,6 +17,38 @@ from datetime import datetime
 from x12.support import parse_x12_date, count_segments
 
 
+def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
+    """
+    Validates duplicate code values for repeating segments.
+
+    Example: Some transactional loops support multiple date, DTP, segments. For these cases this validation ensures
+    that the date_time_qualifier is unique within the loop for the repeating segments.
+
+    Given _validate_duplicate_codes(values, "amt_segment", "amount_qualifier_code"), the following segments are valid:
+    AMT*D*411~
+    AMT*A8*420~
+
+    The following segments are invalid due to duplicate codes
+    AMT*D*411~
+    AMT*D*411~
+    """
+    codes = defaultdict(int)
+    for segment in values.get(segment_name, []):
+        # account for differing internal representation: model vs dict
+        if not isinstance(segment, dict):
+            segment = segment.dict()
+
+        code = segment.get(code_field)
+        codes[code] += 1
+
+    duplicate_codes = {k for k, v in codes.items() if v > 1}
+    if duplicate_codes:
+        raise ValueError(
+            f"Duplicate {segment_name}.{code_field} codes {duplicate_codes}"
+        )
+    return values
+
+
 def validate_duplicate_ref_codes(cls, values: Dict):
     """
     Validates that a loop does not contain duplicate REF codes.
@@ -24,19 +56,19 @@ def validate_duplicate_ref_codes(cls, values: Dict):
     :param values: The validated transaction data.
     :raises: ValueError if duplicate REF codes are found.
     """
-    ref_codes = defaultdict(int)
-    for ref_segment in values.get("ref_segment", []):
-        # account for differing internal representation: model vs dict
-        if not isinstance(ref_segment, dict):
-            ref_segment = ref_segment.dict()
+    return _validate_duplicate_codes(
+        values, "ref_segment", "reference_identification_qualifier"
+    )
 
-        ref_code = ref_segment.get("reference_identification_qualifier")
-        ref_codes[ref_code] += 1
-    duplicate_codes = {k for k, v in ref_codes.items() if v > 1}
 
-    if duplicate_codes:
-        raise ValueError(f"Duplicate REF codes {duplicate_codes}")
-    return values
+def validate_duplicate_amt_codes(cls, values: Dict):
+    """
+    Validates that a loop does not contain duplicate REF codes.
+
+    :param values: The validated transaction data.
+    :raises: ValueError if duplicate REF codes are found.
+    """
+    return _validate_duplicate_codes(values, "amt_segment", "amount_qualifier_code")
 
 
 def validate_duplicate_date_qualifiers(cls, values: Dict):
@@ -46,19 +78,7 @@ def validate_duplicate_date_qualifiers(cls, values: Dict):
     :param values: The validated transaction data.
     :raises: ValueError if duplicate DTP date qualifiers are found.
     """
-    dtp_codes = defaultdict(int)
-    for dtp_segment in values.get("dtp_segment", []):
-        # account for differing internal representation: model vs dict
-        if not isinstance(dtp_segment, dict):
-            dtp_segment = dtp_segment.dict()
-
-        dtp_qualifier = dtp_segment.get("date_time_qualifier")
-        dtp_codes[dtp_qualifier] += 1
-    duplicate_codes = {k for k, v in dtp_codes.items() if v > 1}
-
-    if duplicate_codes:
-        raise ValueError(f"Duplicate REF codes {duplicate_codes}")
-    return values
+    return _validate_duplicate_codes(values, "dtp_segment", "date_time_qualifier")
 
 
 def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:

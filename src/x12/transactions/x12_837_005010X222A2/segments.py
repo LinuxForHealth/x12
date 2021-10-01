@@ -1029,3 +1029,57 @@ class Loop2310FNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["45"]
     entity_type_qualifier: Literal["2"]
+
+
+class Loop2320SbrSegment(SbrSegment):
+    """
+    Claim Other Subscriber
+    """
+
+    class PayerResponsibilityCode(str, Enum):
+        """
+        Code values for SBR01
+        """
+
+        PAYER_RESPONSIBILITY_FOUR = "A"
+        PAYER_RESPONSIBILITY_FIVE = "B"
+        PAYER_RESPONSIBILITY_SIX = "C"
+        PAYER_RESPONSIBILITY_SEVEN = "D"
+        PAYER_RESPONSIBILITY_EIGHT = "E"
+        PAYER_RESPONSIBILITY_NINE = "F"
+        PAYER_RESPONSIBILITY_TEN = "G"
+        PAYER_RESPONSIBILITY_ELEVEN = "H"
+        PAYER_RESPONSIBILITY_PRIMARY = "P"
+        PAYER_RESPONSIBILITY_SECONDARY = "S"
+        PAYER_RESPONSIBILITY_TERTIARY = "T"
+        PAYER_RESPONSIBILITY_UNKNOWN = "U"
+
+    class IndividualRelationshipCode(str, Enum):
+        """
+        Code values for SBR02
+        """
+
+        SPOUSE = "01"
+        SELF = "18"
+        CHILD = "19"
+        EMPLOYEE = "20"
+        UNKNOWN = "21"
+        ORGAN_DONOR = "39"
+        CADAVER_DONOR = "40"
+        LIFE_PARTNER = "53"
+        OTHER_RELATIONSHIP = "G8"
+
+    class InsuranceTypeCode(str, Enum):
+        """
+        SBR05 code values
+        """
+
+        MEDICARE_SECONDARY_WORKING = "12"
+        MEDICARE_SECONDARY_END_STAGE_RENAL = "13"
+        MEDICARE_SECONDARY_AUTO_PRIMARY = "14"
+        MEDICARE_SECONDARY_WORKERS_COMPENSATION = "15"
+        MEDICARE_SECONDARY_PUBLIC_HEALTH_SERVICE = "16"
+        MEDICARE_SECONDARY_BLACK_LUNG = "41"
+        MEDICARE_SECONDARY_VETERANS_ADMINISTRATION = "42"
+        MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
+        MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"

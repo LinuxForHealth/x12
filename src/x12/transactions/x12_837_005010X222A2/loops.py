@@ -92,6 +92,7 @@ from .segments import (
     Loop2310DRefSegment,
     Loop2310ENm1Segment,
     Loop2310FNm1Segment,
+    Loop2320SbrSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -106,12 +107,15 @@ from x12.segments import (
     Cr1Segment,
     Cr2Segment,
     HiSegment,
+    CasSegment,
+    AmtSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
 from x12.validators import (
     validate_duplicate_ref_codes,
     validate_duplicate_date_qualifiers,
+    validate_duplicate_amt_codes,
 )
 
 
@@ -201,6 +205,20 @@ class Loop2010Bb(X12SegmentGroup):
 
     _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
+    )
+
+
+class Loop2320(X12SegmentGroup):
+    """
+    Claim Other subscriber information
+    """
+
+    sbr_segment: Loop2320SbrSegment
+    cas_segment: Optional[CasSegment]
+    amt_segment: Optional[List[AmtSegment]] = Field(min_items=0, max_items=3)
+
+    _validate_amt_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_amt_codes
     )
 
 
@@ -296,6 +314,7 @@ class Loop2300(X12SegmentGroup):
     loop_2310d: Optional[Loop2310D]
     loop_2310e: Optional[Loop2310E]
     loop_2310f: Optional[Loop2310F]
+    loop_2320: Optional[List[Loop2320]] = Field(min_items=0, max_items=10)
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

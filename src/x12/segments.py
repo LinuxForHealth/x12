@@ -81,6 +81,70 @@ class BhtSegment(X12Segment):
     )
 
 
+class CasSegment(X12Segment):
+    """
+    Claim level adjustments
+    Example:
+        CAS*PR*1*7.93~
+    """
+
+    class ClaimAdjustmentGroupCode(str, Enum):
+        """
+        Code values for CAS01
+        """
+
+        CONTRACTUAL_OBLIGATIONS = "CO"
+        CORRECTION_AND_REVERSALS = "CR"
+        OTHER_ADJUSTMENTS = "PI"
+        PATIENT_RESPONSIBILITY = "PR"
+
+    segment_name: X12SegmentName = X12SegmentName.CAS
+    adjustment_reason_code_1: str
+    monetary_amount_1: Decimal
+    quantity_1: Decimal
+
+    adjustment_reason_code_2: Optional[str]
+    monetary_amount_2: Optional[Decimal]
+    quantity_2: Optional[Decimal]
+
+    adjustment_reason_code_3: Optional[str]
+    monetary_amount_3: Optional[Decimal]
+    quantity_3: Optional[Decimal]
+
+    adjustment_reason_code_4: Optional[str]
+    monetary_amount_4: Optional[Decimal]
+    quantity_4: Optional[Decimal]
+
+    adjustment_reason_code_5: Optional[str]
+    monetary_amount_5: Optional[Decimal]
+    quantity_5: Optional[Decimal]
+
+    adjustment_reason_code_6: Optional[str]
+    monetary_amount_6: Optional[Decimal]
+    quantity_6: Optional[Decimal]
+
+    @root_validator
+    def validate_adjustments(cls, values):
+        """
+        Validates that an adjustment "set" has a reason code, amount, and quantity.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        for i in range(1, 7, 1):
+            adjustment_fields: Tuple = (
+                values.get(f"adjustment_reason_code_{i}"),
+                values.get(f"monetary_amount_{i}"),
+                values.get(f"quantity_{i}"),
+            )
+
+            if any(adjustment_fields) and not all(adjustment_fields):
+                raise ValueError(
+                    f"Adjustment set {i} is required to have a reason code, amount, and quantity"
+                )
+
+        return values
+
+
 class ClmSegment(X12Segment):
     """
     Claim Information Segment
@@ -1235,6 +1299,25 @@ class LsSegment(X12Segment):
     loop_id_code: str
 
 
+class MoaSegment(X12Segment):
+    """
+    Outpatient Adjudication Information
+    Example:
+        MOA***A4~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.MOA
+    reimbursement_rate: Optional[Decimal]
+    hcpcs_payable_amount: Optional[Decimal]
+    claim_payment_remark_code_1: Optional[str]
+    claim_payment_remark_code_2: Optional[str]
+    claim_payment_remark_code_3: Optional[str]
+    claim_payment_remark_code_4: Optional[str]
+    claim_payment_remark_code_5: Optional[str]
+    end_stage_renal_disease_payment_amount: Optional[Decimal]
+    nonpayable_professional_component_billable_amount: Optional[Decimal]
+
+
 class MpiSegment(X12Segment):
     """
     Military Personnel Information
@@ -1526,6 +1609,39 @@ class NteSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.NTE
     note_reference_code: str
     description: str
+
+
+class OiSegment(X12Segment):
+    """
+    Other insurance information:
+    Example:
+        OI***Y*B**Y~
+    """
+
+    class BenefitsAssignmentCertificationIndicator(str, Enum):
+        """
+        Code values for OI03
+        """
+
+        NO = "NO"
+        NOT_APPLICABLE = "N"
+        YES = "Y"
+
+    class ReleaseOfInformationCode(str, Enum):
+        """
+        Code values for OI06
+        """
+
+        INFORMED_CONSENT = "I"
+        PROVIDER_SIGNED_STATEMENT = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.OI
+    claim_filing_indicator_code: Optional[str]
+    claim_submission_reason_code: Optional[str]
+    benefits_assignment_certification: BenefitsAssignmentCertificationIndicator
+    patient_signature_source_code: Optional[Literal["P"]]
+    provider_agreement_code: Optional[str]
+    release_of_information_code: ReleaseOfInformationCode
 
 
 class PatSegment(X12Segment):
