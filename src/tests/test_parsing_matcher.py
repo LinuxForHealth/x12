@@ -17,7 +17,7 @@ def segment_data(x12_delimiters) -> Dict:
 @pytest.fixture
 def parser_function() -> Callable:
     def func(x12_parser_context: X12ParserContext):
-        x12_parser_context.loop_name = "test_loop"
+        x12_parser_context.loop_path.append("test_loop")
 
     return func
 

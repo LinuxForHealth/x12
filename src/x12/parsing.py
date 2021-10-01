@@ -82,6 +82,16 @@ class X12ParserContext:
     The X12ParserContext provides a "current" loop data record used to write to the outer transaction data record.
     """
 
+    @property
+    def loop_name(self):
+        """return the current loop name"""
+        return None if not self.loop_path else self.loop_path[-1]
+
+    def remove_loop_from_path(self, loop_name: str) -> None:
+        """Removes a loop from the loop path"""
+        if loop_name in self.loop_path:
+            self.loop_path.remove(loop_name)
+
     def set_loop_context(self, loop_name: str, loop_container: Dict) -> None:
         """
         Sets the current loop context.
@@ -93,13 +103,13 @@ class X12ParserContext:
         :param loop_container: The "current" loop record.
         """
 
-        self.loop_name = loop_name
+        self.loop_path.append(loop_name)
         self.loop_container = loop_container
 
     def reset_loop_context(self) -> None:
         """Resets loop related instance attributes."""
 
-        self.loop_name = None
+        self.loop_path.clear()
         self.loop_container = {}
 
     def reset_transaction(self) -> None:
@@ -123,7 +133,7 @@ class X12ParserContext:
         models.
         """
 
-        self.loop_name: Optional[str] = None
+        self.loop_path: List[str] = []
         self.loop_container: Optional[Dict] = {}
         self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
