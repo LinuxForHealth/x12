@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 PARSING_FUNCTION_REGEX = "set\\_(.)*\\_loop"
 
 
-def match(segment_name: str, conditions: Dict[str, str] = None) -> Callable:
+def match(segment_name: str, conditions: Dict = None) -> Callable:
     """
     The match decorator matches a X12 segment to a decorated function.
 
