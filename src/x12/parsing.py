@@ -89,43 +89,37 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
 
 class X12ParserContext:
     """
-    The X12ParserContext provides a "current" loop data record used to write to the outer transaction data record.
+    The X12ParserContext maintains the current loop position within the larger x12 transactional data structure.
     """
 
     @property
     def loop_name(self):
         """return the current loop name"""
-        return None if not self.loop_path else self.loop_path[-1]
-
-    def remove_loop_from_path(self, loop_name: str) -> None:
-        """Removes a loop from the loop path"""
-        if loop_name in self.loop_path:
-            self.loop_path.remove(loop_name)
+        return None if not self.parsed_loops else self.parsed_loops[-1]
 
     def set_loop_context(self, loop_name: str, loop_container: Dict) -> None:
         """
         Sets the current loop context.
 
-        The loop context includes the loop name and the loop "container". The "loop container" is expected to
+        The loop context includes a list of parsed loops and the loop "container". The "loop container" is expected to
         reference the larger transactional data structure.
 
         :param loop_name: The "current" loop name.
         :param loop_container: The "current" loop record.
         """
 
-        self.loop_path.append(loop_name)
+        self.parsed_loops.append(loop_name)
         self.loop_container = loop_container
 
     def reset_loop_context(self) -> None:
         """Resets loop related instance attributes."""
 
-        self.loop_path.clear()
         self.loop_container = {}
 
     def reset_transaction(self) -> None:
         """Resets transactional attributes, including loop attributes."""
 
-        self.reset_loop_context()
+        self.parsed_loops.clear()
         self.transaction_data.clear()
         self.transaction_data["header"] = {}
         self.transaction_data["footer"] = {}
@@ -143,7 +137,7 @@ class X12ParserContext:
         models.
         """
 
-        self.loop_path: List[str] = []
+        self.parsed_loops: List[str] = []
         self.loop_container: Optional[Dict] = {}
         self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
