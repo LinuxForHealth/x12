@@ -33,7 +33,7 @@ def test_match_no_conditions(parser_function, segment_data, x12_parser_context):
 
 def test_single_match_condition(parser_function, segment_data, x12_parser_context):
     """
-    Tests the match decorator when conditions are specified.
+    Tests the match decorator when a single condition is specified.
     """
     wrapped_func = match("ST", conditions={"transaction_set_identifier_code": "270"})(
         parser_function
@@ -44,7 +44,7 @@ def test_single_match_condition(parser_function, segment_data, x12_parser_contex
 
 def test_multiple_match_condition(parser_function, segment_data, x12_parser_context):
     """
-    Tests the match decorator when conditions are specified.
+    Tests the match decorator when multiple conditions are specified.
     """
     wrapped_func = match(
         "ST",
@@ -59,7 +59,7 @@ def test_multiple_match_condition(parser_function, segment_data, x12_parser_cont
 
 def test_list_match_condition(parser_function, segment_data, x12_parser_context):
     """
-    Tests the match decorator when conditions are specified.
+    Tests the match decorator when a list/"one of" condition is specified.
     """
     wrapped_func = match(
         "ST", conditions={"transaction_set_identifier_code": ["270", "276"]}
