@@ -61,9 +61,9 @@ def test_list_match_condition(parser_function, segment_data, x12_parser_context)
     """
     Tests the match decorator when conditions are specified.
     """
-    wrapped_func = match("ST", conditions={"transaction_set_identifier_code": ["270", "276"]})(
-        parser_function
-    )
+    wrapped_func = match(
+        "ST", conditions={"transaction_set_identifier_code": ["270", "276"]}
+    )(parser_function)
     wrapped_func(segment_data, x12_parser_context)
     assert x12_parser_context.loop_name == "test_loop"
 
