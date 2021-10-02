@@ -74,8 +74,6 @@ def set_information_source_hl_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
 
-    context.reset_loop_context()
-
     if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
         context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = [{}]
     else:
@@ -102,7 +100,6 @@ def set_information_receiver_hl_loop(context: X12ParserContext) -> None:
 
     info_receiver = info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
 
-    context.remove_loop_from_path(TransactionLoops.INFORMATION_SOURCE_NAME)
     context.set_loop_context(TransactionLoops.INFORMATION_RECEIVER, info_receiver)
 
 
@@ -125,7 +122,6 @@ def set_subscriber_hl_loop(context: X12ParserContext) -> None:
     subscriber = info_receiver[TransactionLoops.SUBSCRIBER][-1]
     subscriber["trn_segment"] = []
 
-    context.remove_loop_from_path(TransactionLoops.INFORMATION_RECEIVER_NAME)
     context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
 
 
@@ -182,7 +178,6 @@ def set_dependent_hl_loop(context: X12ParserContext) -> None:
     dependent = subscriber[TransactionLoops.DEPENDENT][-1]
     dependent["trn_segment"] = []
 
-    context.remove_loop_from_path(TransactionLoops.SUBSCRIBER_NAME)
     context.set_loop_context(TransactionLoops.DEPENDENT, dependent)
 
 
@@ -194,7 +189,6 @@ def set_se_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
 
-    context.reset_loop_context()
     context.set_loop_context(
         TransactionLoops.FOOTER, context.transaction_data["footer"]
     )

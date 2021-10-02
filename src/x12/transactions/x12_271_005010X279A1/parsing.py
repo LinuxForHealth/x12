@@ -124,8 +124,6 @@ def set_info_source_loop(context: X12ParserContext) -> None:
         "loop_2000b": [],
     }
 
-    context.reset_loop_context()
-
     if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
         context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = []
 
@@ -165,7 +163,6 @@ def set_info_receiver_loop(context: X12ParserContext) -> None:
     )
 
     info_receiver = info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
-    context.remove_loop_from_path(TransactionLoops.INFORMATION_SOURCE_NAME)
     context.set_loop_context(TransactionLoops.INFORMATION_RECEIVER, info_receiver)
 
 
@@ -209,7 +206,6 @@ def set_subscriber_loop(context: X12ParserContext) -> None:
     )
 
     subscriber = info_receiver[TransactionLoops.SUBSCRIBER][-1]
-    context.remove_loop_from_path(TransactionLoops.INFORMATION_RECEIVER_NAME)
     context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
 
 
@@ -231,7 +227,6 @@ def set_dependent_loop(context: X12ParserContext) -> None:
     )
 
     dependent = subscriber[TransactionLoops.DEPENDENT][-1]
-    context.remove_loop_from_path(TransactionLoops.SUBSCRIBER_NAME)
     context.set_loop_context(TransactionLoops.DEPENDENT, dependent)
 
 
@@ -372,7 +367,6 @@ def set_loop_header_in_eligibility_loop(context: X12ParserContext) -> None:
         }
     )
 
-    context.remove_loop_from_path(TransactionLoops.SUBSCRIBER_ADDITIONAL_ELIGIBILITY)
     context.set_loop_context(loop_name, eligibility_record)
 
 
@@ -400,7 +394,6 @@ def set_benefit_related_entity_name_loop(context: X12ParserContext) -> None:
         loop_name = TransactionLoops.DEPENDENT_RELATED_BENEFIT_NAME
 
     related_entity = eligibility[loop_name][-1]
-    context.remove_loop_from_path(TransactionLoops.SUBSCRIBER_RELATED_BENEFIT_NAME)
     context.set_loop_context(loop_name, related_entity)
 
 
@@ -427,7 +420,6 @@ def set_se_loop(context: X12ParserContext) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     """
 
-    context.reset_loop_context()
     context.set_loop_context(
         TransactionLoops.FOOTER, context.transaction_data["footer"]
     )
