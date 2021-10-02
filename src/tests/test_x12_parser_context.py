@@ -25,16 +25,6 @@ def test_set_loop_context(x12_parser_context: X12ParserContext):
     assert x12_parser_context.loop_container == {}
 
 
-def test_reset_loop_context(x12_parser_context: X12ParserContext):
-
-    x12_parser_context.set_loop_context(
-        "header", x12_parser_context.transaction_data["header"]
-    )
-    x12_parser_context.reset_loop_context()
-    assert x12_parser_context.loop_name is None
-    assert x12_parser_context.loop_container == {}
-
-
 def test_reset_transaction(x12_parser_context: X12ParserContext):
     x12_parser_context.reset_transaction()
     assert x12_parser_context.transaction_data == {"header": {}, "footer": {}}
