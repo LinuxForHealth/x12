@@ -53,24 +53,34 @@ def match(segment_name: str, conditions: Dict[str, str] = None) -> Callable:
     conditions = conditions or {}
 
     def decorator(f):
+        # add a segment grouping attribute for the function
         f.segment_group = segment_name.upper()
 
         @wraps(f)
-        def wrapped(segment_data: List[str], data_context: X12ParserContext):
+        def wrapped(segment_data: Dict, data_context: X12ParserContext):
             """
             Executes the wrapped function if segment_data matches the segment_name and optional conditions.
 
             :param segment_data: List of segment fields.
             :param data_context: The X12ParserContext object
             """
-            if segment_name.upper() == segment_data["segment_name"].upper():
-                unmatched = {
-                    k: v
-                    for k, v in conditions.items()
-                    if segment_data[k].upper() != v.upper()
-                }
-                if len(unmatched) == 0:
-                    f(data_context)
+            is_matched = segment_name.upper() == segment_data["segment_name"].upper()
+
+            if not is_matched:
+                return
+            elif is_matched and not conditions:
+                return f(data_context)
+            else:
+                for k, v in conditions.items():
+                    # evaluate "one of" matches
+                    if isinstance(v, list):
+                        for i in v:
+                            if segment_data[k].upper() == i.upper():
+                                return f(data_context)
+                    else:
+                        # evaluate single matches
+                        if segment_data[k].upper() == v.upper():
+                            return f(data_context)
 
         return wrapped
 
