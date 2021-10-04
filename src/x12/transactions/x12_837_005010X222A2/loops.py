@@ -100,6 +100,8 @@ from .segments import (
     Loop2300BRefSegment,
     Loop2330cNm1Segment,
     Loop2330cRefSegment,
+    Loop2330dNm1Segment,
+    Loop2330dRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -217,6 +219,19 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2330D(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Rendering Provider
+    """
+
+    nm1_segment: Loop2330dNm1Segment
+    ref_segment: List[Loop2330dRefSegment] = Field(min_items=1, max_items=3)
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2330C(X12SegmentGroup):
     """
     Claim - Other Subscriber Other Payer Referring Provider
@@ -270,6 +285,7 @@ class Loop2320(X12SegmentGroup):
     loop_2330a: Optional[Loop2330A]
     loop_2330b: Optional[Loop2330B]
     loop_2330c: Optional[List[Loop2330C]]
+    loop_2330d: Optional[Loop2330D]
 
     _validate_amt_segments = root_validator(allow_reuse=True)(
         validate_duplicate_amt_codes

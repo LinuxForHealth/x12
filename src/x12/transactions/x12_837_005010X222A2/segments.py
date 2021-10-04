@@ -1188,3 +1188,30 @@ class Loop2330cRefSegment(RefSegment):
         PROVIDER_COMMERCIAL_NUMBER = "G2"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330dNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Rendering Provider Name
+    """
+
+    entity_identifier_code: Literal["82"]
+    name_last_or_organization_name: Optional[str]
+
+
+class Loop2330dRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Rendering Provider
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

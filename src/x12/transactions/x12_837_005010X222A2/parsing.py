@@ -527,9 +527,35 @@ def set_other_payer_referring_provider(context: X12ParserContext):
             ] = [{}]
 
         context.set_loop_context(
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME,
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME,
             other_subscriber[
                 TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            ],
+        )
+
+
+@match("NM1", conditions={"entity_identifier_code": "82"})
+def set_other_payer_rendering_provider(context: X12ParserContext):
+    """
+    Sets the claim other payer name rendering provider name loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
+        other_subscriber = _get_other_subscriber(context)
+
+        if (
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
+            not in other_subscriber
+        ):
+            other_subscriber[
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
+            ] = [{}]
+
+        context.set_loop_context(
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME,
+            other_subscriber[
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
             ],
         )
 
