@@ -97,7 +97,7 @@ from .segments import (
     Loop2330aRefSegment,
     Loop2330bNm1Segment,
     Loop2330BDtpSegment,
-    Loop2300BRefSegment
+    Loop2300BRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -219,6 +219,7 @@ class Loop2330B(X12SegmentGroup):
     """
     Claim - Other Payer Name
     """
+
     nm1_segment: Loop2330bNm1Segment
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]

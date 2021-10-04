@@ -1113,10 +1113,12 @@ class Loop2330bNm1Segment(Nm1Segment):
     """
     Claim Other Subscriber Other Payer Name
     """
+
     class IdentificationCodeQualifier(str, Enum):
         """
         Code values for NM108
         """
+
         PAYOR_IDENTIFICATION = "PI"
         CMS_PLAN_ID = "XV"
 
@@ -1131,6 +1133,7 @@ class Loop2330BDtpSegment(DtpSegment):
     """
     Claim Other Subscriber Other Payer Claim Check or Remittance Date
     """
+
     date_time_qualifier: Literal["573"]
     date_time_period_format_qualifier: Literal["D8"]
 
@@ -1139,14 +1142,15 @@ class Loop2300BRefSegment(RefSegment):
     """
     Claim Other Subscriber Other Payer Reference Identification
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         PAYOR_IDENTIFICATION = "PI"
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
-

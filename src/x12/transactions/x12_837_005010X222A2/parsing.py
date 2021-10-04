@@ -492,7 +492,7 @@ def set_other_payer_name(context: X12ParserContext):
         other_subscriber["loop_2330b"] = {}
         context.set_loop_context(
             TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME,
-            other_subscriber["loop_2330b"]
+            other_subscriber["loop_2330b"],
         )
 
 
