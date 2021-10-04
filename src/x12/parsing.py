@@ -69,18 +69,18 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
             if not is_matched:
                 return
             elif is_matched and not conditions:
-                return f(data_context)
+                return f(data_context, segment_data)
             else:
                 for k, v in conditions.items():
                     # evaluate "one of" matches
                     if isinstance(v, list):
                         for i in v:
                             if segment_data[k].upper() == i.upper():
-                                return f(data_context)
+                                return f(data_context, segment_data)
                     else:
                         # evaluate single matches
                         if segment_data[k].upper() == v.upper():
-                            return f(data_context)
+                            return f(data_context, segment_data)
 
         return wrapped
 

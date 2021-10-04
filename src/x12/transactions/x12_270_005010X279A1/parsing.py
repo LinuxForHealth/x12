@@ -6,7 +6,7 @@ Parses X12 270 005010X279A1 segments into a transactional domain model.
 The parsing module includes a specific parser for the 270 transaction and loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
-Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext).
+Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
 """
 from enum import Enum
 
@@ -54,11 +54,12 @@ def _get_subscriber(context) -> Dict:
 
 # eligibility 270 loop parsing functions
 @match("ST")
-def set_header_loop(context: X12ParserContext) -> None:
+def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the transaction set header loop for the 270 transaction set.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     context.set_loop_context(
@@ -67,11 +68,14 @@ def set_header_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", conditions={"hierarchical_level_code": "20"})
-def set_information_source_hl_loop(context: X12ParserContext) -> None:
+def set_information_source_hl_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Sets the Information Source (Payer/Clearinghouse) loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
@@ -84,11 +88,14 @@ def set_information_source_hl_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", conditions={"hierarchical_level_code": "21"})
-def set_information_receiver_hl_loop(context: X12ParserContext) -> None:
+def set_information_receiver_hl_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Sets the Information Receiver (Provider) loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     info_source = _get_info_source(context)
@@ -104,12 +111,13 @@ def set_information_receiver_hl_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", conditions={"hierarchical_level_code": "22"})
-def set_subscriber_hl_loop(context: X12ParserContext) -> None:
+def set_subscriber_hl_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the Subscriber (Member) loop
     Initializes optional TRN segment list.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     info_receiver = _get_info_receiver(context)
@@ -126,12 +134,13 @@ def set_subscriber_hl_loop(context: X12ParserContext) -> None:
 
 
 @match("NM1")
-def set_entity_name_loop(context: X12ParserContext) -> None:
+def set_entity_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the entity name loop based on the current loop context.
     Initializes optional REF segment list
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     new_loop_name: Optional[str] = None
@@ -150,9 +159,12 @@ def set_entity_name_loop(context: X12ParserContext) -> None:
 
 
 @match("EQ")
-def set_eligibility_inquiry_loop(context: X12ParserContext) -> None:
+def set_eligibility_inquiry_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the eligibility inquiry loop, 2110C or 2110D, for a subscriber or dependent record.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     new_loop_name: Optional[str] = None
@@ -167,7 +179,13 @@ def set_eligibility_inquiry_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", conditions={"hierarchical_level_code": "23"})
-def set_dependent_hl_loop(context: X12ParserContext) -> None:
+def set_dependent_hl_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the hierarchy level for a dependent segment.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
     subscriber = _get_subscriber(context)
 
     if TransactionLoops.DEPENDENT not in subscriber:
@@ -182,11 +200,12 @@ def set_dependent_hl_loop(context: X12ParserContext) -> None:
 
 
 @match("SE")
-def set_se_loop(context: X12ParserContext) -> None:
+def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the transaction set footer loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     context.set_loop_context(
