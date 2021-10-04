@@ -1154,3 +1154,37 @@ class Loop2300BRefSegment(RefSegment):
         NAIC_CODE = "NF"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330cNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Referring Provider Name
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM01
+        """
+
+        REFERRING_PROVIDER = "DN"
+        PRIMARY_CARE_PROVIDER = "P3"
+
+    entity_identifier_code: EntityIdentifierCode
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2330cRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Referring Provider
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

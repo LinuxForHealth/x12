@@ -474,9 +474,13 @@ def set_other_subscriber_name(context: X12ParserContext):
 
     if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
         other_subscriber = _get_other_subscriber(context)
-        other_subscriber["loop_2330a"] = {}
+
+        if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME not in other_subscriber:
+            other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME] = {}
+
         context.set_loop_context(
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME, other_subscriber["loop_2330a"]
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME,
+            other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME],
         )
 
 
@@ -489,10 +493,44 @@ def set_other_payer_name(context: X12ParserContext):
     """
     if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
         other_subscriber = _get_other_subscriber(context)
-        other_subscriber["loop_2330b"] = {}
+
+        if (
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME
+            not in other_subscriber
+        ):
+            other_subscriber[
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME
+            ] = {}
+
         context.set_loop_context(
             TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME,
-            other_subscriber["loop_2330b"],
+            other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME],
+        )
+
+
+@match("NM1", conditions={"entity_identifier_code": ["DN", "P3"]})
+def set_other_payer_referring_provider(context: X12ParserContext):
+    """
+    Sets the claim other payer name loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+    if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
+        other_subscriber = _get_other_subscriber(context)
+
+        if (
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            not in other_subscriber
+        ):
+            other_subscriber[
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            ] = [{}]
+
+        context.set_loop_context(
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME,
+            other_subscriber[
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            ],
         )
 
 
