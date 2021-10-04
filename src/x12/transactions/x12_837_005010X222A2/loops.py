@@ -95,6 +95,9 @@ from .segments import (
     Loop2320SbrSegment,
     Loop2330aNm1Segment,
     Loop2330aRefSegment,
+    Loop2330bNm1Segment,
+    Loop2330BDtpSegment,
+    Loop2300BRefSegment
 )
 from x12.segments import (
     SeSegment,
@@ -212,6 +215,21 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2330B(X12SegmentGroup):
+    """
+    Claim - Other Payer Name
+    """
+    nm1_segment: Loop2330bNm1Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    dtp_segment: Optional[Loop2330BDtpSegment]
+    ref_segment: Optional[List[Loop2300BRefSegment]] = Field(min_items=0, max_items=6)
+
+    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2330A(X12SegmentGroup):
     """
     Claim - Other Subscriber Name
@@ -234,6 +252,7 @@ class Loop2320(X12SegmentGroup):
     oi_segment: Optional[OiSegment]
     moa_segment: Optional[MoaSegment]
     loop_2330a: Optional[Loop2330A]
+    loop_2330b: Optional[Loop2330B]
 
     _validate_amt_segments = root_validator(allow_reuse=True)(
         validate_duplicate_amt_codes

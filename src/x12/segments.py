@@ -1557,7 +1557,7 @@ class Nm1Segment(X12Segment):
     name_last_or_organization_name: str = Field(min_length=1, max_length=60)
     name_first: Optional[str] = Field(min_length=0, max_length=35)
     name_middle: Optional[str] = Field(min_length=0, max_length=25)
-    name_prefix: Optional[str]
+    name_prefix: Optional[str] = Field(min_length=0, max_length=10)
     name_suffix: Optional[str] = Field(min_length=0, max_length=10)
     identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
