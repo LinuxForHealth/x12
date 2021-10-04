@@ -1083,3 +1083,25 @@ class Loop2320SbrSegment(SbrSegment):
         MEDICARE_SECONDARY_VETERANS_ADMINISTRATION = "42"
         MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
         MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"
+
+
+class Loop2330aNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Name
+    """
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        STANDARD_HEALTH_ID_US = "II"
+        MEMBER_IDENTIFICATION_NUMBER = "MI"
+
+    entity_identifier_code: Literal["IL"]
+
+
+class Loop2330aRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Reference Identification
+    """
+    reference_identification_qualifier: Literal["SY"]

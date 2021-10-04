@@ -456,6 +456,21 @@ def set_other_subscriber(context: X12ParserContext):
         )
 
 
+@match("NM1")
+def set_other_subscriber_name(context: X12ParserContext):
+    """
+    Sets the claim other subscriber name loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    """
+
+    if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
+        claim = _get_claim(context)
+        other_subscriber = claim.get(TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, [{}])[-1]
+        other_subscriber["loop_2330a"] = {}
+        context.set_loop_context(TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME, other_subscriber["loop_2330a"])
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext) -> None:
     """
