@@ -109,6 +109,8 @@ from x12.segments import (
     HiSegment,
     CasSegment,
     AmtSegment,
+    OiSegment,
+    MoaSegment
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -216,6 +218,8 @@ class Loop2320(X12SegmentGroup):
     sbr_segment: Loop2320SbrSegment
     cas_segment: Optional[CasSegment]
     amt_segment: Optional[List[AmtSegment]] = Field(min_items=0, max_items=3)
+    oi_segment: Optional[OiSegment]
+    moa_segment: Optional[MoaSegment]
 
     _validate_amt_segments = root_validator(allow_reuse=True)(
         validate_duplicate_amt_codes
