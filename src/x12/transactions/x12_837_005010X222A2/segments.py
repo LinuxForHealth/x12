@@ -1089,6 +1089,7 @@ class Loop2330aNm1Segment(Nm1Segment):
     """
     Claim Other Subscriber Name
     """
+
     class IdentificationCodeQualifier(str, Enum):
         """
         Code values for NM108
@@ -1104,4 +1105,5 @@ class Loop2330aRefSegment(RefSegment):
     """
     Claim Other Subscriber Reference Identification
     """
+
     reference_identification_qualifier: Literal["SY"]

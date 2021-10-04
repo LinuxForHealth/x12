@@ -80,7 +80,9 @@ def _get_subscriber(context: X12ParserContext) -> Dict:
 def _get_patient(context: X12ParserContext) -> Optional[Dict]:
     """Returns the current patient record (subscriber or dependent)"""
     subscriber = _get_subscriber(context)
-    is_subscriber_patient = subscriber.get("hl_segment", {}).get("hierarchical_child_code", "0") == "0"
+    is_subscriber_patient = (
+        subscriber.get("hl_segment", {}).get("hierarchical_child_code", "0") == "0"
+    )
 
     if is_subscriber_patient:
         return subscriber
@@ -466,9 +468,13 @@ def set_other_subscriber_name(context: X12ParserContext):
 
     if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION in context.parsed_loops:
         claim = _get_claim(context)
-        other_subscriber = claim.get(TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, [{}])[-1]
+        other_subscriber = claim.get(
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, [{}]
+        )[-1]
         other_subscriber["loop_2330a"] = {}
-        context.set_loop_context(TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME, other_subscriber["loop_2330a"])
+        context.set_loop_context(
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME, other_subscriber["loop_2330a"]
+        )
 
 
 @match("SE")

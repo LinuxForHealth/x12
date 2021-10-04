@@ -94,7 +94,7 @@ from .segments import (
     Loop2310FNm1Segment,
     Loop2320SbrSegment,
     Loop2330aNm1Segment,
-    Loop2330aRefSegment
+    Loop2330aRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -112,7 +112,7 @@ from x12.segments import (
     CasSegment,
     AmtSegment,
     OiSegment,
-    MoaSegment
+    MoaSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -216,6 +216,7 @@ class Loop2330A(X12SegmentGroup):
     """
     Claim - Other Subscriber Name
     """
+
     nm1_segment: Loop2330aNm1Segment
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
