@@ -6,7 +6,7 @@ Parses X12 271 005010X279A1 segments into a transactional domain model.
 The parsing module includes a specific parser for the 271 transaction and loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
-Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext).
+Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
 """
 from enum import Enum
 
@@ -96,12 +96,13 @@ def _get_dependent_eligibility(context) -> Dict:
 
 
 @match("ST")
-def set_header_loop(context: X12ParserContext) -> None:
+def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the transaction set header loop.
     Creates initial data structures for the record
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     context.transaction_data[TransactionLoops.HEADER] = {"bht_segment": None}
 
@@ -111,11 +112,12 @@ def set_header_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", {"hierarchical_level_code": "20"})
-def set_info_source_loop(context: X12ParserContext) -> None:
+def set_info_source_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the information source loop (Loop 2000A).
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     info_source = {
         "hl_segment": None,
@@ -133,11 +135,12 @@ def set_info_source_loop(context: X12ParserContext) -> None:
 
 
 @match("NM1")
-def set_info_source_name_loop(context: X12ParserContext) -> None:
+def set_info_source_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the information source name loop (Loop 2100A)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name != TransactionLoops.INFORMATION_SOURCE:
         return
@@ -150,11 +153,12 @@ def set_info_source_name_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", {"hierarchical_level_code": "21"})
-def set_info_receiver_loop(context: X12ParserContext) -> None:
+def set_info_receiver_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the information receiver loop (Loop 2000B)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     info_source = _get_info_source(context)
 
@@ -167,11 +171,12 @@ def set_info_receiver_loop(context: X12ParserContext) -> None:
 
 
 @match("NM1")
-def set_info_receiver_name_loop(context: X12ParserContext) -> None:
+def set_info_receiver_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the information receiver name loop (Loop 2100B)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name != TransactionLoops.INFORMATION_RECEIVER:
         return
@@ -193,11 +198,12 @@ def set_info_receiver_name_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", {"hierarchical_level_code": "22"})
-def set_subscriber_loop(context: X12ParserContext) -> None:
+def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the subscriber loop (Loop 2000C)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     info_receiver = _get_info_receiver(context)
 
@@ -210,11 +216,12 @@ def set_subscriber_loop(context: X12ParserContext) -> None:
 
 
 @match("HL", {"hierarchical_level_code": "23"})
-def set_dependent_loop(context: X12ParserContext) -> None:
+def set_dependent_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the dependent loop (Loop 2000D)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     subscriber = _get_subscriber(context)
 
@@ -231,11 +238,12 @@ def set_dependent_loop(context: X12ParserContext) -> None:
 
 
 @match("NM1")
-def set_member_name_loop(context: X12ParserContext) -> None:
+def set_member_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the subscriber or dependent name loop (Loop 2100C or 2100D)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name not in (
         TransactionLoops.SUBSCRIBER,
@@ -271,11 +279,14 @@ def set_member_name_loop(context: X12ParserContext) -> None:
 
 
 @match("EB")
-def set_member_eligibility_benefit_info_loop(context: X12ParserContext) -> None:
+def set_member_eligibility_benefit_info_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Sets the subscriber or dependent eligibility/benefit info loop (Loop 2110C/2110D)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name not in (
         TransactionLoops.SUBSCRIBER_NAME,
@@ -322,11 +333,14 @@ def set_member_eligibility_benefit_info_loop(context: X12ParserContext) -> None:
 
 
 @match("III")
-def set_member_additional_information(context: X12ParserContext) -> None:
+def set_member_additional_information(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Sets the subscriber/dependent eligibility benefit additional information loop (Loop 2115c/2115d)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name in SUBSCRIBER_LOOPS:
         eligibility = _get_subscriber_eligibility(context)
@@ -342,11 +356,14 @@ def set_member_additional_information(context: X12ParserContext) -> None:
 
 
 @match("LS")
-def set_loop_header_in_eligibility_loop(context: X12ParserContext) -> None:
+def set_loop_header_in_eligibility_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Ensures that the Loop Header Segment is written to the Member (Subscriber or Dependent)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name in SUBSCRIBER_LOOPS:
         related_benefit = TransactionLoops.SUBSCRIBER_RELATED_BENEFIT_NAME
@@ -371,12 +388,15 @@ def set_loop_header_in_eligibility_loop(context: X12ParserContext) -> None:
 
 
 @match("NM1")
-def set_benefit_related_entity_name_loop(context: X12ParserContext) -> None:
+def set_benefit_related_entity_name_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Creates the structure for the Benefit Related Entity Name Loop.
     The Benefit Related Entity Name Loop is entered either through the Eligibility or Additional Eligibility Loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name not in (
         TransactionLoops.SUBSCRIBER_ELIGIBILITY,
@@ -398,11 +418,14 @@ def set_benefit_related_entity_name_loop(context: X12ParserContext) -> None:
 
 
 @match("LE")
-def set_loop_footer_in_eligibility_loop(context: X12ParserContext) -> None:
+def set_loop_footer_in_eligibility_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
     Ensures that the Loop Header Segment is written to the Member (Subscriber or Dependent)
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
     if context.loop_name in SUBSCRIBER_LOOPS:
         eligibility = _get_subscriber_eligibility(context)
@@ -413,11 +436,12 @@ def set_loop_footer_in_eligibility_loop(context: X12ParserContext) -> None:
 
 
 @match("SE")
-def set_se_loop(context: X12ParserContext) -> None:
+def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the transaction set footer loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     context.set_loop_context(
