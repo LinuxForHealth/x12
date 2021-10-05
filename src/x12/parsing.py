@@ -31,7 +31,7 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
     The following example matches a NM1 (entity name) segment:
 
     @match("NM1")
-    def the_func(context):
+    def the_func(context, segment_data):
        # evaluation occurs here
 
     The match decorator accepts additional criteria, or conditions, for segment matching. The criteria evaluates a
@@ -41,7 +41,7 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
     or a non-person entity.
 
     @match("NM1", conditions={"entity_type_qualifier": "2"})
-    def the_func(context):
+    def the_func(context, segment_data):
        # evaluation occurs here
 
     Finally, the decorator adds a "segment grouping" attribute to the decorated function to optimize lookups.

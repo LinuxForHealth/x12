@@ -102,6 +102,12 @@ from .segments import (
     Loop2330cRefSegment,
     Loop2330dNm1Segment,
     Loop2330dRefSegment,
+    Loop2330eNm1Segment,
+    Loop2330eRefSegment,
+    Loop2330fNm1Segment,
+    Loop2330fRefSegment,
+    Loop2330gNm1Segment,
+    Loop2330gRefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -219,6 +225,45 @@ class Loop2010Bb(X12SegmentGroup):
     )
 
 
+class Loop2330G(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Billing Provider
+    """
+
+    nm1_segment: Loop2330gNm1Segment
+    ref_segment: List[Loop2330gRefSegment] = Field(min_items=1, max_items=3)
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
+class Loop2330F(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Supervising Provider
+    """
+
+    nm1_segment: Loop2330fNm1Segment
+    ref_segment: List[Loop2330fRefSegment] = Field(min_items=1, max_items=3)
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
+class Loop2330E(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Service Facility Location
+    """
+
+    nm1_segment: Loop2330eNm1Segment
+    ref_segment: List[Loop2330eRefSegment] = Field(min_items=1, max_items=3)
+
+    _validate_ref_segments = root_validator(allow_reuse=True)(
+        validate_duplicate_ref_codes
+    )
+
+
 class Loop2330D(X12SegmentGroup):
     """
     Claim - Other Subscriber Other Payer Rendering Provider
@@ -286,6 +331,9 @@ class Loop2320(X12SegmentGroup):
     loop_2330b: Optional[Loop2330B]
     loop_2330c: Optional[List[Loop2330C]]
     loop_2330d: Optional[Loop2330D]
+    loop_2330e: Optional[Loop2330E]
+    loop_2330f: Optional[Loop2330F]
+    loop_2330g: Optional[Loop2330G]
 
     _validate_amt_segments = root_validator(allow_reuse=True)(
         validate_duplicate_amt_codes

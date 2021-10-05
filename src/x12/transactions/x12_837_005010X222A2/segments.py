@@ -1215,3 +1215,80 @@ class Loop2330dRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330eNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location
+    """
+
+    entity_identifier_code: Literal["77"]
+    entity_type_qualifier: Literal["2"]
+
+
+class Loop2330eRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330fNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location
+    """
+
+    entity_identifier_code: Literal["DQ"]
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2330fRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330gNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location
+    """
+
+    entity_identifier_code: Literal["85"]
+
+
+class Loop2330gRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
