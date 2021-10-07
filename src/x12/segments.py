@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
 
-from pydantic import Field, PositiveInt, condecimal, validator, root_validator
+from pydantic import Field, PositiveInt, condecimal, validator, root_validator, conint
 
 from x12.models import X12Segment, X12SegmentName
 from x12.support import (
@@ -333,6 +333,30 @@ class Cr2Segment(X12Segment):
     patient_condition_description_1: Optional[str]
     patient_condition_description_2: Optional[str]
     yes_no_condition_response_code: Optional[str]
+
+
+class Cr3Segment(X12Segment):
+    """
+    Durable Medical Equipment Certification
+    Example:
+        CR3*I*MO*6.00~
+    """
+
+    class CertificationTypeCode(str, Enum):
+        """
+        Code values for CR301
+        """
+
+        INITIAL = "I"
+        RENEWAL = "R"
+        REVISED = "S"
+
+    segment_name: X12SegmentName = X12SegmentName.CR3
+    certification_type_code: CertificationTypeCode
+    unit_basis_measurement_code: Literal["MO"]
+    durable_medical_equipment_duration: condecimal(gt=Decimal("0.0"))
+    insulin_dependent_code: Optional[str]
+    description: Optional[str]
 
 
 class CurSegment(X12Segment):
@@ -900,8 +924,63 @@ class HcpSegment(X12Segment):
         HCP*03*100*10*RPO12345~
     """
 
+    class PricingMethodology(str, Enum):
+        """
+        Code values for HCP01
+        """
+
+        ZERO_PRICING_NOT_COVERED = "00"
+        PRICED_AS_BILLED_100_PERCENT = "01"
+        PRICED_AT_STANDARD_FEE_SCHEDULE = "02"
+        PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
+        BUNDLED_PRICING = "04"
+        PEER_REVIEW_PRICING = "05"
+        FLAT_RATE_PRICING = "07"
+        COMBINATION_PRICING = "08"
+        MATERNITY_PRICING = "09"
+        OTHER_PRICING = "10"
+        LOWER_OF_COST = "11"
+        RATIO_OF_COST = "12"
+        COST_REIMBURSED = "13"
+        ADJUSTMENT_PRICING = "14"
+
+    class RejectReasonCode(str, Enum):
+        """
+        Code values for HCP13
+        """
+
+        CANNOT_IDENTIFY_PROVIDER_AS_TPO = "T1"
+        CANNOT_IDENTIFY_PAYER_AS_TPO = "T2"
+        CANNOT_IDENTIFY_INSURED_AS_TPO = "T3"
+        PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
+        CERTIFICATION_INFORMATION_MISSING = "T5"
+        CLAIM_DOES_NOT_CONTAIN_INFO_FOR_REPRICING = "T6"
+
+    class PolicyComplianceCode(str, Enum):
+        """
+        Code values for HCP14
+        """
+
+        PROCEDURE_FOLLOWED = "1"
+        NOT_FOLLOWED_CALL_NOT_MADE = "2"
+        NOT_MEDICALLY_NECESSARY = "3"
+        NOT_FOLLOWED_OTHER = "4"
+        EMERGENCY_ADMIT_NON_NETWORK_HOSPITAL = "5"
+
+    class ExceptionCode(str, Enum):
+        """
+        Code values for HCP15
+        """
+
+        NON_NETWORK_PROFESSIONAL_PROVIDER_IN_NETWORK_HOSPITAL = "1"
+        EMERGENCY_CARE = "2"
+        SERVICES_SPECIALIST_NOT_IN_NETWORK = "3"
+        OUT_OF_SERVICE_AREA = "4"
+        STATE_MAnDATES = "5"
+        OTHER = "6"
+
     segment_name: X12SegmentName = X12SegmentName.HCP
-    pricing_methodology: str
+    pricing_methodology: PricingMethodology
     repriced_allowed_amount: Decimal
     repriced_saving_amount: Optional[Decimal]
     repricing_organization_identifier: Optional[str] = Field(
@@ -915,9 +994,11 @@ class HcpSegment(X12Segment):
     product_service_id_2: Optional[str]
     unit_basis_measurement_code: Optional[str]
     quantity: Optional[Decimal]
-    reject_reason_code: Optional[str] = Field(min_length=2, max_length=2)
-    policy_compliance_code: Optional[str] = Field(min_length=1, max_length=2)
-    exception_code: Optional[str] = Field(min_length=1, max_length=2)
+    reject_reason_code: Optional[RejectReasonCode] = Field(min_length=2, max_length=2)
+    policy_compliance_code: Optional[PolicyComplianceCode] = Field(
+        min_length=1, max_length=2
+    )
+    exception_code: Optional[ExceptionCode] = Field(min_length=1, max_length=2)
 
 
 class HiSegment(X12Segment):
@@ -1289,7 +1370,7 @@ class LeSegment(X12Segment):
 
 class LsSegment(X12Segment):
     """
-    Loop Header Segment.
+    Loop Header Segment
     The LS segment is used to disambiguate loops which start with the same segment.
     Example:
         LS*2120~
@@ -1297,6 +1378,47 @@ class LsSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LS
     loop_id_code: str
+
+
+class LxSegment(X12Segment):
+    """
+    Transaction set line number
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.LX
+    assigned_number: conint(gt=0)
+
+
+class MeaSegment(X12Segment):
+    """
+    Measurements
+    Example:
+        MEA*TR*R1*113.40~
+    """
+
+    class MeasurementReferenceIdCode(str, Enum):
+        """
+        Code values for MEA01
+        """
+
+        ORIGINAL = "OG"
+        TEST_RESULTS = "TR"
+
+    class MeasurementQualifier(str, Enum):
+        """
+        Code values for MEA02
+        """
+
+        HEIGHT = "HT"
+        HEMOGLOBIN = "R1"
+        HEMATOCRIT = "R2"
+        EPOETIN_STARTING_DOSAGE = "R3"
+        CREATINE = "R4"
+
+    segment_name: X12SegmentName = X12SegmentName.MEA
+    measurement_reference_id_code: MeasurementReferenceIdCode
+    measurement_qualifier: MeasurementQualifier
+    measurement_value: Decimal
 
 
 class MoaSegment(X12Segment):
@@ -1788,6 +1910,19 @@ class PrvSegment(X12Segment):
         return values
 
 
+class Ps1Segment(X12Segment):
+    """
+    Purchased Service Information
+    Example:
+        PS1*PN222222*110.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PS1
+    purchased_service_provider_identifier: str
+    purchased_service_charge_amount: condecimal(gt=Decimal("0.0"))
+    state_province_code: Optional[str]
+
+
 class PwkSegment(X12Segment):
     """
     Paperwork
@@ -1795,9 +1930,87 @@ class PwkSegment(X12Segment):
         PWK*OZ*BM***AC*DMN0012~
     """
 
+    class AttachmentReportTypeCode(str, Enum):
+        """
+        PWK01 code values
+        """
+
+        REPORT_JUSTIFYING_TREATMENT_BEYOND_UTILIZATION_GUIDELINES = "03"
+        DRUGS_ADMINISTERED = "04"
+        TREATMENT_DIAGNOSIS = "05"
+        INITIAL_ASSESSMENT = "06"
+        FUNCTIONAL_GOALS = "07"
+        PLAN_OF_TREATMENT = "08"
+        PROGRESS_REPORT = "09"
+        CONTINUED_TREATMENT = "10"
+        CHEMICAL_ANALYSIS = "11"
+        CERTIFIED_TEST_REPORT = "13"
+        JUSTIFICATION_FOR_ADMISSION = "15"
+        RECOVERY_PLAN = "21"
+        ALLERGIES_SENSITIVITIES_DOCUMENT = "A3"
+        AUTOPSY_REPORT = "A4"
+        AMBULANCE_CERTIFICATION = "AM"
+        ADMISSION_SUMMARY = "AS"
+        PHYSICIAN_ORDER = "B3"
+        REFERRAL_FORM = "B4"
+        BENCHMARK_TESTING_RESULTS = "BR"
+        BASELINE = "BS"
+        BLANKET_TESTING_RESULTS = "BT"
+        CHIROPRACTIC_JUSTIFICATION = "CB"
+        CONSENT_FORM = "CK"
+        CERTIFICATION = "CT"
+        DRUG_PROFILE_DOCUMENT = "D2"
+        DENTAL_MODELS = "DA"
+        DURABLE_MEDICAL_EQUIPMENT_PRESCRIPTION = "DB"
+        DIAGNOSTIC_REPORT = "DG"
+        DISCHARGE_MONITORING_REPORT = "DJ"
+        DISCHARGE_SUMMARY = "DS"
+        EXPLANATION_OF_BENEFITS = "EB"
+        HEALTH_CERTIFICATE = "HC"
+        HEALTH_CLINIC_RECORDS = "HR"
+        IMMUNIZATION_RECORD = "I5"
+        STATE_SCHOOL_IMMUNIZATION_RECORDS = "IR"
+        LABORATORY_RESULTS = "LA"
+        MEDICAL_RECORD_ATTACHMENT = "M1"
+        MODELS = "MT"
+        NURSING_NOTES = "NN"
+        OPERATIVE_NOTE = "OB"
+        OXYGEN_CONTENT_AVERAGING_REPORT = "OC"
+        ORDERS_AND_TREATMENTS_DOCUMENT = "OD"
+        OBJECTIVE_PHYSICAL_EXAMINATION = "OE"
+        OXYGEN_THERAPY_CERTIFICATION = "OX"
+        SUPPORT_DATA_FOR_CLAIM = "OZ"
+        PATHOLOGY_REPORT = "P4"
+        PATIENT_MEDICAL_HISTORY_DOCUMENT = "P5"
+        PARENTAL_OR_ENTERAL_CERTIFICATION = "PE"
+        PHYSICAL_THERAPY_NOTES = "PN"
+        PROSTHETICS_OR_ORTHOTIC_CERTIFICATION = "PO"
+        PARAMEDICAL_RESULTS = "PQ"
+        PHYSICIANS_REPORT = "PY"
+        PHYSICAL_THERAPY_CERTIFICATION = "PZ"
+        RADIOLOGY_FILMS = "RB"
+        RADIOLOGY_REPORTS = "RR"
+        REPORT_OF_TESTS_AND_ANALYSIS_REPORT = "RT"
+        RENEWABLE_OXYGEN_CONTENT_AVERAGING_REPORT = "RX"
+        SYMPTOMS_DOCUMENT = "SG"
+        DEATH_NOTIFICATION = "V5"
+        PHOTOGRAPHS = "XP"
+
+    class AttachmentTransmissionCode(str, Enum):
+        """
+        Code values for PWK02
+        """
+
+        AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
+        BY_MAIL = "BM"
+        ELECTRONICALLY_ONLY = "EL"
+        EMAIL = "EM"
+        FILE_TRANSFER = "FT"
+        BY_FAX = "FX"
+
     segment_name: X12SegmentName = X12SegmentName.PWK
-    report_type_code: str
-    report_transmission_code: str
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
     report_copies_needed: Optional[str]
     entity_identifier_code: Optional[str]
     identification_code_qualifier: Optional[str]
@@ -1822,6 +2035,20 @@ class PwkSegment(X12Segment):
             raise ValueError("Identification code requires a qualifier and code value")
 
         return values
+
+
+class QtySegment(X12Segment):
+    """
+    Quantity Information
+    Example:
+        QTY*PT*2.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.QTY
+    quantity_qualifier: str
+    quantity: Decimal
+    composite_unit_of_measure: Optional[str]
+    free_form_message: Optional[str]
 
 
 class RefSegment(X12Segment):
@@ -1879,6 +2106,71 @@ class StSegment(X12Segment):
     transaction_set_identifier_code: str = Field(min_length=3, max_length=3)
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
     implementation_convention_reference: str = Field(min_length=1, max_length=35)
+
+
+class Sv1Segment(X12Segment):
+    """
+    Professional Service Segment
+    Example:
+        SV1*HC:99213*40*UN*1.0***1~
+    """
+
+    class UnitBasisMeasurementCode(str, Enum):
+        """
+        Code values for SV103
+        """
+
+        MINUTES = "MJ"
+        UNIT = "UN"
+
+    segment_name: X12SegmentName = X12SegmentName.SV1
+    product_service_id_qualifier: str
+    line_item_charge_amount: Decimal
+    unit_basis_measurement_code: UnitBasisMeasurementCode
+    service_unit_count: condecimal(gt=Decimal("0.0"))
+    place_of_service_code: Optional[str]
+    service_type_code: Optional[str]
+    composite_diagnosis_code_pointer: str
+    monetary_amount: Optional[str]
+    emergency_indicator: Optional[Literal["Y"]]
+    multiple_procedure_code: Optional[str]
+    epsdt_indicator: Optional[Literal["Y"]]
+    family_planning_indicator: Optional[Literal["Y"]]
+    review_code: Optional[str]
+    national_local_assigned_review_value: Optional[str]
+    copay_status_code: Optional[Literal["0"]]
+    health_care_professional_shortage_area_code: Optional[str]
+    reference_identification: Optional[str]
+    postal_code: Optional[str]
+    monetary_amount: Optional[Decimal]
+    level_of_care_code: Optional[str]
+    provider_agreement_code: Optional[str]
+
+
+class Sv5Segment(X12Segment):
+    """
+    Durable Medical Equipment Service
+    Example:
+        SV5*HC:A4631*DA*30.00*50.00*5000.00*4~
+    """
+
+    class RentalUnitPriceIndicator(str, Enum):
+        """
+        Code values for SV506
+        """
+
+        WEEKLY = "1"
+        MONTHLY = "4"
+        DAILY = "6"
+
+    segment_name: X12SegmentName = X12SegmentName.SV5
+    product_service_id_qualifier: str
+    unit_basis_measurement_code: Literal["DA"]
+    length_of_medical_necessity: condecimal(gt=Decimal("0.0"))
+    dme_rental_price: condecimal(gt=Decimal("0.0"))
+    dme_purchase_price: condecimal(gt=Decimal("0.0"))
+    rental_unit_price_indicator: RentalUnitPriceIndicator
+    prognosis_code: Optional[str]
 
 
 class TrnSegment(X12Segment):

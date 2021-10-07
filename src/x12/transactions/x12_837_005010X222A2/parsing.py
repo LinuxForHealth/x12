@@ -533,6 +533,32 @@ def set_other_subscriber_other_payer_loop(
     context.set_loop_context(loop_name, loop_record)
 
 
+@match("LX")
+def set_service_line_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the claim service line loop
+    """
+    claim = _get_claim(context)
+    new_service_line = {
+        "pwk_segment": [],
+        "crc_segment": [],
+        "dtp_segment": [],
+        "qty_segment": [],
+        "mea_segment": [],
+        "ref_segment": [],
+        "amt_segment": [],
+        "k3_segment": [],
+        "nte_segment": [],
+    }
+    if TransactionLoops.CLAIM_SERVICE_LINE not in claim:
+        claim[TransactionLoops.CLAIM_SERVICE_LINE] = [new_service_line]
+    else:
+        claim[TransactionLoops.CLAIM_SERVICE_LINE].append(new_service_line)
+
+    service_line = claim[TransactionLoops.CLAIM_SERVICE_LINE][-1]
+    context.set_loop_context(TransactionLoops.CLAIM_SERVICE_LINE, service_line)
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """

@@ -104,6 +104,16 @@ def test_cr2_segment():
     assert cr2_segment.x12() == "CR2********M~"
 
 
+def test_cr3_segment():
+    segment_data = {
+        "certification_type_code": "I",
+        "unit_basis_measurement_code": "MO",
+        "durable_medical_equipment_duration": "6.00",
+    }
+    cr3_segment: Cr3Segment = Cr3Segment(**segment_data)
+    assert cr3_segment.x12() == "CR3*I*MO*6.00~"
+
+
 def test_cur_segment():
     segment_data = {"entity_identifier_code": "85", "currency_code": "USD"}
 
@@ -329,6 +339,22 @@ def test_ls_segment():
     assert ls_segment.x12() == "LS*2120~"
 
 
+def test_lx_segment():
+    segment_data = {"assigned_number": 1}
+    lx_segment: LxSegment = LxSegment(**segment_data)
+    assert lx_segment.x12() == "LX*1~"
+
+
+def test_mea_segment():
+    segment_data = {
+        "measurement_reference_id_code": "TR",
+        "measurement_qualifier": "R1",
+        "measurement_value": "113.40",
+    }
+    mea_segment: MeaSegment = MeaSegment(**segment_data)
+    assert mea_segment.x12() == "MEA*TR*R1*113.40~"
+
+
 def test_moa_segment():
     segment_data = {"claim_payment_remark_code_1": "A4"}
     moa_segment: MoaSegment = MoaSegment(**segment_data)
@@ -414,6 +440,15 @@ def test_prv_segment():
     assert prv_segment.x12() == "PRV*RF*PXC*207Q00000X~"
 
 
+def test_ps1_segment():
+    segment_data = {
+        "purchased_service_provider_identifier": "PN222222",
+        "purchased_service_charge_amount": "110.00",
+    }
+    ps1_segment: Ps1Segment = Ps1Segment(**segment_data)
+    assert ps1_segment.x12() == "PS1*PN222222*110.00~"
+
+
 def test_pwk_segment():
     segment_data = {
         "segment_name": "PWK",
@@ -425,6 +460,12 @@ def test_pwk_segment():
 
     pwk_segment: PwkSegment = PwkSegment(**segment_data)
     assert pwk_segment.x12() == "PWK*OZ*BM***AC*DMN0012~"
+
+
+def test_qty_segment():
+    segment_data = {"quantity_qualifier": "PT", "quantity": "2.00"}
+    qty_segment: QtySegment = QtySegment(**segment_data)
+    assert qty_segment.x12() == "QTY*PT*2.00~"
 
 
 def test_ref_segment():
@@ -465,6 +506,31 @@ def test_st_segment():
 
     st_segment: StSegment = StSegment(**segment_data)
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
+
+
+def test_sv1_segment():
+    segment_data = {
+        "product_service_id_qualifier": "HC:99213",
+        "line_item_charge_amount": "40.00",
+        "unit_basis_measurement_code": "UN",
+        "service_unit_count": "1.00",
+        "composite_diagnosis_code_pointer": "1",
+    }
+    sv1_segment: Sv1Segment = Sv1Segment(**segment_data)
+    assert sv1_segment.x12() == "SV1*HC:99213*40.00*UN*1.00***1~"
+
+
+def test_sv5_segment():
+    segment_data = {
+        "product_service_id_qualifier": "HC:A4631",
+        "unit_basis_measurement_code": "DA",
+        "length_of_medical_necessity": "30.00",
+        "dme_rental_price": "50.00",
+        "dme_purchase_price": "5000.00",
+        "rental_unit_price_indicator": "4",
+    }
+    sv5_segment: Sv5Segment = Sv5Segment(**segment_data)
+    assert sv5_segment.x12() == "SV5*HC:A4631*DA*30.00*50.00*5000.00*4~"
 
 
 def test_trn_segment():

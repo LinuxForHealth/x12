@@ -14,13 +14,13 @@ from x12.segments import (
     RefSegment,
     SbrSegment,
     DtpSegment,
-    PwkSegment,
     Cn1Segment,
     AmtSegment,
     NteSegment,
     CrcSegment,
     PatSegment,
     HcpSegment,
+    QtySegment,
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -485,93 +485,6 @@ class Loop2300DtpSegment(DtpSegment):
         return values
 
 
-class Loop2300PwkSegment(PwkSegment):
-    """
-    Claim information Paperwork Segment
-    """
-
-    class AttachmentReportTypeCode(str, Enum):
-        """
-        PWK01 code values
-        """
-
-        REPORT_JUSTIFYING_TREATMENT_BEYOND_UTILIZATION_GUIDELINES = "03"
-        DRUGS_ADMINISTERED = "04"
-        TREATMENT_DIAGNOSIS = "05"
-        INITIAL_ASSESSMENT = "06"
-        FUNCTIONAL_GOALS = "07"
-        PLAN_OF_TREATMENT = "08"
-        PROGRESS_REPORT = "09"
-        CONTINUED_TREATMENT = "10"
-        CHEMICAL_ANALYSIS = "11"
-        CERTIFIED_TEST_REPORT = "13"
-        JUSTIFICATION_FOR_ADMISSION = "15"
-        RECOVERY_PLAN = "21"
-        ALLERGIES_SENSITIVITIES_DOCUMENT = "A3"
-        AUTOPSY_REPORT = "A4"
-        AMBULANCE_CERTIFICATION = "AM"
-        ADMISSION_SUMMARY = "AS"
-        PHYSICIAN_ORDER = "B3"
-        REFERRAL_FORM = "B4"
-        BENCHMARK_TESTING_RESULTS = "BR"
-        BASELINE = "BS"
-        BLANKET_TESTING_RESULTS = "BT"
-        CHIROPRACTIC_JUSTIFICATION = "CB"
-        CONSENT_FORM = "CK"
-        CERTIFICATION = "CT"
-        DRUG_PROFILE_DOCUMENT = "D2"
-        DENTAL_MODELS = "DA"
-        DURABLE_MEDICAL_EQUIPMENT_PRESCRIPTION = "DB"
-        DIAGNOSTIC_REPORT = "DG"
-        DISCHARGE_MONITORING_REPORT = "DJ"
-        DISCHARGE_SUMMARY = "DS"
-        EXPLANATION_OF_BENEFITS = "EB"
-        HEALTH_CERTIFICATE = "HC"
-        HEALTH_CLINIC_RECORDS = "HR"
-        IMMUNIZATION_RECORD = "I5"
-        STATE_SCHOOL_IMMUNIZATION_RECORDS = "IR"
-        LABORATORY_RESULTS = "LA"
-        MEDICAL_RECORD_ATTACHMENT = "M1"
-        MODELS = "MT"
-        NURSING_NOTES = "NN"
-        OPERATIVE_NOTE = "OB"
-        OXYGEN_CONTENT_AVERAGING_REPORT = "OC"
-        ORDERS_AND_TREATMENTS_DOCUMENT = "OD"
-        OBJECTIVE_PHYSICAL_EXAMINATION = "OE"
-        OXYGEN_THERAPY_CERTIFICATION = "OX"
-        SUPPORT_DATA_FOR_CLAIM = "OZ"
-        PATHOLOGY_REPORT = "P4"
-        PATIENT_MEDICAL_HISTORY_DOCUMENT = "P5"
-        PARENTAL_OR_ENTERAL_CERTIFICATION = "PE"
-        PHYSICAL_THERAPY_NOTES = "PN"
-        PROSTHETICS_OR_ORTHOTIC_CERTIFICATION = "PO"
-        PARAMEDICAL_RESULTS = "PQ"
-        PHYSICIANS_REPORT = "PY"
-        PHYSICAL_THERAPY_CERTIFICATION = "PZ"
-        RADIOLOGY_FILMS = "RB"
-        RADIOLOGY_REPORTS = "RR"
-        REPORT_OF_TESTS_AND_ANALYSIS_REPORT = "RT"
-        RENEWABLE_OXYGEN_CONTENT_AVERAGING_REPORT = "RX"
-        SYMPTOMS_DOCUMENT = "SG"
-        DEATH_NOTIFICATION = "V5"
-        PHOTOGRAPHS = "XP"
-
-    class AttachmentTransmissionCode(str, Enum):
-        """
-        Code values for PWK02
-        """
-
-        AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
-        BY_MAIL = "BM"
-        ELECTRONICALLY_ONLY = "EL"
-        EMAIL = "EM"
-        FILE_TRANSFER = "FT"
-        BY_FAX = "FX"
-
-    report_type_code: AttachmentReportTypeCode
-    report_transmission_code: AttachmentTransmissionCode
-
-
 class Loop2300Cn1Segment(Cn1Segment):
     """
     Claim information contract information
@@ -800,72 +713,6 @@ class Loop2300CrcSegment(CrcSegment):
         else:
             raise ValueError(f"Unknown CRC01 code category value {code_category}")
         return values
-
-
-class Loop2300HcpSegment(HcpSegment):
-    """
-    Claim Information Price Adjustments
-    """
-
-    class PricingMethodology(str, Enum):
-        """
-        Code values for HCP01
-        """
-
-        ZERO_PRICING_NOT_COVERED = "00"
-        PRICED_AS_BILLED_100_PERCENT = "01"
-        PRICED_AT_STANDARD_FEE_SCHEDULE = "02"
-        PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
-        BUNDLED_PRICING = "04"
-        PEER_REVIEW_PRICING = "05"
-        FLAT_RATE_PRICING = "07"
-        COMBINATION_PRICING = "08"
-        MATERNITY_PRICING = "09"
-        OTHER_PRICING = "10"
-        LOWER_OF_COST = "11"
-        RATIO_OF_COST = "12"
-        COST_REIMBURSED = "13"
-        ADJUSTMENT_PRICING = "14"
-
-    class RejectReasonCode(str, Enum):
-        """
-        Code values for HCP13
-        """
-
-        CANNOT_IDENTIFY_PROVIDER_AS_TPO = "T1"
-        CANNOT_IDENTIFY_PAYER_AS_TPO = "T2"
-        CANNOT_IDENTIFY_INSURED_AS_TPO = "T3"
-        PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
-        CERTIFICATION_INFORMATION_MISSING = "T5"
-        CLAIM_DOES_NOT_CONTAIN_INFO_FOR_REPRICING = "T6"
-
-    class PolicyComplianceCode(str, Enum):
-        """
-        Code values for HCP14
-        """
-
-        PROCEDURE_FOLLOWED = "1"
-        NOT_FOLLOWED_CALL_NOT_MADE = "2"
-        NOT_MEDICALLY_NECESSARY = "3"
-        NOT_FOLLOWED_OTHER = "4"
-        EMERGENCY_ADMIT_NON_NETWORK_HOSPITAL = "5"
-
-    class ExceptionCode(str, Enum):
-        """
-        Code values for HCP15
-        """
-
-        NON_NETWORK_PROFESSIONAL_PROVIDER_IN_NETWORK_HOSPITAL = "1"
-        EMERGENCY_CARE = "2"
-        SERVICES_SPECIALIST_NOT_IN_NETWORK = "3"
-        OUT_OF_SERVICE_AREA = "4"
-        STATE_MAnDATES = "5"
-        OTHER = "6"
-
-    pricing_methodology: PricingMethodology
-    reject_reason_code: Optional[RejectReasonCode]
-    policy_compliance_code: Optional[PolicyComplianceCode]
-    exception_code: Optional[ExceptionCode]
 
 
 class Loop2310ANm1Segment(Nm1Segment):
@@ -1292,3 +1139,169 @@ class Loop2330gRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2400CrcSegment(CrcSegment):
+    """
+    Conditions Indicator
+    """
+
+    class YesNoResponseCode(str, Enum):
+        """
+        Code values for CRC
+        """
+
+        YES = "Y"
+        NO = "N"
+
+    class CodeCategory(str, Enum):
+        """
+        Code values for CRC01
+        """
+
+        DURABLE_MEDICAL_EQUIPMENT_CERTIFICATION = "09"
+        HOSPICE = "70"
+
+    class ConditionsIndicator(str, Enum):
+        """
+        Code values for CRC03 - CRC07
+        """
+
+        # Ambulance Conditions
+        PATIENT_ADMITTED_TO_HOSPITAL = "01"
+        PATIENT_MOVED_BY_STRETCHER = "04"
+        PATIENT_UNCONSCIOUS_IN_SHOCK = "05"
+        PATIENT_EMERGENCY_TRANSPORT = "06"
+        PATIENT_RESTRAINED = "07"
+        PATIENT_HEMORRHAGING = "08"
+        AMBULANCE_MEDICALLY_NECESSARY = "09"
+        PATIENT_CONFINED_BED_CHAIR = "12"
+        # Hospice Condition
+        OPEN = "65"
+        # Durable Medical Equipment Condition
+        CERTIFICATE_ON_FILE_SUPPLIER = "38"
+        REPLACEMENT_ITEM = "ZV"
+
+    code_category: CodeCategory
+    certification_condition_indicator: YesNoResponseCode
+    condition_code_1: ConditionsIndicator
+    condition_code_2: Optional[ConditionsIndicator]
+    condition_code_3: Optional[ConditionsIndicator]
+    condition_code_4: Optional[ConditionsIndicator]
+    condition_code_5: Optional[ConditionsIndicator]
+
+
+class Loop2400DtpSegment(DtpSegment):
+    """
+    Date values for Loop 2400 - Claim service line
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTP001
+        """
+
+        SERVICE = "472"
+        PRESCRIPTION = "471"
+        CERTIFICATION_REVISION = "607"
+        BEGIN_THERAPY = "463"
+        LAST_CERTIFICATION = "461"
+        LATEST_VISIT_CONSULTATION = "304"
+        MOST_RECENT_HEMOGLOBIN_HEMATOCRIT = "738"
+        MOST_RECENT_SERUM_CREATINE = "739"
+        SHIPPED = "011"
+        LAST_X_RAY = "455"
+        INITIAL_TREATMENT = "454"
+
+    date_time_qualifier: DateTimeQualifier
+
+
+class Loop2400QtySegment(QtySegment):
+    """
+    Quantity Information for Claim Service Lines
+    """
+
+    class QuantityQualifier(str, Enum):
+        """
+        Code values for QTY01
+        """
+
+        UNITS = "FL"
+        PATIENTS = "PL"
+
+    quantity_qualifier: QuantityQualifier
+
+
+class Loop2400Cn1Segment(Cn1Segment):
+    """
+    Contract Information
+    """
+
+    class ContractTypeCode(str, Enum):
+        """
+        Code values for CN101
+        """
+
+        DIAGNOSIS_RELATED_GROUP = "01"
+        PER_DIEM = "02"
+        VARIABLE_PER_DIEM = "03"
+        FLAT = "04"
+        CAPITATED = "05"
+        PERCENT = "06"
+        OTHER = "09"
+
+
+class Loop2400RefSegment(RefSegment):
+    """
+    Loop 2400/Service Line Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        REPRICED_LINE_ITEM_REFERENCE_NUMBER = "9B"
+        ADJUSTED_REPRICED_LINE_ITEM_REFERENCE_NUMBER = "9D"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        PROVIDER_CONTROL_NUMBER = "6R"
+        MAMMOGRAPHY_CERTIFICATION_NUMBER = "EW"
+        CLINICAL_LABORATORY_IMPROVEMENT_NUMBER = "X4"
+        FACILITY_CERTIFICATION_NUMBER = "F4"
+        BATCH_NUMBER = "BT"
+        REFERRAL_NUMBER = "9F"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2400AmtSegment(AmtSegment):
+    """
+    Loop 2400/Service Line Amounts
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+
+        TAX = "T"
+        POSTAGE_CLAIMED = "F4"
+
+    amount_qualifier_code: AmountQualifierCode
+
+
+class Loop2400NteSegment(NteSegment):
+    """
+    Loop 2400/Claim Service Line Notes
+    """
+
+    class NoteReferenceCode(str, Enum):
+        """
+        NTE01 code values
+        """
+
+        ADDITIONAL_INFORMATION = "ADD"
+        GOALS_REHAB_DISCHARGE_PLANS = "DCP"
+        THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
+
+    note_reference_code: NoteReferenceCode
