@@ -114,6 +114,12 @@ def test_cr3_segment():
     assert cr3_segment.x12() == "CR3*I*MO*6.00~"
 
 
+def test_ctp_segment():
+    segment_data = {"quantity": "2.00", "composite_unit_of_measure": "UN"}
+    ctp_segment: CtpSegment = CtpSegment(**segment_data)
+    assert ctp_segment.x12() == "CTP****2.00*UN~"
+
+
 def test_cur_segment():
     segment_data = {"entity_identifier_code": "85", "currency_code": "USD"}
 
@@ -331,6 +337,15 @@ def test_le_segment():
     segment_data = {"loop_id_code": "2120"}
     le_segment: LeSegment = LeSegment(**segment_data)
     assert le_segment.x12() == "LE*2120~"
+
+
+def test_lin_segment():
+    segment_data = {
+        "product_service_id_qualifier": "N4",
+        "national_drug_code_universal_product_number": "01234567891",
+    }
+    lin_segment: LinSegment = LinSegment(**segment_data)
+    assert lin_segment.x12() == "LIN**N4*01234567891~"
 
 
 def test_ls_segment():

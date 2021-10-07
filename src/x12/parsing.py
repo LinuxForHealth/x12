@@ -111,15 +111,11 @@ class X12ParserContext:
         self.parsed_loops.append(loop_name)
         self.loop_container = loop_container
 
-    def reset_loop_context(self) -> None:
-        """Resets loop related instance attributes."""
-
-        self.loop_container = {}
-
     def reset_transaction(self) -> None:
         """Resets transactional attributes, including loop attributes."""
 
         self.parsed_loops.clear()
+        self.loop_container.clear()
         self.transaction_data.clear()
         self.transaction_data["header"] = {}
         self.transaction_data["footer"] = {}

@@ -1305,3 +1305,55 @@ class Loop2400NteSegment(NteSegment):
         THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
 
     note_reference_code: NoteReferenceCode
+
+
+class Loop2410RefSegment(RefSegment):
+    """
+    Loop 2400/Claim Service Line Drug Identification Reference Identifier
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        LINK_SEQUENCE_NUMBER = "VY"
+        PHARMACY_PRESCRIPTION_NUMBER = "XZ"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420ANm1Segment(Nm1Segment):
+    """
+    Loop 2420A Rendering Provider Name
+    """
+
+    entity_identifier_code: Literal["82"]
+    identification_code_qualifier: Literal["XX"]
+
+
+class Loop2420APrvSegment(PrvSegment):
+    """
+    Loop 2420A Rendering Provider Speciality
+    """
+
+    provider_code: Literal["PE"]
+    reference_identification_qualifier: Literal["PXC"]
+
+
+class Loop2420ARefSegment(RefSegment):
+    """
+    Loop 2420A Rendering Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

@@ -359,6 +359,21 @@ class Cr3Segment(X12Segment):
     description: Optional[str]
 
 
+class CtpSegment(X12Segment):
+    """
+    Pricing Information
+    Example:
+        CTP****2.00*UN~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CTP
+    class_of_trade_code: Optional[str]
+    price_identifier_code: Optional[str]
+    unit_price: Optional[Decimal]
+    quantity: Decimal
+    composite_unit_of_measure: str
+
+
 class CurSegment(X12Segment):
     """
     Foreign Currency Information
@@ -1366,6 +1381,32 @@ class LeSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LE
     loop_id_code: str
+
+
+class LinSegment(X12Segment):
+    """
+    Drug Identification
+    Example:
+        LIN**N4*01234567891~
+    """
+
+    class ProductServiceIdQualifier(str, Enum):
+        """
+        Code values for LIN02
+        """
+
+        EAN_UCC_13 = "EN"
+        EAN_UCC_8 = "EO"
+        HIBC_SUPPLIER_PRIMARY_DATA_MESSAGE = "HI"
+        NATIONAL_DRUG_CODE_542_FORMAT = "N4"
+        CUSTOMER_ORDER_NUMBER = "ON"
+        GTIN_14_DIGIT_STRUCTURE = "UK"
+        UCC_12 = "UP"
+
+    segment_name: X12SegmentName = X12SegmentName.LIN
+    assigned_identification: Optional[str]
+    product_service_id_qualifier: ProductServiceIdQualifier
+    national_drug_code_universal_product_number: str
 
 
 class LsSegment(X12Segment):

@@ -113,6 +113,10 @@ from .segments import (
     Loop2400RefSegment,
     Loop2400AmtSegment,
     Loop2400NteSegment,
+    Loop2410RefSegment,
+    Loop2420ANm1Segment,
+    Loop2420APrvSegment,
+    Loop2420ARefSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -139,6 +143,8 @@ from x12.segments import (
     MeaSegment,
     Ps1Segment,
     HcpSegment,
+    LinSegment,
+    CtpSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -421,6 +427,26 @@ class Loop2310A(X12SegmentGroup):
     )
 
 
+class Loop2420A(X12SegmentGroup):
+    """
+    Claim Service Line - Rendering Provider
+    """
+
+    nm1_segment: Loop2420ANm1Segment
+    prv_segment: Optional[Loop2420APrvSegment]
+    ref_segment: Optional[List[Loop2420ARefSegment]] = Field(min_items=0, max_items=20)
+
+
+class Loop2410(X12SegmentGroup):
+    """
+    Claim Service Line - Drug Identification
+    """
+
+    lin_segment: LinSegment
+    ctp_segment: CtpSegment
+    ref_segment: Loop2410RefSegment
+
+
 class Loop2400(X12SegmentGroup):
     """
     Claim - Service Line
@@ -443,6 +469,8 @@ class Loop2400(X12SegmentGroup):
     nte_segment: Optional[List[Loop2400NteSegment]] = Field(min_items=0, max_items=2)
     ps1_segment: Optional[Ps1Segment]
     hcp_segment: Optional[HcpSegment]
+    loop_2410: Optional[Loop2410]
+    loop_2420: Optional[Loop2420A]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers
