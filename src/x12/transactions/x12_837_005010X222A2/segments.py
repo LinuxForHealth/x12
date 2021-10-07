@@ -1357,3 +1357,29 @@ class Loop2420ARefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420BNm1Segment(Nm1Segment):
+    """
+    Loop 2420B Purchased Service Provider Name
+    """
+
+    entity_identifier_code: Literal["QB"]
+    identification_code_qualifier: Literal["XX"]
+
+
+class Loop2420BRefSegment(RefSegment):
+    """
+    Loop 2420B Purchased Service Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
