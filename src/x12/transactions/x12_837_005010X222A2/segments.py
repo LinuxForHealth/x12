@@ -1411,7 +1411,7 @@ class Loop2420CRefSegment(RefSegment):
 
 class Loop2420DNm1Segment(Nm1Segment):
     """
-    Loop 2420C Supervising Provider Name
+    Loop 2420D Supervising Provider Name
     """
 
     entity_identifier_code: Literal["DQ"]
@@ -1419,7 +1419,7 @@ class Loop2420DNm1Segment(Nm1Segment):
 
 class Loop2420DRefSegment(RefSegment):
     """
-    Loop 2420C Supervising Provider Reference Identification
+    Loop 2420D Supervising Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1433,3 +1433,49 @@ class Loop2420DRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420ENm1Segment(Nm1Segment):
+    """
+    Loop 2420E Ordering Provider Name
+    """
+
+    entity_identifier_code: Literal["DK"]
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2420ERefSegment(RefSegment):
+    """
+    Loop 2420E Ordering Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420EPerSegment(PerSegment):
+    """
+    Loop 2420E Ordering Provider Contact Information
+    """
+
+    class CommunicationNumberQualifier(str, Enum):
+        """
+        Code values for PER03, PER05, PER07
+        """
+
+        ELECTRONIC_MAIL = "EM"
+        TELEPHONE_EXTENSION = "EX"
+        FACSIMILE = "FX"
+        TELEPHONE = "TE"
+
+    communication_number_qualifier_1: CommunicationNumberQualifier
+    communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
+    communication_number_qualifier_3: Optional[CommunicationNumberQualifier]

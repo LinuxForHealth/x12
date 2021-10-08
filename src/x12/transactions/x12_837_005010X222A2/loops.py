@@ -123,6 +123,9 @@ from .segments import (
     Loop2420CRefSegment,
     Loop2420DNm1Segment,
     Loop2420DRefSegment,
+    Loop2420ENm1Segment,
+    Loop2420ERefSegment,
+    Loop2420EPerSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -433,6 +436,18 @@ class Loop2310A(X12SegmentGroup):
     )
 
 
+class Loop2420E(X12SegmentGroup):
+    """
+    Claim Service Line - Ordering Provider Name
+    """
+
+    nm1_segment: Loop2420ENm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+    ref_segment: Optional[List[Loop2420ERefSegment]] = Field(min_items=0, max_items=20)
+    per_segment: Optional[Loop2420EPerSegment]
+
+
 class Loop2420D(X12SegmentGroup):
     """
     Claim Service Line - Supervising Provider Name
@@ -509,6 +524,7 @@ class Loop2400(X12SegmentGroup):
     loop_2420b: Optional[Loop2420B]
     loop_2420c: Optional[Loop2420C]
     loop_2420d: Optional[Loop2420D]
+    loop_2420e: Optional[Loop2420E]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers
