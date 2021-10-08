@@ -1383,3 +1383,27 @@ class Loop2420BRefSegment(RefSegment):
         PROVIDER_COMMERCIAL_NUMBER = "G2"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420CNm1Segment(Nm1Segment):
+    """
+    Loop 2420C Service Facility Location Name
+    """
+
+    entity_identifier_code: Literal["77"]
+
+
+class Loop2420CRefSegment(RefSegment):
+    """
+    Loop 2420C Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
