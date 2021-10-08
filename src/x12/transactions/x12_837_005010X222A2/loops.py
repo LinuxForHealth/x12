@@ -48,6 +48,8 @@ The HealthCare Claims Professional set organizes loops into a hierarchical and n
 The Header and Footer components are not "loops" per the specification, but are included to standardize and simplify
 transactional modeling and processing.
 """
+from decimal import Decimal
+
 from x12.models import X12SegmentGroup
 from .segments import (
     HeaderStSegment,
@@ -164,7 +166,7 @@ from x12.segments import (
     LqSegment,
     FrmSegment,
 )
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import Field, root_validator
 from x12.validators import (
     validate_duplicate_ref_codes,
@@ -633,6 +635,24 @@ class Loop2300(X12SegmentGroup):
         validate_duplicate_ref_codes
     )
 
+    @root_validator
+    def validate_claim_amounts(cls, values: Dict):
+        """
+        Validates that CLM02 == SUM(Loop2400.SV102)
+        """
+        claim_amount: Decimal = values.get("clm_segment").total_claim_charge_amount
+        line_total: Decimal = Decimal("0.0")
+
+        for line in values.get("loop_2400", []):
+            line_total += line.sv1_segment.line_item_charge_amount
+
+        if claim_amount != line_total:
+            raise ValueError(
+                f"Claim Amount {claim_amount} != Service Line Total {line_total}"
+            )
+
+        return values
+
 
 class Loop2010Ca(X12SegmentGroup):
     """
@@ -668,7 +688,6 @@ class Loop2000B(X12SegmentGroup):
     pat_segment: Optional[PatSegment]
     loop_2010ba: Loop2010Ba
     loop_2010bb: Loop2010Bb
-    # todo: validate 2300 based on 2010ba nm1 member id and patient loop
     loop_2300: Optional[List[Loop2300]] = Field(min_items=0, max_items=100)
     loop_2000c: Optional[List[Loop2000C]]
 

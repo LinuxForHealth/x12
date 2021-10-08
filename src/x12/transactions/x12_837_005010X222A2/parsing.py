@@ -258,7 +258,8 @@ def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
 
     subscriber = billing_provider[TransactionLoops.SUBSCRIBER][-1]
 
-    if TransactionLoops.PATIENT_LOOP not in subscriber:
+    has_dependent_patient = segment_data.get("hierarchical_child_code", "0") == "1"
+    if has_dependent_patient and TransactionLoops.PATIENT_LOOP not in subscriber:
         subscriber[TransactionLoops.PATIENT_LOOP] = [{}]
 
     context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
