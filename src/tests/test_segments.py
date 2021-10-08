@@ -41,6 +41,92 @@ def test_bht_segment():
     )
 
 
+def test_cas_segment():
+    segment_data = {
+        "adjustment_reason_code_1": "PR",
+        "monetary_amount_1": 1.0,
+        "quantity_1": 7.93,
+    }
+
+    cas_segment: CasSegment = CasSegment(**segment_data)
+    assert cas_segment.x12() == "CAS*PR*1.00*7.93~"
+
+
+def test_clm_segment():
+    segment_data = {
+        "patient_control_number": "26463774",
+        "total_claim_charge_amount": "100.00",
+        "health_care_service_location_information": "11:B:1",
+        "provider_or_supplier_signature_indicator": "Y",
+        "provider_accept_assignment_code": "A",
+        "benefit_assignment_certification_indicator": "Y",
+        "release_of_information_code": "I",
+    }
+
+    clm_segment: ClmSegment = ClmSegment(**segment_data)
+    assert clm_segment.x12() == "CLM*26463774*100.00***11:B:1*Y*A*Y*I~"
+
+
+def test_cn1_segment():
+    segment_data = {"contract_type_code": "02", "contract_amount": "550"}
+
+    cn1_segment: Cn1Segment = Cn1Segment(**segment_data)
+    assert cn1_segment.x12() == "CN1*02*550.00~"
+
+
+def test_crc_segment():
+    segment_data = {
+        "code_category": "E1",
+        "certification_condition_indicator": "Y",
+        "condition_code_1": "L1",
+    }
+    crc_segment: CrcSegment = CrcSegment(**segment_data)
+    assert crc_segment.x12() == "CRC*E1*Y*L1~"
+
+
+def test_cr1_segment():
+    segment_data = {
+        "weight_measurement_code": "LB",
+        "patient_weight": "140",
+        "ambulance_transport_reason_code": "A",
+        "mileage_measurement_code": "DH",
+        "transport_distance": "12.0",
+        "stretcher_purpose_description": "UNCONSCIOUS",
+    }
+
+    cr1_segment: Cr1Segment = Cr1Segment(**segment_data)
+    assert cr1_segment.x12() == "CR1*LB*140.00**A*DH*12.00****UNCONSCIOUS~"
+
+
+def test_cr2_segment():
+    segment_data = {"patient_condition_code": "M"}
+    cr2_segment: Cr2Segment = Cr2Segment(**segment_data)
+    assert cr2_segment.x12() == "CR2********M~"
+
+
+def test_cr3_segment():
+    segment_data = {
+        "certification_type_code": "I",
+        "unit_basis_measurement_code": "MO",
+        "durable_medical_equipment_duration": "6.00",
+    }
+    cr3_segment: Cr3Segment = Cr3Segment(**segment_data)
+    assert cr3_segment.x12() == "CR3*I*MO*6.00~"
+
+
+def test_ctp_segment():
+    segment_data = {"quantity": "2.00", "composite_unit_of_measure": "UN"}
+    ctp_segment: CtpSegment = CtpSegment(**segment_data)
+    assert ctp_segment.x12() == "CTP****2.00*UN~"
+
+
+def test_cur_segment():
+    segment_data = {"entity_identifier_code": "85", "currency_code": "USD"}
+
+    cur_segment: CurSegment = CurSegment(**segment_data)
+    assert cur_segment.x12() == "CUR*85*USD~"
+
+
 def test_dmg_segment():
     segment_data = {
         "date_time_period_format_qualifier": "D8",
@@ -113,6 +199,13 @@ def test_eq_segment():
     assert eq_segment.x12() == "EQ*98^34^44^81^A0^A3**FAM~"
 
 
+def test_frm_segment():
+    segment_data = {"question_number_letter": "12", "question_response_1": "N"}
+
+    frm_segment: FrmSegment = FrmSegment(**segment_data)
+    assert frm_segment.x12() == "FRM*12*N~"
+
+
 def test_ge_segment():
     segment_data = {
         "number_of_transaction_sets_included": 1,
@@ -137,6 +230,17 @@ def test_gs_segment():
 
     gs_segment: GsSegment = GsSegment(**segment_data)
     assert gs_segment.x12() == "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A~"
+
+
+def test_hcp_segment():
+    segment_data = {
+        "pricing_methodology": "03",
+        "repriced_allowed_amount": "100.00",
+        "repriced_saving_amount": "10.00",
+        "repricing_organization_identifier": "RPO12345",
+    }
+    hcp_segment: HcpSegment = HcpSegment(**segment_data)
+    assert hcp_segment.x12() == "HCP*03*100.00*10.00*RPO12345~"
 
 
 def test_hi_segment():
@@ -230,16 +334,59 @@ def test_isa_segment():
     )
 
 
+def test_k3_segment():
+    segment_data = {"fixed_format_information": "STATE DATA REQUIREMENT"}
+    k3_segment: K3Segment = K3Segment(**segment_data)
+    assert k3_segment.x12() == "K3*STATE DATA REQUIREMENT~"
+
+
 def test_le_segment():
     segment_data = {"loop_id_code": "2120"}
     le_segment: LeSegment = LeSegment(**segment_data)
     assert le_segment.x12() == "LE*2120~"
 
 
+def test_lin_segment():
+    segment_data = {
+        "product_service_id_qualifier": "N4",
+        "national_drug_code_universal_product_number": "01234567891",
+    }
+    lin_segment: LinSegment = LinSegment(**segment_data)
+    assert lin_segment.x12() == "LIN**N4*01234567891~"
+
+
+def test_lq_segment():
+    segment_data = {"code_list_qualifier_code": "UT", "form_identifier": "1.02"}
+    lq_segment: LqSegment = LqSegment(**segment_data)
+    assert lq_segment.x12() == "LQ*UT*1.02~"
+
+
 def test_ls_segment():
     segment_data = {"loop_id_code": "2120"}
     ls_segment: LsSegment = LsSegment(**segment_data)
     assert ls_segment.x12() == "LS*2120~"
+
+
+def test_lx_segment():
+    segment_data = {"assigned_number": 1}
+    lx_segment: LxSegment = LxSegment(**segment_data)
+    assert lx_segment.x12() == "LX*1~"
+
+
+def test_mea_segment():
+    segment_data = {
+        "measurement_reference_id_code": "TR",
+        "measurement_qualifier": "R1",
+        "measurement_value": "113.40",
+    }
+    mea_segment: MeaSegment = MeaSegment(**segment_data)
+    assert mea_segment.x12() == "MEA*TR*R1*113.40~"
+
+
+def test_moa_segment():
+    segment_data = {"claim_payment_remark_code_1": "A4"}
+    moa_segment: MoaSegment = MoaSegment(**segment_data)
+    assert moa_segment.x12() == "MOA***A4~"
 
 
 def test_msg_segment():
@@ -279,6 +426,38 @@ def test_nm1_segment():
     assert nm1_segment.x12() == "NM1*PR*2*ACME*****PI*12345~"
 
 
+def test_nte_segment():
+    segment_data = {
+        "note_reference_code": "ADD",
+        "description": "SURGERY WAS UNUSUALLY LONG BECAUSE [FILL IN REASON]",
+    }
+    nte_segment: NteSegment = NteSegment(**segment_data)
+    assert (
+        nte_segment.x12()
+        == "NTE*ADD*SURGERY WAS UNUSUALLY LONG BECAUSE [FILL IN REASON]~"
+    )
+
+
+def test_oi_segment():
+    segment_data = {
+        "benefits_assignment_certification": "Y",
+        "patient_signature_source_code": "P",
+        "release_of_information_code": "Y",
+    }
+
+    oi_segment: OiSegment = OiSegment(**segment_data)
+    assert oi_segment.x12() == "OI***Y*P**Y~"
+
+
+def test_pat_segment():
+    segment_data = {
+        "unit_basis_measurement_code": "01",
+        "patient_weight": "146.00",
+    }
+    pat_segment: PatSegment = PatSegment(**segment_data)
+    assert pat_segment.x12() == "PAT******01*146.00~"
+
+
 def test_prv_segment():
     segment_data = {
         "provider_code": "RF",
@@ -289,6 +468,34 @@ def test_prv_segment():
     assert prv_segment.x12() == "PRV*RF*PXC*207Q00000X~"
 
 
+def test_ps1_segment():
+    segment_data = {
+        "purchased_service_provider_identifier": "PN222222",
+        "purchased_service_charge_amount": "110.00",
+    }
+    ps1_segment: Ps1Segment = Ps1Segment(**segment_data)
+    assert ps1_segment.x12() == "PS1*PN222222*110.00~"
+
+
+def test_pwk_segment():
+    segment_data = {
+        "segment_name": "PWK",
+        "report_type_code": "OZ",
+        "report_transmission_code": "BM",
+        "identification_code_qualifier": "AC",
+        "identification_code": "DMN0012",
+    }
+
+    pwk_segment: PwkSegment = PwkSegment(**segment_data)
+    assert pwk_segment.x12() == "PWK*OZ*BM***AC*DMN0012~"
+
+
+def test_qty_segment():
+    segment_data = {"quantity_qualifier": "PT", "quantity": "2.00"}
+    qty_segment: QtySegment = QtySegment(**segment_data)
+    assert qty_segment.x12() == "QTY*PT*2.00~"
+
+
 def test_ref_segment():
     segment_data = {
         "reference_identification_qualifier": "EO",
@@ -296,6 +503,16 @@ def test_ref_segment():
     }
     ref_segment: RefSegment = RefSegment(**segment_data)
     assert ref_segment.x12() == "REF*EO*477563928~"
+
+
+def test_sbr_segment():
+    segment_data = {
+        "payer_responsibility_code": "P",
+        "group_policy_number": "2222-SJ",
+        "claim_filing_indicator_code": "CI",
+    }
+    sbr_segment: SbrSegment = SbrSegment(**segment_data)
+    assert sbr_segment.x12() == "SBR*P**2222-SJ******CI~"
 
 
 def test_se_segment():
@@ -317,6 +534,42 @@ def test_st_segment():
 
     st_segment: StSegment = StSegment(**segment_data)
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
+
+
+def test_sv1_segment():
+    segment_data = {
+        "product_service_id_qualifier": "HC:99213",
+        "line_item_charge_amount": "40.00",
+        "unit_basis_measurement_code": "UN",
+        "service_unit_count": "1.00",
+        "composite_diagnosis_code_pointer": "1",
+    }
+    sv1_segment: Sv1Segment = Sv1Segment(**segment_data)
+    assert sv1_segment.x12() == "SV1*HC:99213*40.00*UN*1.00***1~"
+
+
+def test_sv5_segment():
+    segment_data = {
+        "product_service_id_qualifier": "HC:A4631",
+        "unit_basis_measurement_code": "DA",
+        "length_of_medical_necessity": "30.00",
+        "dme_rental_price": "50.00",
+        "dme_purchase_price": "5000.00",
+        "rental_unit_price_indicator": "4",
+    }
+    sv5_segment: Sv5Segment = Sv5Segment(**segment_data)
+    assert sv5_segment.x12() == "SV5*HC:A4631*DA*30.00*50.00*5000.00*4~"
+
+
+def test_svd_segment():
+    segment_data = {
+        "other_payer_primary_identifier": "43",
+        "service_line_paid_amount": "55.00",
+        "composite_medical_procedure_identifier": "HC:84550",
+        "paid_service_count": "3.00",
+    }
+    svd_segment: SvdSegment = SvdSegment(**segment_data)
+    assert svd_segment.x12() == "SVD*43*55.00*HC:84550**3.00~"
 
 
 def test_trn_segment():

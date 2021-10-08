@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
 
-from pydantic import Field, PositiveInt, condecimal, validator, root_validator
+from pydantic import Field, PositiveInt, condecimal, validator, root_validator, conint
 
 from x12.models import X12Segment, X12SegmentName
 from x12.support import (
@@ -79,6 +79,312 @@ class BhtSegment(X12Segment):
     _validate_transaction_time = field_validator("transaction_set_creation_time")(
         parse_x12_time
     )
+
+
+class CasSegment(X12Segment):
+    """
+    Claim level adjustments
+    Example:
+        CAS*PR*1*7.93~
+    """
+
+    class ClaimAdjustmentGroupCode(str, Enum):
+        """
+        Code values for CAS01
+        """
+
+        CONTRACTUAL_OBLIGATIONS = "CO"
+        CORRECTION_AND_REVERSALS = "CR"
+        OTHER_ADJUSTMENTS = "OA"
+        PAYER_INITIATED_REDUCTIONS = "PI"
+        PATIENT_RESPONSIBILITY = "PR"
+
+    segment_name: X12SegmentName = X12SegmentName.CAS
+    adjustment_reason_code_1: str
+    monetary_amount_1: Decimal
+    quantity_1: Decimal
+
+    adjustment_reason_code_2: Optional[str]
+    monetary_amount_2: Optional[Decimal]
+    quantity_2: Optional[Decimal]
+
+    adjustment_reason_code_3: Optional[str]
+    monetary_amount_3: Optional[Decimal]
+    quantity_3: Optional[Decimal]
+
+    adjustment_reason_code_4: Optional[str]
+    monetary_amount_4: Optional[Decimal]
+    quantity_4: Optional[Decimal]
+
+    adjustment_reason_code_5: Optional[str]
+    monetary_amount_5: Optional[Decimal]
+    quantity_5: Optional[Decimal]
+
+    adjustment_reason_code_6: Optional[str]
+    monetary_amount_6: Optional[Decimal]
+    quantity_6: Optional[Decimal]
+
+    @root_validator
+    def validate_adjustments(cls, values):
+        """
+        Validates that an adjustment "set" has a reason code, amount, and quantity.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        for i in range(1, 7, 1):
+            adjustment_fields: Tuple = (
+                values.get(f"adjustment_reason_code_{i}"),
+                values.get(f"monetary_amount_{i}"),
+                values.get(f"quantity_{i}"),
+            )
+
+            if any(adjustment_fields) and not all(adjustment_fields):
+                raise ValueError(
+                    f"Adjustment set {i} is required to have a reason code, amount, and quantity"
+                )
+
+        return values
+
+
+class ClmSegment(X12Segment):
+    """
+    Claim Information Segment
+    Example:
+        CLM*26463774*100***11:B:1*Y*A*Y*I~
+    """
+
+    class ProviderOrSupplierSignatureIndicator(str, Enum):
+        """
+        Code values for CLM06
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class ProviderAcceptAssignmentCode(str, Enum):
+        """
+        Code values for CLM07
+        """
+
+        ASSIGNED = "A"
+        ASSIGNMENT_ACCEPTED_CLINICAL_LAB_ONLY = "B"
+        NOT_ASSIGNED = "C"
+
+    class BenefitsAssignmentCertificationIndicator(str, Enum):
+        """
+        Code values for CLM08
+        """
+
+        NO = "N"
+        NOT_APPLICABLE = "W"
+        YES = "Y"
+
+    class ReleaseOfInformationCode(str, Enum):
+        """
+        Code values for CLM09
+        """
+
+        INFORMED_CONSENT_NO_SIGNATURE = "I"
+        SIGNED_STATEMENT = "Y"
+
+    class SpecialProgramCode(str, Enum):
+        """
+        Code values for CLM12
+        """
+
+        PHYSICALLY_HANDICAPPED_CHILDRENS_PROGAM = "02"
+        SPECIAL_FEDERAL_FUNDING = "03"
+        DISABILITY = "05"
+        SECOND_OPINION_OR_SURGERY = "09"
+
+    class DelayReasonCode(str, Enum):
+        """
+        Code values for CLM20
+        """
+
+        PROOF_OF_ELIGIBILITY_UNKNOWN_UNAVAILABLE = "1"
+        LITIGATION = "2"
+        AUTHORIZATION_DELAYS = "3"
+        DELAY_IN_CERTIFYING_PROVIDER = "4"
+        DELAY_IN_SUPPLYING_BILLING_FORMS = "5"
+        DELAY_IN_DELIVERY_OF_CUSTOM_APPLIANCES = "6"
+        THIRD_PARTY_PROCESSING_DELAY = "7"
+        DELAY_IN_ELIGIBILITY_DETERMINATION = "8"
+        ORIGINAL_CLAIM_REJECTED_DENIED_UNRELATED_TO_BILLING = "9"
+        ADMINISTRATION_DELAY_PRIOR_APPROVAL = "10"
+        OTHER = "11"
+        NATURAL_DISASTER = "15"
+
+    segment_name: X12SegmentName = X12SegmentName.CLM
+    patient_control_number: str = Field(min_length=1, max_length=38)
+    total_claim_charge_amount: Decimal = Decimal("0.00")
+    claim_filing_indicator_code: Optional[str] = Field(min_length=1, max_length=2)
+    non_institutional_claim_type_code: Optional[str] = Field(min_length=1, max_length=2)
+    health_care_service_location_information: str
+    provider_or_supplier_signature_indicator: ProviderOrSupplierSignatureIndicator
+    provider_accept_assignment_code: ProviderAcceptAssignmentCode
+    benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
+    release_of_information_code: ReleaseOfInformationCode
+    patient_signature_source_code: Optional[Literal["P"]]
+    related_causes_code: Optional[str]
+    special_program_code: Optional[SpecialProgramCode]
+    yes_no_condition_response_code_1: Optional[str]
+    level_of_service_code: Optional[str]
+    yes_no_condition_response_code_2: Optional[str]
+    provider_agreement_code: Optional[str]
+    claim_status_code: Optional[str]
+    yes_no_condition_response_code_3: Optional[str]
+    claim_submission_reason_code: Optional[str]
+    delay_reason_code: Optional[DelayReasonCode]
+
+
+class Cn1Segment(X12Segment):
+    """
+    Contract information.
+    Example:
+        CN1*02*550~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CN1
+    contract_type_code: str
+    contract_amount: Optional[Decimal]
+    contract_percentage: Optional[Decimal]
+    contract_code: Optional[str]
+    terms_discount_percentage: Optional[Decimal]
+    contract_version_identifier: Optional[str]
+
+
+class CrcSegment(X12Segment):
+    """
+    Conditions Indicator
+    Example:
+        CRC*E1*Y*L1~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CRC
+    code_category: str = Field(min_length=2, max_length=2)
+    certification_condition_indicator: str = Field(min_length=1, max_length=1)
+    condition_code_1: str
+    condition_code_2: Optional[str]
+    condition_code_3: Optional[str]
+    condition_code_4: Optional[str]
+    condition_code_5: Optional[str]
+
+
+class Cr1Segment(X12Segment):
+    """
+    Ambulance Transport Information
+    Example:
+        CR1*LB*140**A*DH*12****UNCONSCIOUS~
+    """
+
+    class AmbulanceTransportReasonCode(str, Enum):
+        """
+        Code values for CR104
+        """
+
+        PATIENT_TRANSPORTED_CARE_OF_SYMPTOMS = "A"
+        PATIENT_TRANSPORTED_FOR_PHYSICIAN = "B"
+        PATIENT_TRANSPORTED_FOR_FAMILY = "C"
+        PATIENT_TRANSPORTED_FOR_SPECIALIST = "D"
+        PATIENT_TRANSPORTED_FOR_REHABILITATION = "E"
+
+    segment_name: X12SegmentName = X12SegmentName.CR1
+    weight_measurement_code: Optional[Literal["LB"]]
+    patient_weight: Optional[Decimal]
+    ambulance_transport_code: Optional[str]
+    ambulance_transport_reason_code: AmbulanceTransportReasonCode
+    mileage_measurement_code: Literal["DH"]
+    transport_distance: Decimal
+    address_information_1: Optional[str]
+    address_information_2: Optional[str]
+    round_trip_purpose_description: Optional[str]
+    stretcher_purpose_description: Optional[str]
+
+
+class Cr2Segment(X12Segment):
+    """
+    Chiropractic Certification
+    Example:
+        CR2********M~
+    """
+
+    class PatientConditionCode(str, Enum):
+        """
+        Code values for CR208
+        """
+
+        ACUTE_CONDITION = "A"
+        CHRONIC_CONDITION = "C"
+        NON_ACUTE = "D"
+        NON_LIFE_THREATENING = "E"
+        ROUTINE = "F"
+        SYMPTOMATIC = "G"
+        ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "M"
+
+    segment_name: X12SegmentName = X12SegmentName.CR2
+    count: Optional[str]
+    quantity: Optional[str]
+    subluxation_level_code_1: Optional[str]
+    subluxation_level_code_2: Optional[str]
+    unit_basis_measurement_code: Optional[str]
+    quantity_1: Optional[Decimal]
+    quantity_2: Optional[Decimal]
+    patient_condition_code: PatientConditionCode
+    patient_condition_description_1: Optional[str]
+    patient_condition_description_2: Optional[str]
+    yes_no_condition_response_code: Optional[str]
+
+
+class Cr3Segment(X12Segment):
+    """
+    Durable Medical Equipment Certification
+    Example:
+        CR3*I*MO*6.00~
+    """
+
+    class CertificationTypeCode(str, Enum):
+        """
+        Code values for CR301
+        """
+
+        INITIAL = "I"
+        RENEWAL = "R"
+        REVISED = "S"
+
+    segment_name: X12SegmentName = X12SegmentName.CR3
+    certification_type_code: CertificationTypeCode
+    unit_basis_measurement_code: Literal["MO"]
+    durable_medical_equipment_duration: condecimal(gt=Decimal("0.0"))
+    insulin_dependent_code: Optional[str]
+    description: Optional[str]
+
+
+class CtpSegment(X12Segment):
+    """
+    Pricing Information
+    Example:
+        CTP****2.00*UN~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CTP
+    class_of_trade_code: Optional[str]
+    price_identifier_code: Optional[str]
+    unit_price: Optional[Decimal]
+    quantity: Decimal
+    composite_unit_of_measure: str
+
+
+class CurSegment(X12Segment):
+    """
+    Foreign Currency Information
+    Example:
+        CUR*85*USD~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CUR
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    currency_code: str = Field(min_length=3, max_length=3)
 
 
 class DmgSegment(X12Segment):
@@ -590,6 +896,34 @@ class EqSegment(X12Segment):
         return values
 
 
+class FrmSegment(X12Segment):
+    """
+    Supporting documentation segment
+    Example:
+        FRM*12*N~
+    """
+
+    class QuestionResponse(str, Enum):
+        """
+        Code values for FRM02
+        """
+
+        NO = "N"
+        NOT_APPLICABLE = "W"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.FRM
+    question_number_letter: str
+    question_response_1: Optional[QuestionResponse]
+    question_response_2: Optional[str]
+    question_response_3: Optional[Union[str, datetime.date]]
+    question_response_4: Optional[Decimal]
+
+    _validate_cquestion_response_3 = field_validator("question_response_3")(
+        parse_x12_date
+    )
+
+
 class GeSegment(X12Segment):
     """
     Defines a functional header for the message and is an EDI control segment.
@@ -625,6 +959,90 @@ class GsSegment(X12Segment):
     _validate_creation_time = field_validator("functional_group_creation_time")(
         parse_x12_time
     )
+
+
+class HcpSegment(X12Segment):
+    """
+    Health Care Pricing
+    Example:
+        HCP*03*100*10*RPO12345~
+    """
+
+    class PricingMethodology(str, Enum):
+        """
+        Code values for HCP01
+        """
+
+        ZERO_PRICING_NOT_COVERED = "00"
+        PRICED_AS_BILLED_100_PERCENT = "01"
+        PRICED_AT_STANDARD_FEE_SCHEDULE = "02"
+        PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
+        BUNDLED_PRICING = "04"
+        PEER_REVIEW_PRICING = "05"
+        FLAT_RATE_PRICING = "07"
+        COMBINATION_PRICING = "08"
+        MATERNITY_PRICING = "09"
+        OTHER_PRICING = "10"
+        LOWER_OF_COST = "11"
+        RATIO_OF_COST = "12"
+        COST_REIMBURSED = "13"
+        ADJUSTMENT_PRICING = "14"
+
+    class RejectReasonCode(str, Enum):
+        """
+        Code values for HCP13
+        """
+
+        CANNOT_IDENTIFY_PROVIDER_AS_TPO = "T1"
+        CANNOT_IDENTIFY_PAYER_AS_TPO = "T2"
+        CANNOT_IDENTIFY_INSURED_AS_TPO = "T3"
+        PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
+        CERTIFICATION_INFORMATION_MISSING = "T5"
+        CLAIM_DOES_NOT_CONTAIN_INFO_FOR_REPRICING = "T6"
+
+    class PolicyComplianceCode(str, Enum):
+        """
+        Code values for HCP14
+        """
+
+        PROCEDURE_FOLLOWED = "1"
+        NOT_FOLLOWED_CALL_NOT_MADE = "2"
+        NOT_MEDICALLY_NECESSARY = "3"
+        NOT_FOLLOWED_OTHER = "4"
+        EMERGENCY_ADMIT_NON_NETWORK_HOSPITAL = "5"
+
+    class ExceptionCode(str, Enum):
+        """
+        Code values for HCP15
+        """
+
+        NON_NETWORK_PROFESSIONAL_PROVIDER_IN_NETWORK_HOSPITAL = "1"
+        EMERGENCY_CARE = "2"
+        SERVICES_SPECIALIST_NOT_IN_NETWORK = "3"
+        OUT_OF_SERVICE_AREA = "4"
+        STATE_MAnDATES = "5"
+        OTHER = "6"
+
+    segment_name: X12SegmentName = X12SegmentName.HCP
+    pricing_methodology: PricingMethodology
+    repriced_allowed_amount: Decimal
+    repriced_saving_amount: Optional[Decimal]
+    repricing_organization_identifier: Optional[str] = Field(
+        min_length=1, max_length=50
+    )
+    per_diem_flat_rate_amount: Optional[Decimal]
+    repriced_apg_code: Optional[str] = Field(min_length=1, max_length=50)
+    repriced_apg_amount: Optional[Decimal]
+    product_service_id_1: Optional[str]
+    product_service_id_1_qualifier: Optional[str]
+    product_service_id_2: Optional[str]
+    unit_basis_measurement_code: Optional[str]
+    quantity: Optional[Decimal]
+    reject_reason_code: Optional[RejectReasonCode] = Field(min_length=2, max_length=2)
+    policy_compliance_code: Optional[PolicyComplianceCode] = Field(
+        min_length=1, max_length=2
+    )
+    exception_code: Optional[ExceptionCode] = Field(min_length=1, max_length=2)
 
 
 class HiSegment(X12Segment):
@@ -969,6 +1387,19 @@ class IsaSegment(X12Segment):
         return self.delimiters.element_separator.join(segment_fields)
 
 
+class K3Segment(X12Segment):
+    """
+    File information
+    Example:
+        K3*STATE DATA REQUIREMENT~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.K3
+    fixed_format_information: str
+    record_format_code: Optional[str]
+    composite_unit_of_measurement: Optional[str]
+
+
 class LeSegment(X12Segment):
     """
     Loop trailer segment.
@@ -981,9 +1412,55 @@ class LeSegment(X12Segment):
     loop_id_code: str
 
 
+class LinSegment(X12Segment):
+    """
+    Drug Identification
+    Example:
+        LIN**N4*01234567891~
+    """
+
+    class ProductServiceIdQualifier(str, Enum):
+        """
+        Code values for LIN02
+        """
+
+        EAN_UCC_13 = "EN"
+        EAN_UCC_8 = "EO"
+        HIBC_SUPPLIER_PRIMARY_DATA_MESSAGE = "HI"
+        NATIONAL_DRUG_CODE_542_FORMAT = "N4"
+        CUSTOMER_ORDER_NUMBER = "ON"
+        GTIN_14_DIGIT_STRUCTURE = "UK"
+        UCC_12 = "UP"
+
+    segment_name: X12SegmentName = X12SegmentName.LIN
+    assigned_identification: Optional[str]
+    product_service_id_qualifier: ProductServiceIdQualifier
+    national_drug_code_universal_product_number: str
+
+
+class LqSegment(X12Segment):
+    """
+    Form Identification Code
+    Example:
+        LQ*UT*1.02~
+    """
+
+    class CodeListQualifierCode(str, Enum):
+        """
+        Code values for LQ01
+        """
+
+        FORM_TYPE_CODE = "AS"
+        CMS_CMN_FORMS = "UT"
+
+    segment_name: X12SegmentName = X12SegmentName.LQ
+    code_list_qualifier_code: CodeListQualifierCode
+    form_identifier: str
+
+
 class LsSegment(X12Segment):
     """
-    Loop Header Segment.
+    Loop Header Segment
     The LS segment is used to disambiguate loops which start with the same segment.
     Example:
         LS*2120~
@@ -991,6 +1468,66 @@ class LsSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LS
     loop_id_code: str
+
+
+class LxSegment(X12Segment):
+    """
+    Transaction set line number
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.LX
+    assigned_number: conint(gt=0)
+
+
+class MeaSegment(X12Segment):
+    """
+    Measurements
+    Example:
+        MEA*TR*R1*113.40~
+    """
+
+    class MeasurementReferenceIdCode(str, Enum):
+        """
+        Code values for MEA01
+        """
+
+        ORIGINAL = "OG"
+        TEST_RESULTS = "TR"
+
+    class MeasurementQualifier(str, Enum):
+        """
+        Code values for MEA02
+        """
+
+        HEIGHT = "HT"
+        HEMOGLOBIN = "R1"
+        HEMATOCRIT = "R2"
+        EPOETIN_STARTING_DOSAGE = "R3"
+        CREATINE = "R4"
+
+    segment_name: X12SegmentName = X12SegmentName.MEA
+    measurement_reference_id_code: MeasurementReferenceIdCode
+    measurement_qualifier: MeasurementQualifier
+    measurement_value: Decimal
+
+
+class MoaSegment(X12Segment):
+    """
+    Outpatient Adjudication Information
+    Example:
+        MOA***A4~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.MOA
+    reimbursement_rate: Optional[Decimal]
+    hcpcs_payable_amount: Optional[Decimal]
+    claim_payment_remark_code_1: Optional[str]
+    claim_payment_remark_code_2: Optional[str]
+    claim_payment_remark_code_3: Optional[str]
+    claim_payment_remark_code_4: Optional[str]
+    claim_payment_remark_code_5: Optional[str]
+    end_stage_renal_disease_payment_amount: Optional[Decimal]
+    nonpayable_professional_component_billable_amount: Optional[Decimal]
 
 
 class MpiSegment(X12Segment):
@@ -1232,7 +1769,7 @@ class Nm1Segment(X12Segment):
     name_last_or_organization_name: str = Field(min_length=1, max_length=60)
     name_first: Optional[str] = Field(min_length=0, max_length=35)
     name_middle: Optional[str] = Field(min_length=0, max_length=25)
-    name_prefix: Optional[str]
+    name_prefix: Optional[str] = Field(min_length=0, max_length=10)
     name_suffix: Optional[str] = Field(min_length=0, max_length=10)
     identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
@@ -1272,6 +1809,114 @@ class Nm1Segment(X12Segment):
                     "Invalid field usage for Organization/Non-Person Entity"
                 )
         return field_value
+
+
+class NteSegment(X12Segment):
+    """
+    Note/Special Instruction
+    Example:
+        NTE*ADD*SURGERY WAS UNUSUALLY LONG BECAUSE [FILL IN REASON]~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.NTE
+    note_reference_code: str
+    description: str
+
+
+class OiSegment(X12Segment):
+    """
+    Other insurance information:
+    Example:
+        OI***Y*B**Y~
+    """
+
+    class BenefitsAssignmentCertificationIndicator(str, Enum):
+        """
+        Code values for OI03
+        """
+
+        NO = "NO"
+        NOT_APPLICABLE = "N"
+        YES = "Y"
+
+    class ReleaseOfInformationCode(str, Enum):
+        """
+        Code values for OI06
+        """
+
+        INFORMED_CONSENT = "I"
+        PROVIDER_SIGNED_STATEMENT = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.OI
+    claim_filing_indicator_code: Optional[str]
+    claim_submission_reason_code: Optional[str]
+    benefits_assignment_certification: BenefitsAssignmentCertificationIndicator
+    patient_signature_source_code: Optional[Literal["P"]]
+    provider_agreement_code: Optional[str]
+    release_of_information_code: ReleaseOfInformationCode
+
+
+class PatSegment(X12Segment):
+    """
+    Patient Information:
+    Example:
+        PAT******01*146~
+    """
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code value for PAT04
+        """
+
+        SPECIFIC_DATE = "D8"
+
+    segment_name: X12SegmentName = X12SegmentName.PAT
+    individual_relationship_code: Optional[str]
+    patient_location_code: Optional[str]
+    student_status_code: Optional[str]
+    date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
+    patient_death_date: Optional[Union[str, datetime.date]]
+    unit_basis_measurement_code: Optional[Literal["01"]]
+    patient_weight: Optional[Decimal]
+    pregnancy_indicator: Optional[Literal["Y"]]
+
+    _validate_transaction_date = field_validator("patient_death_date")(parse_x12_date)
+
+    @root_validator
+    def validate_death_date(cls, values):
+        """
+        Validates that both a date format qualifier and the patient death date are both present, if one or the other is
+        present.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        date_fields: Tuple = values.get(
+            "date_time_period_format_qualifier"
+        ), values.get("patient_death_date")
+
+        if any(date_fields) and not all(date_fields):
+            raise ValueError(
+                "Patient Death Date requires format qualifier and date value"
+            )
+
+        return values
+
+    @root_validator
+    def validate_weight(cls, values):
+        """
+        Validates that both a weight unit and value are present, if one or the other is
+        present.
+
+        :param values: The raw, unvalidated transaction data.
+        """
+        weight_fields: Tuple = values.get("unit_basis_measurement_code"), values.get(
+            "patient_weight"
+        )
+
+        if any(weight_fields) and not all(weight_fields):
+            raise ValueError("Patient weight requires units and value")
+
+        return values
 
 
 class PerSegment(X12Segment):
@@ -1355,6 +2000,147 @@ class PrvSegment(X12Segment):
         return values
 
 
+class Ps1Segment(X12Segment):
+    """
+    Purchased Service Information
+    Example:
+        PS1*PN222222*110.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PS1
+    purchased_service_provider_identifier: str
+    purchased_service_charge_amount: condecimal(gt=Decimal("0.0"))
+    state_province_code: Optional[str]
+
+
+class PwkSegment(X12Segment):
+    """
+    Paperwork
+    Example:
+        PWK*OZ*BM***AC*DMN0012~
+    """
+
+    class AttachmentReportTypeCode(str, Enum):
+        """
+        PWK01 code values
+        """
+
+        REPORT_JUSTIFYING_TREATMENT_BEYOND_UTILIZATION_GUIDELINES = "03"
+        DRUGS_ADMINISTERED = "04"
+        TREATMENT_DIAGNOSIS = "05"
+        INITIAL_ASSESSMENT = "06"
+        FUNCTIONAL_GOALS = "07"
+        PLAN_OF_TREATMENT = "08"
+        PROGRESS_REPORT = "09"
+        CONTINUED_TREATMENT = "10"
+        CHEMICAL_ANALYSIS = "11"
+        CERTIFIED_TEST_REPORT = "13"
+        JUSTIFICATION_FOR_ADMISSION = "15"
+        RECOVERY_PLAN = "21"
+        ALLERGIES_SENSITIVITIES_DOCUMENT = "A3"
+        AUTOPSY_REPORT = "A4"
+        AMBULANCE_CERTIFICATION = "AM"
+        ADMISSION_SUMMARY = "AS"
+        PHYSICIAN_ORDER = "B3"
+        REFERRAL_FORM = "B4"
+        BENCHMARK_TESTING_RESULTS = "BR"
+        BASELINE = "BS"
+        BLANKET_TESTING_RESULTS = "BT"
+        CHIROPRACTIC_JUSTIFICATION = "CB"
+        CONSENT_FORM = "CK"
+        CERTIFICATION = "CT"
+        DRUG_PROFILE_DOCUMENT = "D2"
+        DENTAL_MODELS = "DA"
+        DURABLE_MEDICAL_EQUIPMENT_PRESCRIPTION = "DB"
+        DIAGNOSTIC_REPORT = "DG"
+        DISCHARGE_MONITORING_REPORT = "DJ"
+        DISCHARGE_SUMMARY = "DS"
+        EXPLANATION_OF_BENEFITS = "EB"
+        HEALTH_CERTIFICATE = "HC"
+        HEALTH_CLINIC_RECORDS = "HR"
+        IMMUNIZATION_RECORD = "I5"
+        STATE_SCHOOL_IMMUNIZATION_RECORDS = "IR"
+        LABORATORY_RESULTS = "LA"
+        MEDICAL_RECORD_ATTACHMENT = "M1"
+        MODELS = "MT"
+        NURSING_NOTES = "NN"
+        OPERATIVE_NOTE = "OB"
+        OXYGEN_CONTENT_AVERAGING_REPORT = "OC"
+        ORDERS_AND_TREATMENTS_DOCUMENT = "OD"
+        OBJECTIVE_PHYSICAL_EXAMINATION = "OE"
+        OXYGEN_THERAPY_CERTIFICATION = "OX"
+        SUPPORT_DATA_FOR_CLAIM = "OZ"
+        PATHOLOGY_REPORT = "P4"
+        PATIENT_MEDICAL_HISTORY_DOCUMENT = "P5"
+        PARENTAL_OR_ENTERAL_CERTIFICATION = "PE"
+        PHYSICAL_THERAPY_NOTES = "PN"
+        PROSTHETICS_OR_ORTHOTIC_CERTIFICATION = "PO"
+        PARAMEDICAL_RESULTS = "PQ"
+        PHYSICIANS_REPORT = "PY"
+        PHYSICAL_THERAPY_CERTIFICATION = "PZ"
+        RADIOLOGY_FILMS = "RB"
+        RADIOLOGY_REPORTS = "RR"
+        REPORT_OF_TESTS_AND_ANALYSIS_REPORT = "RT"
+        RENEWABLE_OXYGEN_CONTENT_AVERAGING_REPORT = "RX"
+        SYMPTOMS_DOCUMENT = "SG"
+        DEATH_NOTIFICATION = "V5"
+        PHOTOGRAPHS = "XP"
+
+    class AttachmentTransmissionCode(str, Enum):
+        """
+        Code values for PWK02
+        """
+
+        AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
+        BY_MAIL = "BM"
+        ELECTRONICALLY_ONLY = "EL"
+        EMAIL = "EM"
+        FILE_TRANSFER = "FT"
+        BY_FAX = "FX"
+
+    segment_name: X12SegmentName = X12SegmentName.PWK
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
+    report_copies_needed: Optional[str]
+    entity_identifier_code: Optional[str]
+    identification_code_qualifier: Optional[str]
+    identification_code: Optional[str]
+    description: Optional[str]
+    actions_indicated: Optional[str]
+    request_category_code: Optional[str]
+
+    @root_validator
+    def validate_identification_code(cls, values):
+        """
+        Validates that both an identification code and code qualifier are present if either exists.
+        :param values: The model values
+        :return: The model values
+        """
+        fields = (
+            values.get("identification_code_qualifier"),
+            values.get("identification_code"),
+        )
+
+        if any(fields) and not all(fields):
+            raise ValueError("Identification code requires a qualifier and code value")
+
+        return values
+
+
+class QtySegment(X12Segment):
+    """
+    Quantity Information
+    Example:
+        QTY*PT*2.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.QTY
+    quantity_qualifier: str
+    quantity: Decimal
+    composite_unit_of_measure: Optional[str]
+    free_form_message: Optional[str]
+
+
 class RefSegment(X12Segment):
     """
     Reference Identification
@@ -1366,6 +2152,25 @@ class RefSegment(X12Segment):
     reference_identification_qualifier: str = Field(min_length=2, max_length=3)
     reference_identification: str = Field(min_length=1, max_length=50)
     description: Optional[str] = Field(min_length=1, max_length=80)
+
+
+class SbrSegment(X12Segment):
+    """
+    Subscriber Information
+    Example:
+        SBR*P**2222-SJ******CI~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SBR
+    payer_responsibility_code: str
+    individual_relationship_code: Optional[str]
+    group_policy_number: Optional[str] = Field(min_length=1, max_length=50)
+    group_name: Optional[str] = Field(min_length=1, max_length=60)
+    insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
+    coordination_of_benefits_code: Optional[str]
+    condition_response_code: Optional[str]
+    employment_status_code: Optional[str]
+    claim_filing_indicator_code: str = Field(min_length=1, max_length=2)
 
 
 class SeSegment(X12Segment):
@@ -1391,6 +2196,87 @@ class StSegment(X12Segment):
     transaction_set_identifier_code: str = Field(min_length=3, max_length=3)
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
     implementation_convention_reference: str = Field(min_length=1, max_length=35)
+
+
+class Sv1Segment(X12Segment):
+    """
+    Professional Service Segment
+    Example:
+        SV1*HC:99213*40*UN*1.0***1~
+    """
+
+    class UnitBasisMeasurementCode(str, Enum):
+        """
+        Code values for SV103
+        """
+
+        MINUTES = "MJ"
+        UNIT = "UN"
+
+    segment_name: X12SegmentName = X12SegmentName.SV1
+    product_service_id_qualifier: str
+    line_item_charge_amount: Decimal
+    unit_basis_measurement_code: UnitBasisMeasurementCode
+    service_unit_count: condecimal(gt=Decimal("0.0"))
+    place_of_service_code: Optional[str]
+    service_type_code: Optional[str]
+    composite_diagnosis_code_pointer: str
+    monetary_amount: Optional[str]
+    emergency_indicator: Optional[Literal["Y"]]
+    multiple_procedure_code: Optional[str]
+    epsdt_indicator: Optional[Literal["Y"]]
+    family_planning_indicator: Optional[Literal["Y"]]
+    review_code: Optional[str]
+    national_local_assigned_review_value: Optional[str]
+    copay_status_code: Optional[Literal["0"]]
+    health_care_professional_shortage_area_code: Optional[str]
+    reference_identification: Optional[str]
+    postal_code: Optional[str]
+    monetary_amount: Optional[Decimal]
+    level_of_care_code: Optional[str]
+    provider_agreement_code: Optional[str]
+
+
+class Sv5Segment(X12Segment):
+    """
+    Durable Medical Equipment Service
+    Example:
+        SV5*HC:A4631*DA*30.00*50.00*5000.00*4~
+    """
+
+    class RentalUnitPriceIndicator(str, Enum):
+        """
+        Code values for SV506
+        """
+
+        WEEKLY = "1"
+        MONTHLY = "4"
+        DAILY = "6"
+
+    segment_name: X12SegmentName = X12SegmentName.SV5
+    product_service_id_qualifier: str
+    unit_basis_measurement_code: Literal["DA"]
+    length_of_medical_necessity: condecimal(gt=Decimal("0.0"))
+    dme_rental_price: condecimal(gt=Decimal("0.0"))
+    dme_purchase_price: condecimal(gt=Decimal("0.0"))
+    rental_unit_price_indicator: RentalUnitPriceIndicator
+    prognosis_code: Optional[str]
+
+
+class SvdSegment(X12Segment):
+    """
+    Line Ajudication Information
+    Example:
+        SVD*43*55.00*HC:84550**3.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SVD
+    other_payer_primary_identifier: str
+    service_line_paid_amount: Decimal
+    composite_medical_procedure_identifier: str
+    product_service_id: Optional[str]
+    paid_service_count: Decimal
+    bundled_unbundled_line_number: Optional[conint(gt=0)]
 
 
 class TrnSegment(X12Segment):
