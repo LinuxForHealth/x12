@@ -128,6 +128,7 @@ from .segments import (
     Loop2420EPerSegment,
     Loop2420FNm1Segment,
     Loop2420FRefSegment,
+    Loop2420GNm1Segment,
 )
 from x12.segments import (
     SeSegment,
@@ -438,6 +439,16 @@ class Loop2310A(X12SegmentGroup):
     )
 
 
+class Loop2420G(X12SegmentGroup):
+    """
+    Claim Service Line - Ambulance Pick-Up Location
+    """
+
+    nm1_segment: Loop2420GNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
 class Loop2420F(X12SegmentGroup):
     """
     Claim Service Line - Referring Provider Name
@@ -537,6 +548,7 @@ class Loop2400(X12SegmentGroup):
     loop_2420d: Optional[Loop2420D]
     loop_2420e: Optional[Loop2420E]
     loop_2420f: Optional[Loop2420F]
+    loop_2420g: Optional[Loop2420G]
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

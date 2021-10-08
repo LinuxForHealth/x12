@@ -1513,3 +1513,12 @@ class Loop2420FRefSegment(RefSegment):
         PROVIDER_COMMERCIAL_NUMBER = "G2"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420GNm1Segment(Nm1Segment):
+    """
+    Loop 2420G Ambulance Pickup Location
+    """
+
+    entity_identifier_code: Literal["PW"]
+    entity_type_qualifier: Literal["2"]
