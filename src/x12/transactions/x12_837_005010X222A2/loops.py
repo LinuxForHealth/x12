@@ -130,6 +130,8 @@ from .segments import (
     Loop2420FRefSegment,
     Loop2420GNm1Segment,
     Loop2420HNm1Segment,
+    Loop2430DtpSegment,
+    Loop2430AmtSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -158,6 +160,9 @@ from x12.segments import (
     HcpSegment,
     LinSegment,
     CtpSegment,
+    SvdSegment,
+    LqSegment,
+    FrmSegment,
 )
 from typing import List, Optional
 from pydantic import Field, root_validator
@@ -440,6 +445,26 @@ class Loop2310A(X12SegmentGroup):
     )
 
 
+class Loop2440(X12SegmentGroup):
+    """
+    Form Identification Code
+    """
+
+    lq_segment: List[LqSegment] = Field(min_items=1)
+    frm_segment: List[FrmSegment] = Field(min_items=1, max_items=99)
+
+
+class Loop2430(X12SegmentGroup):
+    """
+    Claim Service Line - Adjudication Information
+    """
+
+    svd_segment: SvdSegment
+    cas_segment: Optional[List[CasSegment]] = Field()
+    dtp_segment: Loop2430DtpSegment
+    amt_segment: Loop2430AmtSegment
+
+
 class Loop2420H(X12SegmentGroup):
     """
     Claim Service Line - Ambulance Drop-Off Location
@@ -561,6 +586,8 @@ class Loop2400(X12SegmentGroup):
     loop_2420f: Optional[Loop2420F]
     loop_2420g: Optional[Loop2420G]
     loop_2420h: Optional[Loop2420H]
+    loop_2430: Optional[List[Loop2430]] = Field(min_items=0, max_items=15)
+    loop_2440: Optional[List[Loop2440]] = Field(min_items=0)
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

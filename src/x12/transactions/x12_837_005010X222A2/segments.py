@@ -21,6 +21,7 @@ from x12.segments import (
     PatSegment,
     HcpSegment,
     QtySegment,
+    CasSegment,
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -1531,3 +1532,20 @@ class Loop2420HNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["45"]
     entity_type_qualifier: Literal["2"]
+
+
+class Loop2430DtpSegment(DtpSegment):
+    """
+    Loop 2430 Line Check or Remittance Date
+    """
+
+    date_time_qualifier: Literal["573"]
+    date_time_period_format_qualifier: Literal["D8"]
+
+
+class Loop2430AmtSegment(AmtSegment):
+    """
+    Loop 2430 Remaining Patient Liability
+    """
+
+    amount_qualifier_code: Literal["EAF"]

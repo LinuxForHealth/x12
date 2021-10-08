@@ -624,6 +624,50 @@ def set_service_line_entity_loop(context: X12ParserContext, segment_data: Dict) 
         context.set_loop_context(loop_name, loop_data)
 
 
+@match("SVD")
+def set_line_adjudication_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the claim service line adjudication loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    service_line = _get_service_line(context)
+
+    loop_data = {"cas_segment": []}
+    loop_name = TransactionLoops.CLAIM_SERVICE_LINE_LINE_AJUDICATION_INFORMATION
+
+    if loop_name not in service_line:
+        service_line[loop_name] = loop_data
+    else:
+        service_line[loop_name].append(loop_data)
+
+    loop_record = service_line[loop_name][-1]
+
+    context.set_loop_context(loop_name, loop_record)
+
+
+@match("LQ")
+def set_form_identification_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the form identification loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    service_line = _get_service_line(context)
+    loop_name = TransactionLoops.CLAIM_SERVICE_LINE_LINE_FORM_IDENTIFICATION
+    loop_data = {"frm_segment": []}
+
+    if loop_name not in service_line:
+        service_line[loop_name] = [loop_data]
+    else:
+        service_line[loop_name].append(loop_data)
+
+    loop_record = service_line[loop_name][-1]
+    context.set_loop_context(loop_name, loop_record)
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """

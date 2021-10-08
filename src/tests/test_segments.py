@@ -199,6 +199,13 @@ def test_eq_segment():
     assert eq_segment.x12() == "EQ*98^34^44^81^A0^A3**FAM~"
 
 
+def test_frm_segment():
+    segment_data = {"question_number_letter": "12", "question_response_1": "N"}
+
+    frm_segment: FrmSegment = FrmSegment(**segment_data)
+    assert frm_segment.x12() == "FRM*12*N~"
+
+
 def test_ge_segment():
     segment_data = {
         "number_of_transaction_sets_included": 1,
@@ -346,6 +353,12 @@ def test_lin_segment():
     }
     lin_segment: LinSegment = LinSegment(**segment_data)
     assert lin_segment.x12() == "LIN**N4*01234567891~"
+
+
+def test_lq_segment():
+    segment_data = {"code_list_qualifier_code": "UT", "form_identifier": "1.02"}
+    lq_segment: LqSegment = LqSegment(**segment_data)
+    assert lq_segment.x12() == "LQ*UT*1.02~"
 
 
 def test_ls_segment():
@@ -546,6 +559,17 @@ def test_sv5_segment():
     }
     sv5_segment: Sv5Segment = Sv5Segment(**segment_data)
     assert sv5_segment.x12() == "SV5*HC:A4631*DA*30.00*50.00*5000.00*4~"
+
+
+def test_svd_segment():
+    segment_data = {
+        "other_payer_primary_identifier": "43",
+        "service_line_paid_amount": "55.00",
+        "composite_medical_procedure_identifier": "HC:84550",
+        "paid_service_count": "3.00",
+    }
+    svd_segment: SvdSegment = SvdSegment(**segment_data)
+    assert svd_segment.x12() == "SVD*43*55.00*HC:84550**3.00~"
 
 
 def test_trn_segment():

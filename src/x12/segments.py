@@ -95,7 +95,8 @@ class CasSegment(X12Segment):
 
         CONTRACTUAL_OBLIGATIONS = "CO"
         CORRECTION_AND_REVERSALS = "CR"
-        OTHER_ADJUSTMENTS = "PI"
+        OTHER_ADJUSTMENTS = "OA"
+        PAYER_INITIATED_REDUCTIONS = "PI"
         PATIENT_RESPONSIBILITY = "PR"
 
     segment_name: X12SegmentName = X12SegmentName.CAS
@@ -895,6 +896,34 @@ class EqSegment(X12Segment):
         return values
 
 
+class FrmSegment(X12Segment):
+    """
+    Supporting documentation segment
+    Example:
+        FRM*12*N~
+    """
+
+    class QuestionResponse(str, Enum):
+        """
+        Code values for FRM02
+        """
+
+        NO = "N"
+        NOT_APPLICABLE = "W"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.FRM
+    question_number_letter: str
+    question_response_1: Optional[QuestionResponse]
+    question_response_2: Optional[str]
+    question_response_3: Optional[Union[str, datetime.date]]
+    question_response_4: Optional[Decimal]
+
+    _validate_cquestion_response_3 = field_validator("question_response_3")(
+        parse_x12_date
+    )
+
+
 class GeSegment(X12Segment):
     """
     Defines a functional header for the message and is an EDI control segment.
@@ -1407,6 +1436,26 @@ class LinSegment(X12Segment):
     assigned_identification: Optional[str]
     product_service_id_qualifier: ProductServiceIdQualifier
     national_drug_code_universal_product_number: str
+
+
+class LqSegment(X12Segment):
+    """
+    Form Identification Code
+    Example:
+        LQ*UT*1.02~
+    """
+
+    class CodeListQualifierCode(str, Enum):
+        """
+        Code values for LQ01
+        """
+
+        FORM_TYPE_CODE = "AS"
+        CMS_CMN_FORMS = "UT"
+
+    segment_name: X12SegmentName = X12SegmentName.LQ
+    code_list_qualifier_code: CodeListQualifierCode
+    form_identifier: str
 
 
 class LsSegment(X12Segment):
@@ -2212,6 +2261,22 @@ class Sv5Segment(X12Segment):
     dme_purchase_price: condecimal(gt=Decimal("0.0"))
     rental_unit_price_indicator: RentalUnitPriceIndicator
     prognosis_code: Optional[str]
+
+
+class SvdSegment(X12Segment):
+    """
+    Line Ajudication Information
+    Example:
+        SVD*43*55.00*HC:84550**3.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SVD
+    other_payer_primary_identifier: str
+    service_line_paid_amount: Decimal
+    composite_medical_procedure_identifier: str
+    product_service_id: Optional[str]
+    paid_service_count: Decimal
+    bundled_unbundled_line_number: Optional[conint(gt=0)]
 
 
 class TrnSegment(X12Segment):

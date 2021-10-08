@@ -49,6 +49,7 @@ class X12SegmentName(str, Enum):
     DTP = "DTP"
     EB = "EB"
     EQ = "EQ"
+    FRM = "FRM"
     GE = "GE"
     GS = "GS"
     HCP = "HCP"
@@ -62,6 +63,7 @@ class X12SegmentName(str, Enum):
     K3 = "K3"
     LE = "LE"
     LIN = "LIN"
+    LQ = "LQ"
     LS = "LS"
     LX = "LX"
     MEA = "MEA"
@@ -85,6 +87,7 @@ class X12SegmentName(str, Enum):
     ST = "ST"
     SV1 = "SV1"
     SV5 = "SV5"
+    SVD = "SVD"
     TRN = "TRN"
 
 
