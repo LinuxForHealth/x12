@@ -1479,3 +1479,37 @@ class Loop2420EPerSegment(PerSegment):
     communication_number_qualifier_1: CommunicationNumberQualifier
     communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
     communication_number_qualifier_3: Optional[CommunicationNumberQualifier]
+
+
+class Loop2420FNm1Segment(Nm1Segment):
+    """
+    Loop 2420C Service Facility Location Name
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        REFERRING_PROVIDER = "DN"
+        PRIMARY_CARE_PROVIDER = "P3"
+
+    entity_identifier_code: EntityIdentifierCode
+    entity_type_qualifier: Literal["1"]
+
+
+class Loop2420FRefSegment(RefSegment):
+    """
+    Loop 2420C Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
