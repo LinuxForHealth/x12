@@ -1407,3 +1407,29 @@ class Loop2420CRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2420DNm1Segment(Nm1Segment):
+    """
+    Loop 2420C Supervising Provider Name
+    """
+
+    entity_identifier_code: Literal["DQ"]
+
+
+class Loop2420DRefSegment(RefSegment):
+    """
+    Loop 2420C Supervising Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
