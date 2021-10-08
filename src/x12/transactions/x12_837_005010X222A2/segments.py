@@ -1522,3 +1522,12 @@ class Loop2420GNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["PW"]
     entity_type_qualifier: Literal["2"]
+
+
+class Loop2420HNm1Segment(Nm1Segment):
+    """
+    Loop 2420H Ambulance Drop-Off Location
+    """
+
+    entity_identifier_code: Literal["45"]
+    entity_type_qualifier: Literal["2"]
