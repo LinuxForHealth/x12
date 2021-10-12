@@ -84,6 +84,7 @@ class X12SegmentName(str, Enum):
     PS1 = "PS1"
     PWK = "PWK"
     QTY = "QTY"
+    RDM = "RDM"
     REF = "REF"
     SBR = "SBR"
     SE = "SE"

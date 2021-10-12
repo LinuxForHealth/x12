@@ -1850,9 +1850,9 @@ class N1Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.N1
-    entity_identifier_code: Literal["PR"]
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
     payer_name: str = Field(min_length=1, max_length=60)
-    identification_code_qualifier: Optional[Literal["XV"]]
+    identification_code_qualifier: str = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
 
@@ -2294,6 +2294,41 @@ class QtySegment(X12Segment):
     quantity: Decimal
     composite_unit_of_measure: Optional[str]
     free_form_message: Optional[str]
+
+
+class RdmSegment(X12Segment):
+    """
+    Remittance Delivery Method
+    Example:
+        RDM*
+    """
+
+    class ReportTransmissionCode(str, Enum):
+        """
+        Code values for RDM01
+        """
+
+        BY_MAIL = "BM"
+        EMAIL = "EM"
+        FILE_TRANSFER = "FT"
+        ONLINE = "OL"
+
+    segment_name: X12SegmentName = X12SegmentName.RDM
+    report_transmission_code: ReportTransmissionCode
+    name: Optional[str] = Field(min_length=1, max_length=60)
+    communication_number: Optional[str] = Field(min_length=1, max_length=256)
+
+    @root_validator(pre=True)
+    def validate_remittance_destination(cls, values):
+        """Validates that appropriate fields are populated"""
+        code = values.get("report_transmission_code")
+
+        if code == "BM" and not values.get("name"):
+            raise ValueError("name is required for mail remittance")
+        elif code != "BM" and not values.get("communication_number"):
+            raise ValueError("communication_number is required for online remittance")
+
+        return values
 
 
 class RefSegment(X12Segment):

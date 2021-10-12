@@ -20,6 +20,7 @@ class TransactionLoops(str, Enum):
 
     HEADER = "header"
     PAYER_IDENTIFICATION = "loop_1000a"
+    PAYEE_IDENTIFICATION = "loop_1000b"
     FOOTER = "footer"
 
 
@@ -57,6 +58,23 @@ def set_payer_identification_loop(
     }
     loop_data = context.transaction_data[TransactionLoops.PAYER_IDENTIFICATION]
     context.set_loop_context(TransactionLoops.PAYER_IDENTIFICATION, loop_data)
+
+
+@match("N1", conditions={"entity_identifier_code": "PE"})
+def set_payee_identification_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the payee identification loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    context.transaction_data[TransactionLoops.PAYEE_IDENTIFICATION] = {
+        "ref_segment": []
+    }
+    loop_data = context.transaction_data[TransactionLoops.PAYEE_IDENTIFICATION]
+    context.set_loop_context(TransactionLoops.PAYEE_IDENTIFICATION, loop_data)
 
 
 @match("SE")

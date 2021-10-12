@@ -528,6 +528,12 @@ def test_qty_segment():
     assert qty_segment.x12() == "QTY*PT*2.00~"
 
 
+def test_rdm_segment():
+    segment_data = {"report_transmission_code": "BM", "name": "JANE DOE"}
+    rdm_segment: RdmSegment = RdmSegment(**segment_data)
+    assert rdm_segment.x12() == "RDM*BM*JANE DOE~"
+
+
 def test_ref_segment():
     segment_data = {
         "reference_identification_qualifier": "EO",

@@ -9,17 +9,20 @@ from x12.segments import (
     SeSegment,
     BprSegment,
     DtmSegment,
-    N1Segment,
     N3Segment,
     N4Segment,
+    RdmSegment,
 )
 from .segments import (
     HeaderStSegment,
     HeaderTrnSegment,
     HeaderCurSegment,
     HeaderRefSegment,
+    Loop1000AN1Segment,
     Loop1000ARefSegment,
     Loop1000APerSegment,
+    Loop1000BN1Segment,
+    Loop1000BRefSegment,
 )
 from typing import Optional, List
 from pydantic import Field
@@ -43,11 +46,23 @@ class Loop1000A(X12SegmentGroup):
     Loop 1000A - Payer Identification
     """
 
-    n1_segment: N1Segment
+    n1_segment: Loop1000AN1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
     ref_segment: Optional[List[Loop1000ARefSegment]] = Field(min_items=0, max_items=4)
     per_segment: Optional[List[Loop1000APerSegment]]
+
+
+class Loop1000B(X12SegmentGroup):
+    """
+    Loop 1000B - Payee Identification
+    """
+
+    n1_segment: Loop1000BN1Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    ref_segment: Optional[List[Loop1000BRefSegment]]
+    rdm_segment: Optional[RdmSegment]
 
 
 class Footer(X12SegmentGroup):

@@ -10,6 +10,7 @@ from x12.segments import (
     RefSegment,
     DtmSegment,
     PerSegment,
+    N1Segment,
 )
 from typing import Literal, Optional
 from enum import Enum
@@ -60,6 +61,15 @@ class HeaderDtmSegment(DtmSegment):
     date_time_qualifier: Literal["405"]
 
 
+class Loop1000AN1Segment(N1Segment):
+    """
+    Payer Identification
+    """
+
+    entity_identifier_code: Literal["PR"]
+    identification_code_qualifier: Optional[Literal["XV"]]
+
+
 class Loop1000ARefSegment(RefSegment):
     """
     Loop 1000A Ref Segment
@@ -93,3 +103,39 @@ class Loop1000APerSegment(PerSegment):
         INFORMATION_CONTACT = "IC"
 
     contact_function_code: ContactFunctionCode
+
+
+class Loop1000BN1Segment(N1Segment):
+    """
+    Payee Identification
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for N1003
+        """
+
+        FEDERAL_TAXPAYER_IDENTIFICATION_NUMBER = "FI"
+        CMS_PLAN_ID = "XV"
+        CMS_NPI = "XX"
+
+    entity_identifier_code: Literal["PE"]
+    identification_code_qualifier: IdentificationCodeQualifier
+
+
+class Loop1000BRefSegment(RefSegment):
+    """
+    Payee Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        NATIONAL_COUNCIL_PHARMACY_NUMBER = "D3"
+        PAYEE_IDENTIFICATION = "PQ"
+        FEDERAL_TAXPAYERS_IDENTIFICATION_NUMBER = "TJ"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier

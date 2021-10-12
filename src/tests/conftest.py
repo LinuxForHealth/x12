@@ -471,8 +471,8 @@ def x12_835_managed_care_transaction():
             "N1*PR*RUSHMORE LIFE~",
             "N3*10 SOUTH AVENUE~",
             "N4*RAPID CITY*SD*55111~",
-            # "N1*PE*ACME MEDICAL CENTER*XX*5544667733~",
-            # "REF*TJ*777667755~",
+            "N1*PE*ACME MEDICAL CENTER*XX*5544667733~",
+            "REF*TJ*777667755~",
             # "LX*1~",
             # "CLP*5554555444*1*800*450*300*12*94060555410000~",
             # "CAS*CO*A2*50~",
@@ -489,7 +489,7 @@ def x12_835_managed_care_transaction():
             # "DTM*151*20020312~",
             # "CAS*PR*1*600~",
             # "CAS_CO*45*50~",
-            "SE*8*112233~",
+            "SE*10*112233~",
         ]
     )
 
