@@ -93,6 +93,8 @@ class X12SegmentName(str, Enum):
     SV5 = "SV5"
     SVD = "SVD"
     TRN = "TRN"
+    TS2 = "TS2"
+    TS3 = "TS3"
 
 
 class X12Segment(abc.ABC, BaseModel):

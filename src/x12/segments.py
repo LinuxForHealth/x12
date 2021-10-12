@@ -2483,6 +2483,72 @@ class TrnSegment(X12Segment):
     reference_identification_2: Optional[str] = Field(min_length=1, max_length=50)
 
 
+class Ts2Segment(X12Segment):
+    """
+    Provider supplemental information
+    Example:
+        TS2*59786.00*55375.77~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.TS2
+    total_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_federal_specific_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_hospital_specific_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_disproportionate_share_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_capital_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_indirect_medical_education_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_outlier_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_day_outlier_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_cost_outlier_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    average_drg_length_of_stay: Optional[condecimal(ge=Decimal("0.0"))]
+    total_discharge_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_cost_report_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_noncovered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_msp_passthrough_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    average_drg_weight: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pps_capital_fsp_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pps_capital_hsp_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pps_dsh_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
+
+
+class Ts3Segment(X12Segment):
+    """
+    Provider summary information
+    Example:
+        TS3*123456*11*20021031*10*130957.66~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.TS3
+    provider_identifier: str = Field(min_length=1, max_length=50)
+    facility_type_code: str = Field(min_length=1, max_length=2)
+    fiscal_period_date: Union[str, datetime.date]
+    total_claim_count: conint(ge=0)
+    total_claim_charge_amount: condecimal(ge=Decimal("0.0"))
+    monetary_amount_1: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_2: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_3: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_4: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_5: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_6: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_7: Optional[condecimal(ge=Decimal("0.0"))]
+    total_msp_payer_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_8: Optional[condecimal(ge=Decimal("0.0"))]
+    total_non_lab_charge_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_9: Optional[condecimal(ge=Decimal("0.0"))]
+    total_hcpcs_reported_charge_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_hcpcs_payable_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    monetary_amount_10: Optional[condecimal(ge=Decimal("0.0"))]
+    total_professional_component_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_msp_patient_liability_met_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_patient_reimbursement_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pip_claim_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pip_adjustment_amount: Optional[condecimal(ge=Decimal("0.0"))]
+
+    _validate_fiscal_period_date = field_validator("fiscal_period_date")(parse_x12_date)
+
+
 # load segment classes into a lookup table indexed by segment name
 SEGMENT_LOOKUP: Dict = {}
 

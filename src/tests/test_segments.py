@@ -622,6 +622,27 @@ def test_trn_segment():
     assert trn_segment.x12() == "TRN*1*98175-012547*8877281234*RADIOLOGY~"
 
 
+def test_ts2_segment():
+    segment_data = {
+        "total_drg_amount": "59786.00",
+        "total_federal_specific_amount": "55375.77",
+    }
+    ts2_segment: Ts2Segment = Ts2Segment(**segment_data)
+    assert ts2_segment.x12() == "TS2*59786.00*55375.77~"
+
+
+def test_ts3_segment():
+    segment_data = {
+        "provider_identifier": "123456",
+        "facility_type_code": "11",
+        "fiscal_period_date": "20021031",
+        "total_claim_count": "10",
+        "total_claim_charge_amount": "130957.66",
+    }
+    ts3_segment: Ts3Segment = Ts3Segment(**segment_data)
+    assert ts3_segment.x12() == "TS3*123456*11*20021031*10*130957.66~"
+
+
 def test_segment_lookup():
     """Basic validations to ensure that the segment lookup loads"""
 

@@ -21,6 +21,7 @@ class TransactionLoops(str, Enum):
     HEADER = "header"
     PAYER_IDENTIFICATION = "loop_1000a"
     PAYEE_IDENTIFICATION = "loop_1000b"
+    HEADER_NUMBER = "loop_2000"
     FOOTER = "footer"
 
 
@@ -75,6 +76,23 @@ def set_payee_identification_loop(
     }
     loop_data = context.transaction_data[TransactionLoops.PAYEE_IDENTIFICATION]
     context.set_loop_context(TransactionLoops.PAYEE_IDENTIFICATION, loop_data)
+
+
+@match("LX")
+def set_header_number_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the header number loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if TransactionLoops.HEADER_NUMBER not in context.transaction_data:
+        context.transaction_data[TransactionLoops.HEADER_NUMBER] = [{}]
+    else:
+        context.transaction_data[TransactionLoops.HEADER_NUMBER].append({})
+
+    loop_data = context.transaction_data[TransactionLoops.HEADER_NUMBER][-1]
+    context.set_loop_context(TransactionLoops.HEADER_NUMBER, loop_data)
 
 
 @match("SE")

@@ -12,6 +12,9 @@ from x12.segments import (
     N3Segment,
     N4Segment,
     RdmSegment,
+    LxSegment,
+    Ts3Segment,
+    Ts2Segment,
 )
 from .segments import (
     HeaderStSegment,
@@ -63,6 +66,25 @@ class Loop1000B(X12SegmentGroup):
     n4_segment: Optional[N4Segment]
     ref_segment: Optional[List[Loop1000BRefSegment]]
     rdm_segment: Optional[RdmSegment]
+
+
+class Loop2100(X12SegmentGroup):
+    """
+    Loop 2100 - Claim Payment Information
+    """
+
+    pass
+
+
+class Loop2000(X12SegmentGroup):
+    """
+    Loop 2000 - Claim Payment Header Number
+    """
+
+    lx_segment: LxSegment
+    ts3_segment: Optional[Ts3Segment]
+    ts2_segment: Optional[Ts2Segment]
+    # loop_2100: List[Loop2100]
 
 
 class Footer(X12SegmentGroup):
