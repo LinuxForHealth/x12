@@ -41,6 +41,32 @@ def test_bht_segment():
     )
 
 
+def test_bpr_segment():
+    segment_data = {
+        "transaction_handling_code": "C",
+        "total_actual_provider_payment_amount": "150000.00",
+        "credit_debit_flag_code": "C",
+        "payment_method_code": "ACH",
+        "payment_format_code": "CTX",
+        "sender_dfi_qualifier": "01",
+        "sender_dfi_id": "999999992",
+        "sender_account_qualifier": "DA",
+        "sender_account_number": "123456",
+        "payer_identifier": "1512345678",
+        "payer_supplemental_code": "999999999",
+        "receiver_dfi_qualifier": "01",
+        "receiver_bank_id_number": "999988880",
+        "receiver_account_qualifier": "DA",
+        "receiver_account_number": "98765",
+        "eft_effective_date": "20030901",
+    }
+    bpr_segment: BprSegment = BprSegment(**segment_data)
+    assert (
+        bpr_segment.x12()
+        == "BPR*C*150000.00*C*ACH*CTX*01*999999992*DA*123456*1512345678*999999999*01*999988880*DA*98765*20030901~"
+    )
+
+
 def test_cas_segment():
     segment_data = {
         "adjustment_reason_code_1": "PR",
@@ -136,6 +162,12 @@ def test_dmg_segment():
 
     dmg_segment: DmgSegment = DmgSegment(**segment_data)
     assert dmg_segment.x12() == "DMG*D8*19430917*M~"
+
+
+def test_dtm_segment():
+    segment_data = {"date_time_qualifier": "405", "production_date": "20020317"}
+    dtm_segment: DtmSegment = DtmSegment(**segment_data)
+    assert dtm_segment.x12() == "DTM*405*20020317~"
 
 
 def test_dtp_segment_date_period():

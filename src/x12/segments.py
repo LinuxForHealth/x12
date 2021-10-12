@@ -81,6 +81,135 @@ class BhtSegment(X12Segment):
     )
 
 
+class BprSegment(X12Segment):
+    """
+    Financial Information
+    Example:
+        BPR*C*150000*C*ACH*CTX*01*999999992*DA*123456*1512345678*999999999*01*999988880*DA*98765*20030901~
+    """
+
+    class TransactionHandlingCode(str, Enum):
+        """
+        Code values for BPR01
+        """
+
+        PAYMENT_ACCOMPANIES_REMITTANCE_ADVICE = "C"
+        MAKE_PAYMENT_ONLY = "D"
+        NOTIFICATION_ONLY = "H"
+        REMITTANCE_INFORMATION_ONLY = "I"
+        PRENOTIFICATION_FUTURE_TRANSFERS = "P"
+        SPLIT_PAYMENT_REMITTANCE = "U"
+        HANDLING_PARTY_OPTION_TO_SPLIT_PAYMENT_REMITTANCE = "X"
+
+    class CreditDebitFlagCode(str, Enum):
+        """
+        Code values for BPR03
+        """
+
+        CREDIT = "C"
+        DEBIT = "D"
+
+    class PaymentMethodCode(str, Enum):
+        """
+        Code values for BPR04
+        """
+
+        AUTOMATED_CLEARING_HOUSE = "ACH"
+        FINANCIAL_INSTITUTION_OPTION = "BOP"
+        CHECK = "CHK"
+        FEDERAL_RESERVE_WIRE_TRANSFER = "FWT"
+        NON_PAYMENT_DATA = "NON"
+
+    class PaymentFormatCode(str, Enum):
+        """
+        Code values for BPR05
+        """
+
+        CASH_DISBURSEMENT_PLUS_ADDENDA = "CCP"
+        CORPORATE_TAX_EXCHANGE = "CTX"
+
+    class FinancialInstitutionIdQualifier(str, Enum):
+        """
+        Code values for BPR06
+        """
+
+        ABA_TRANSIT_ROUTING_NUMBER = "01"
+        CANADIAN_BANK_BRANCH_INSTITUTION_NUMBER = "04"
+
+    class DfiIdentificationQualifier(str, Enum):
+        """
+        Code values for BPR12
+        """
+
+        ABA_TRANSIT_ROUTING_NUMBER = "01"
+        CANADIAN_BANK_BRANCH_INSTITUTION_NUMBER = "04"
+
+    class AccountNumberQualifier(str, Enum):
+        """
+        Code values for BPR14
+        """
+
+        DEMAND_DEPOSIT = "DA"
+        SAVINGS = "SG"
+
+    segment_name: X12SegmentName = X12SegmentName.BPR
+    transaction_handling_code: TransactionHandlingCode
+    total_actual_provider_payment_amount: condecimal(ge=Decimal("0.0"))
+    credit_debit_flag_code: CreditDebitFlagCode
+    payment_method_code: PaymentMethodCode
+    payment_format_code: Optional[PaymentFormatCode]
+    sender_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
+    sender_dfi_id: Optional[str]
+    sender_account_qualifier: Optional[Literal["DA"]]
+    sender_account_number: Optional[str]
+    payer_identifier: Optional[str]
+    payer_supplemental_code: Optional[str]
+    receiver_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
+    receiver_bank_id_number: Optional[str]
+    receiver_account_qualifier: Optional[AccountNumberQualifier]
+    receiver_account_number: Optional[str]
+    eft_effective_date: Optional[Union[str, datetime.date]]
+
+    _validate_x12_date = field_validator("eft_effective_date")(validate_date_field)
+
+    @validator("payment_format_code")
+    def validate_payment_format_code(cls, v, values):
+        """
+        Validates that the payment format code is present for ACH transactions
+        """
+        is_ach = values.get("payment_method_code") == "ACH"
+        if is_ach and not v:
+            raise ValueError("payment_format_code is required for ACH transactions")
+        return v
+
+    @root_validator(pre=True)
+    def validate_electronic_payment_fields(cls, values):
+        """
+        Validates the required fields for electronic transactions
+        """
+        payment_code = values.get("payment_method_code")
+
+        if payment_code not in ("ACH", "BOP", "FTW"):
+            return values
+
+        for f in (
+            "sender_dfi_qualifier",
+            "sender_dfi_id",
+            "sender_account_qualifier",
+            "sender_account_number",
+            "payer_identifier",
+            "receiver_dfi_qualifier",
+            "receiver_bank_id_number",
+            "receiver_account_qualifier",
+            "receiver_account_number",
+        ):
+
+            if not values.get(f):
+                raise ValueError(f"{f} is required for electronic transactions")
+
+        return values
+
+
 class CasSegment(X12Segment):
     """
     Claim level adjustments
@@ -433,6 +562,20 @@ class DmgSegment(X12Segment):
             )
 
         return values
+
+
+class DtmSegment(X12Segment):
+    """
+    Production Date
+    Example:
+        DTM*405*20020317~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.DTM
+    date_time_qualifier: str = Field(min_length=3, max_length=3)
+    production_date: Union[str, datetime.date]
+
+    _validate_x12_date = field_validator("production_date")(validate_date_field)
 
 
 class DtpSegment(X12Segment):
@@ -1699,6 +1842,18 @@ class MsgSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.MSG
     free_form_text: str
+
+
+class N1Segment(X12Segment):
+    """
+    Payer Identification
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.N1
+    entity_identifier_code: Literal["PR"]
+    payer_name: str = Field(min_length=1, max_length=60)
+    identification_code_qualifier: Optional[Literal["XV"]]
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
 
 class N3Segment(X12Segment):

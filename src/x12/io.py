@@ -171,6 +171,15 @@ class X12ModelReader:
             X12SegmentName.IEA,
         )
 
+    def _is_group_header(self, segment_name) -> bool:
+        """
+        Returns True if the segment_name is the functional group header segment
+
+        :param segment_name: The segment name
+        :return: True if the segment is the functional groupheader, otherwise False.
+        """
+        return segment_name == X12SegmentName.GS
+
     def _is_transaction_header(self, segment_name) -> bool:
         """
         Returns True if the segment_name is the transaction set header segment.
@@ -187,7 +196,15 @@ class X12ModelReader:
 
         :return: X12SegmentGroup model iterator
         """
+        version: Optional[str] = None
+        transaction_code: Optional[str] = None
+
         for segment_name, segment_fields in self._x12_segment_reader.segments():
+
+            if self._is_group_header(segment_name):
+                version: str = segment_fields[
+                    TransactionSetVersionIds.IMPLEMENTATION_VERSION
+                ]
 
             if self._is_control_segment(segment_name):
                 continue
@@ -196,9 +213,11 @@ class X12ModelReader:
                 transaction_code: str = segment_fields[
                     TransactionSetVersionIds.TRANSACTION_SET_CODE
                 ]
-                version: str = segment_fields[
-                    TransactionSetVersionIds.IMPLEMENTATION_VERSION
-                ]
+
+                if version is None:
+                    version: str = segment_fields[
+                        TransactionSetVersionIds.FALLBACK_IMPLEMENTATION_VERSION
+                    ]
 
                 parser: X12Parser = create_parser(
                     transaction_code, version, self._x12_segment_reader.delimiters
