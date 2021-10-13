@@ -46,7 +46,7 @@ class X12Config(BaseSettings):
     X12 Parsing and Validation Configurations
     """
 
-    x12_character_set: str = Field(regex="^(BASIC|EXTENDED)$")
+    x12_character_set: str = Field(regex="^(BASIC|EXTENDED)$", default="BASIC")
     x12_reader_buffer_size: int = 1024000
 
     class Config:
