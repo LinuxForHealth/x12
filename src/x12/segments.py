@@ -2554,6 +2554,23 @@ class Sv5Segment(X12Segment):
     prognosis_code: Optional[str]
 
 
+class SvcSegment(X12Segment):
+    """
+    Service Information
+    Example:
+        SVC*HC:99214*100.00*80.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SVC
+    composite_medical_procedure_identifier_1: str
+    line_item_charge_amount: Decimal
+    line_item_provider_payment_amount: Decimal
+    national_uniform_billing_committee_revenue_code: Optional[str]
+    units_of_service_paid_count: Optional[Decimal]
+    composite_medical_procedure_identifier_2: Optional[str]
+    original_units_of_service_count: Optional[Decimal]
+
+
 class SvdSegment(X12Segment):
     """
     Line Ajudication Information

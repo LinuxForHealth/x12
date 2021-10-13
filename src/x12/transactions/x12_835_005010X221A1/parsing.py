@@ -23,6 +23,7 @@ class TransactionLoops(str, Enum):
     PAYEE_IDENTIFICATION = "loop_1000b"
     CLAIM_PAYMENT_LINE_ITEM = "loop_2000"
     CLAIM_PAYMENT_INFORMATION = "loop_2100"
+    SERVICE_PAYMENT_INFORMATION = "loop_2110"
     FOOTER = "footer"
 
 
@@ -34,6 +35,12 @@ def _get_header(context: X12ParserContext) -> Dict:
 def _get_claim_payment_line(context: X12ParserContext) -> Dict:
     """Returns the current claim payment line record"""
     return context.transaction_data[TransactionLoops.CLAIM_PAYMENT_LINE_ITEM][-1]
+
+
+def _get_claim_payment_information(context: X12ParserContext) -> Dict:
+    """Returns the current claim payment info"""
+    claim_payment_line = _get_claim_payment_line(context)
+    return claim_payment_line[TransactionLoops.CLAIM_PAYMENT_INFORMATION][-1]
 
 
 @match("ST")
@@ -132,6 +139,35 @@ def set_claim_payment_information_loop(
 
     loop_data = claim_payment_line[TransactionLoops.CLAIM_PAYMENT_INFORMATION][-1]
     context.set_loop_context(TransactionLoops.CLAIM_PAYMENT_INFORMATION, loop_data)
+
+
+@match("SVC")
+def set_service_payment_information_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the service payment information loop
+    """
+    claim_payment_information = _get_claim_payment_information(context)
+
+    if TransactionLoops.SERVICE_PAYMENT_INFORMATION not in claim_payment_information:
+        claim_payment_information[TransactionLoops.SERVICE_PAYMENT_INFORMATION] = []
+
+    claim_payment_information[TransactionLoops.SERVICE_PAYMENT_INFORMATION].append(
+        {
+            "dtm_segment": [],
+            "cas_segment": [],
+            "ref_segment": [],
+            "amt_segment": [],
+            "qty_segment": [],
+            "lq_segment": [],
+        }
+    )
+
+    loop_data = claim_payment_information[TransactionLoops.SERVICE_PAYMENT_INFORMATION][
+        -1
+    ]
+    context.set_loop_context(TransactionLoops.SERVICE_PAYMENT_INFORMATION, loop_data)
 
 
 @match("SE")

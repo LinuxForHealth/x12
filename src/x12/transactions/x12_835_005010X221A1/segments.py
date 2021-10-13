@@ -14,6 +14,7 @@ from x12.segments import (
     CasSegment,
     AmtSegment,
     QtySegment,
+    LqSegment,
 )
 from typing import Literal, Optional
 from enum import Enum
@@ -280,3 +281,128 @@ class Loop2100QtySegment(QtySegment):
         FEDERAL_PAYMENT_MANDATE_CATEGORY_5 = "ZO"
 
     quantity_qualifier: QuantityQualifier
+
+
+class Loop2110DtmSegment(DtmSegment):
+    """
+    Service Line Payment Information Date
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTM01
+        """
+
+        SERVICE_PERIOD_START = "150"
+        SERVICE_PERIOD_END = "151"
+        SERVICE = "472"
+
+    date_time_qualifier: DateTimeQualifier
+
+
+class Loop2110CasSegment(CasSegment):
+    """
+    Service Line Payment Information Adjustments
+    """
+
+    class ClaimAdjustmentGroupCode(str, Enum):
+        """
+        Code values for CAS01
+        """
+
+        CONTRACTURAL_OBLIGATIONS = "CO"
+        OTHER_ADJUSTMENTS = "OA"
+        PAYOR_INITIATED_REDUCTIONS = "PI"
+        PATIENT_RESPONSIBILITY = "PR"
+
+    adjustment_group_code: ClaimAdjustmentGroupCode
+
+
+class Loop2110RefSegment(RefSegment):
+    """
+    Service Line Payment Information Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        AMBULATORY_PATIENT_GROUP_NUMBER = "1S"
+        AMBULATORY_PAYMENT_CLASSIFICATION = "APC"
+        AUTHORIZATION_NUMBER = "BB"
+        ATTACHMENT_CODE = "E9"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        PREDETERMINATION_OF_BENEFITS_NUMBER = "G3"
+        LOCATION_NUMBER = "LU"
+        RATE_CODE_NUMBER = "RB"
+        PROVIDER_CONTROL_NUMBER = "6R"
+        STATE_LICENSE_NUMBER = "0B"
+        BLUE_CROSS_PROVIDER_NUMBER = "1A"
+        BLUE_SHIELD_PROVIDER_NUMBER = "1B"
+        MEDICARE_PROVIDER_NUMBER = "1C"
+        MEDICAID_PROVIDER_NUMBER = "1D"
+        PROVIDER_UPIN_NUMBER = "1G"
+        CHAMPUS_IDENTIFICATION_NUMBER = "1H"
+        FACILITY_ID_NUMBER = "1J"
+        NATIONAL_COUNCIL_PRESCRIPTION_PHARMACY_NUMBER = "D3"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        POLICY_FORM_IDENTIFYING_NUMBER = "0K"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2110AmtSegment(AmtSegment):
+    """
+    Service Line Payment Information Amount
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+
+        ALLOWED_ACTUAL = "B6"
+        DEDUCTION_AMOUNT = "KH"
+        TAX = "T"
+        TOTAL_CLAIM_BEFORE_TAXES = "T2"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_1 = "ZK"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_2 = "ZL"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_3 = "ZM"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_4 = "ZN"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_5 = "ZO"
+
+
+class Loop2110QtySegment(QtySegment):
+    """
+    Service Line Payment Information Quantity
+    """
+
+    class QuantityQualifier(str, Enum):
+        """
+        Code values for QTY01
+        """
+
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_1 = "ZK"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_2 = "ZL"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_3 = "ZM"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_4 = "ZN"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_5 = "ZO"
+
+    quantity_qualifier: QuantityQualifier
+
+
+class Loop2110LqSegment(LqSegment):
+    """
+    Service Line Payment Information Health Care Remark Codes
+    """
+
+    class CodeListQualifierCodes(str, Enum):
+        """
+        Code values for LQ01
+        """
+
+        CLAIM_PAYMENT_REMARK_CODES = "HE"
+        NATIONAL_COUNCIL_PRESCRIPTION_DRUG_REJECT_PAYMENT_CODES = "RX"
+
+    code_list_qualifier_code: CodeListQualifierCodes

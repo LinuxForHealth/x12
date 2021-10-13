@@ -593,6 +593,16 @@ def test_st_segment():
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
 
 
+def test_svc_segment():
+    segment_data = {
+        "composite_medical_procedure_identifier_1": "HC:99214",
+        "line_item_charge_amount": "100.00",
+        "line_item_provider_payment_amount": "80.00",
+    }
+    svc_segment: SvcSegment = SvcSegment(**segment_data)
+    assert svc_segment.x12() == "SVC*HC:99214*100.00*80.00~"
+
+
 def test_sv1_segment():
     segment_data = {
         "product_service_id_qualifier": "HC:99213",
