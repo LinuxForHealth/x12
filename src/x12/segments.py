@@ -229,9 +229,11 @@ class CasSegment(X12Segment):
         PATIENT_RESPONSIBILITY = "PR"
 
     segment_name: X12SegmentName = X12SegmentName.CAS
+    adjustment_group_code: ClaimAdjustmentGroupCode
+
     adjustment_reason_code_1: str
     monetary_amount_1: Decimal
-    quantity_1: Decimal
+    quantity_1: Optional[Decimal]
 
     adjustment_reason_code_2: Optional[str]
     monetary_amount_2: Optional[Decimal]
@@ -264,7 +266,6 @@ class CasSegment(X12Segment):
             adjustment_fields: Tuple = (
                 values.get(f"adjustment_reason_code_{i}"),
                 values.get(f"monetary_amount_{i}"),
-                values.get(f"quantity_{i}"),
             )
 
             if any(adjustment_fields) and not all(adjustment_fields):
@@ -365,6 +366,72 @@ class ClmSegment(X12Segment):
     yes_no_condition_response_code_3: Optional[str]
     claim_submission_reason_code: Optional[str]
     delay_reason_code: Optional[DelayReasonCode]
+
+
+class ClpSegment(X12Segment):
+    """
+    Claim Payment
+    Example:
+        CLP*7722337*1*211366.97*138018.40**12*119932404007801~
+
+    """
+
+    class ClaimStatusCode(str, Enum):
+        """
+        Code values for CLP02
+        """
+
+        PROCESSED_AS_PRIMARY = "1"
+        PROCESSED_AS_SECONDARY = "2"
+        PROCESSED_AS_TERTIARY = "3"
+        DENIED = "4"
+        PROCESSED_AS_PRIMARY_FORWARDED = "19"
+        PROCESSED_AS_SECONDARY_FORWARDED = "20"
+        PROCESSED_AS_TERTIARY_FORWARDED = "21"
+        REVERSAL_PREVIOUS_PAYMENT = "22"
+        NOT_OUR_CLAIM_FORWARDED = "23"
+        PREDETERMINATION_PRICING_NO_PAYMENT = "25"
+
+    class ClaimFilingIndicatorCode(str, Enum):
+        """
+        Code values for CLP06
+        """
+
+        PPO = "12"
+        POS = "13"
+        EPO = "14"
+        INDEMNITY_INSURANCE = "15"
+        HMO_MEDICARE_RISK = "16"
+        DENTAL_MAINTENANCE_ORGANIZATION = "17"
+        AUTOMOBILE_MEDICAL = "AM"
+        CHAMPUS = "CH"
+        DISABILITY = "DS"
+        HMO = "HM"
+        LIABILITY_MEDICAL = "LM"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        OTHER_FEDERAL_PROGRAM = "OF"
+        TITLE_V = "TV"
+        VETERANS_AFFAIRS_PLAN = "VA"
+        WORKERS_COMPENSATION_HEALTH_CLAIM = "WC"
+        MUTUALLY_DEFINED = "ZZ"
+
+    segment_name: X12SegmentName = X12SegmentName.CLP
+    patient_control_number: str = Field(min_length=1, max_length=38)
+    claim_status_code: ClaimStatusCode
+    total_claim_charge_amount: Decimal
+    claim_payment_amount: Decimal
+    patient_responsibility_amount: Optional[Decimal]
+    claim_filing_indicator_code: ClaimFilingIndicatorCode
+    payer_claim_control_number: Optional[str] = Field(min_length=1, max_length=50)
+    facility_type_code: Optional[str] = Field(min_length=1, max_length=2)
+    claim_frequency_type_code: Optional[str] = Field(min_length=1, max_length=1)
+    patient_status_code: Optional[str]
+    drg_code: Optional[str] = Field(min_length=1, max_length=4)
+    drg_weight: Optional[condecimal(gt=Decimal("0.0"))]
+    discharge_fraction: Optional[condecimal(ge=Decimal("0.0"))]
+    condition_response_code: Optional[str]
 
 
 class Cn1Segment(X12Segment):
@@ -1652,6 +1719,40 @@ class MeaSegment(X12Segment):
     measurement_reference_id_code: MeasurementReferenceIdCode
     measurement_qualifier: MeasurementQualifier
     measurement_value: Decimal
+
+
+class MiaSegment(X12Segment):
+    """
+    Medicare Inpatient Adjudication
+    Example:
+        MIA*0***138018.40~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.MIA
+    covered_days_visit_count: Literal["0"]
+    pps_operating_outlier_amount: Optional[Decimal]
+    lifetime_psychiatric_days_count: Optional[Decimal]
+    claim_drg_amount: Optional[Decimal]
+    claim_payment_remark_code: Optional[str] = Field(min_length=1, max_length=20)
+    claim_disproportionate_share_amount: Optional[Decimal]
+    claim_msp_passthrough_amount: Optional[Decimal]
+    claim_pps_capital_amount: Optional[Decimal]
+    pps_capital_fsp_drg_amount: Optional[Decimal]
+    pps_capital_hsp_drg_amount: Optional[Decimal]
+    pps_capital_dsh_drg_amount: Optional[Decimal]
+    old_capital_amount: Optional[Decimal]
+    pps_capital_ime_amount: Optional[Decimal]
+    pps_operating_hospital_specific_drg_amount: Optional[Decimal]
+    cost_report_day_count: Optional[Decimal]
+    pps_operating_federal_specific_drg_amount: Optional[Decimal]
+    claim_pps_capital_outlier_amount: Optional[Decimal]
+    claim_indirect_teaching_amount: Optional[Decimal]
+    nonpayable_professional_component_amount: Optional[Decimal]
+    claim_payment_remark_code_1: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_2: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_3: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_4: Optional[str] = Field(min_length=1, max_length=50)
+    pps_capital_exception_amount: Optional[Decimal]
 
 
 class MoaSegment(X12Segment):

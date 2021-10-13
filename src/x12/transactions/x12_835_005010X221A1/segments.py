@@ -11,6 +11,9 @@ from x12.segments import (
     DtmSegment,
     PerSegment,
     N1Segment,
+    CasSegment,
+    AmtSegment,
+    QtySegment,
 )
 from typing import Literal, Optional
 from enum import Enum
@@ -139,3 +142,141 @@ class Loop1000BRefSegment(RefSegment):
         FEDERAL_TAXPAYERS_IDENTIFICATION_NUMBER = "TJ"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2100CasSegment(CasSegment):
+    """
+    Claim Payment Information CAS segment
+    """
+
+    class ClaimAdjustmentGroupCode(str, Enum):
+        """
+        Code values for CAS01
+        """
+
+        CONTRACTUAL_OBLIGATIONS = "CO"
+        OTHER_ADJUSTMENTS = "OA"
+        PAYER_INITIATED_REDUCTIONS = "PI"
+        PATIENT_RESPONSIBILITY = "PR"
+
+    adjustment_group_code: ClaimAdjustmentGroupCode
+
+
+class Loop2100RefSegment(RefSegment):
+    """
+    Claim Payment Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        GROUP_POLICY_NUMBER = "1L"
+        MEMBER_IDENTIFICATION_NUMBER = "1W"
+        EMPLOYEE_IDENTIFICATION_NUMBER = "28"
+        GROUP_NUMBER = "6P"
+        REPRICED_CLAIM_REFERENCE_NUMBER = "9A"
+        ADJUSTED_REPRICED_CLAIM_REFERENCE_NUMBER = "9C"
+        AUTHORIZATION_NUMBER = "BB"
+        CLASS_OF_CONTRACT_CODE = "CE"
+        MEDICAL_RECORD_IDENTIFICATION_NUMBER = "EA"
+        ORIGINAL_REFERENCE_NUMBER = "F8"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        PREDETERMINATION_BENEFITS_IDENTIFICATION_NUMBER = "G3"
+        INSURANCE_POLICY_NUMBER = "IG"
+        SOCIAL_SECURITY_NUMBER = "SY"
+        STATE_LICENSE_NUMBER = "0B"
+        BLUE_CROSS_PROVIDER_NUMBER = "1A"
+        BLUE_SHIELD_PROVIDER_NUMBER = "1B"
+        MEDICARE_PROVIDER_NUMBER = "1C"
+        MEDICAID_PROVIDER_NUMBER = "1D"
+        PROVIDER_UPIN_NUMBER = "1G"
+        CHAMPUS_IDENTIFICATION_NUMBER = "1H"
+        FACILITY_ID_NUMBER = "1J"
+        NATIONAL_COUNCIL_PRESCRIPTION_PHARMACY_NUMBER = "D3"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2100DtmSegment(DtmSegment):
+    """
+    Claim Payment Information Date Time Reference
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        DTM01 code values
+        """
+
+        CLAIM_STATEMENT_PERIOD_START = "232"
+        CLAIM_STATEMENT_PERIOD_STOP = "233"
+        EXPIRATION = "036"
+        RECEIVED = "050"
+
+    date_time_qualifier: DateTimeQualifier
+
+
+class Loop2100PerSegment(PerSegment):
+    """
+    Claim Payment Contact Information
+    """
+
+    contact_function_code: Literal["CX"]
+
+
+class Loop2100AmtSegment(AmtSegment):
+    """
+    Claim Payment Amounts
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+
+        COVERAGE_AMOUNT = "AU"
+        DISCOUNT_AMOUNT = "D8"
+        PER_DAY_LIMIT = "DY"
+        PATIENT_AMOUNT_PAID = "F5"
+        INTEREST = "I"
+        NEGATIVE_LEDGER_BALANCE = "NL"
+        TAX = "T"
+        TOTAL_CLAIM_BEFORE_TAXES = "T2"
+        FEDERAL_MANDATE_CATEGORY_1 = "ZK"
+        FEDERAL_MANDATE_CATEGORY_2 = "ZL"
+        FEDERAL_MANDATE_CATEGORY_3 = "ZM"
+        FEDERAL_MANDATE_CATEGORY_4 = "ZN"
+        FEDERAL_MANDATE_CATEGORY_5 = "ZO"
+
+    amount_qualifier_code: AmountQualifierCode
+
+
+class Loop2100QtySegment(QtySegment):
+    """
+    Payment Information Quantity
+    """
+
+    class QuantityQualifier(str, Enum):
+        """
+        Code values for QTY01
+        """
+
+        COVERED_ACTUAL = "CA"
+        COINSURED_ACTUAL = "CD"
+        LIFE_TERM_RESERVE_ACTUAL = "LA"
+        LIFE_TERM_RESERVE_ESTIMATED = "LE"
+        NONCOVERED_ESTIMATED = "NE"
+        NOT_REPLACED_BLOOD_UNITS = "NR"
+        OUTLIER_DAYS = "OU"
+        PRESCRIPTION = "PS"
+        VISITS = "VS"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_1 = "ZK"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_2 = "ZL"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_3 = "ZM"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_4 = "ZN"
+        FEDERAL_PAYMENT_MANDATE_CATEGORY_5 = "ZO"
+
+    quantity_qualifier: QuantityQualifier

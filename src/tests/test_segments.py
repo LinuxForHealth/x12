@@ -69,13 +69,13 @@ def test_bpr_segment():
 
 def test_cas_segment():
     segment_data = {
-        "adjustment_reason_code_1": "PR",
-        "monetary_amount_1": 1.0,
-        "quantity_1": 7.93,
+        "adjustment_group_code": "PR",
+        "adjustment_reason_code_1": "1",
+        "monetary_amount_1": "7.93",
     }
 
     cas_segment: CasSegment = CasSegment(**segment_data)
-    assert cas_segment.x12() == "CAS*PR*1.00*7.93~"
+    assert cas_segment.x12() == "CAS*PR*1*7.93~"
 
 
 def test_clm_segment():
@@ -91,6 +91,19 @@ def test_clm_segment():
 
     clm_segment: ClmSegment = ClmSegment(**segment_data)
     assert clm_segment.x12() == "CLM*26463774*100.00***11:B:1*Y*A*Y*I~"
+
+
+def test_clp_segment():
+    segment_data = {
+        "patient_control_number": "7722337",
+        "claim_status_code": "1",
+        "total_claim_charge_amount": "211366.97",
+        "claim_payment_amount": "138018.40",
+        "claim_filing_indicator_code": "12",
+        "payer_claim_control_number": "119932404007801",
+    }
+    clp_segment: ClpSegment = ClpSegment(**segment_data)
+    assert clp_segment.x12() == "CLP*7722337*1*211366.97*138018.40**12*119932404007801~"
 
 
 def test_cn1_segment():
@@ -413,6 +426,12 @@ def test_mea_segment():
     }
     mea_segment: MeaSegment = MeaSegment(**segment_data)
     assert mea_segment.x12() == "MEA*TR*R1*113.40~"
+
+
+def test_mia_segment():
+    segment_data = {"covered_days_visit_count": "0", "claim_drg_amount": "138018.40"}
+    mia_segment: MiaSegment = MiaSegment(**segment_data)
+    assert mia_segment.x12() == "MIA*0***138018.40~"
 
 
 def test_moa_segment():

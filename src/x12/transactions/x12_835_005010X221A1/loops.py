@@ -15,6 +15,10 @@ from x12.segments import (
     LxSegment,
     Ts3Segment,
     Ts2Segment,
+    ClpSegment,
+    Nm1Segment,
+    MiaSegment,
+    MoaSegment
 )
 from .segments import (
     HeaderStSegment,
@@ -26,6 +30,12 @@ from .segments import (
     Loop1000APerSegment,
     Loop1000BN1Segment,
     Loop1000BRefSegment,
+    Loop2100CasSegment,
+    Loop2100RefSegment,
+    Loop2100DtmSegment,
+    Loop2100PerSegment,
+    Loop2100AmtSegment,
+    Loop2100QtySegment
 )
 from typing import Optional, List
 from pydantic import Field
@@ -72,8 +82,16 @@ class Loop2100(X12SegmentGroup):
     """
     Loop 2100 - Claim Payment Information
     """
-
-    pass
+    clp_segment: ClpSegment
+    cas_segment: Optional[List[Loop2100CasSegment]] = Field(min_items=0, max_items=99)
+    nm1_segment: List[Nm1Segment] = Field(min_items=1, max_items=7)
+    mia_segment: Optional[MiaSegment]
+    moa_segment: Optional[MoaSegment]
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=15)
+    dtm_segment: Optional[List[Loop2100DtmSegment]] = Field(min_items=0, max_items=5)
+    per_segment: Optional[List[Loop2100PerSegment]] = Field(min_items=0, max_items=2)
+    amt_segment: Optional[List[Loop2100AmtSegment]] = Field(min_items=0, max_items=13)
+    qty_segment: Optional[List[Loop2100QtySegment]] = Field(min_items=0, max_items=14)
 
 
 class Loop2000(X12SegmentGroup):
@@ -84,7 +102,7 @@ class Loop2000(X12SegmentGroup):
     lx_segment: LxSegment
     ts3_segment: Optional[Ts3Segment]
     ts2_segment: Optional[Ts2Segment]
-    # loop_2100: List[Loop2100]
+    loop_2100: List[Loop2100]
 
 
 class Footer(X12SegmentGroup):
