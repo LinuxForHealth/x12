@@ -54,7 +54,7 @@ class AmtSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.AMT
     amount_qualifier_code: str = Field(min_length=1, max_length=3)
-    monetary_amount: condecimal(ge=Decimal("0.00"))
+    monetary_amount: Decimal
     credit_debit_flag_code: Optional[str]
 
 
@@ -154,7 +154,7 @@ class BprSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.BPR
     transaction_handling_code: TransactionHandlingCode
-    total_actual_provider_payment_amount: condecimal(ge=Decimal("0.0"))
+    total_actual_provider_payment_amount: Decimal
     credit_debit_flag_code: CreditDebitFlagCode
     payment_method_code: PaymentMethodCode
     payment_format_code: Optional[PaymentFormatCode]
@@ -1952,7 +1952,7 @@ class N1Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.N1
     entity_identifier_code: str = Field(min_length=2, max_length=3)
-    payer_name: str = Field(min_length=1, max_length=60)
+    name: str = Field(min_length=1, max_length=60)
     identification_code_qualifier: str = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
@@ -2229,6 +2229,7 @@ class PlbSegment(X12Segment):
     Example:
         PLB*1234567890*20000930*CV:9876514*-1.27~
     """
+
     segment_name: X12SegmentName = X12SegmentName.PLB
     provider_identifier: str = Field(min_length=1, max_length=50)
     fiscal_period_date: Union[str, datetime.date]
@@ -2290,7 +2291,7 @@ class Ps1Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.PS1
     purchased_service_provider_identifier: str
-    purchased_service_charge_amount: condecimal(gt=Decimal("0.0"))
+    purchased_service_charge_amount: Decimal
     state_province_code: Optional[str]
 
 
@@ -2573,8 +2574,8 @@ class Sv5Segment(X12Segment):
     product_service_id_qualifier: str
     unit_basis_measurement_code: Literal["DA"]
     length_of_medical_necessity: condecimal(gt=Decimal("0.0"))
-    dme_rental_price: condecimal(gt=Decimal("0.0"))
-    dme_purchase_price: condecimal(gt=Decimal("0.0"))
+    dme_rental_price: Decimal
+    dme_purchase_price: Decimal
     rental_unit_price_indicator: RentalUnitPriceIndicator
     prognosis_code: Optional[str]
 
@@ -2634,26 +2635,26 @@ class Ts2Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.TS2
-    total_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_federal_specific_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_hospital_specific_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_disproportionate_share_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_capital_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_indirect_medical_education_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_drg_amount: Optional[Decimal]
+    total_federal_specific_amount: Optional[Decimal]
+    total_hospital_specific_amount: Optional[Decimal]
+    total_disproportionate_share_amount: Optional[Decimal]
+    total_capital_amount: Optional[Decimal]
+    total_indirect_medical_education_amount: Optional[Decimal]
     total_outlier_day_count: Optional[condecimal(ge=Decimal("0.0"))]
-    total_day_outlier_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_cost_outlier_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_day_outlier_amount: Optional[Decimal]
+    total_cost_outlier_amount: Optional[Decimal]
     average_drg_length_of_stay: Optional[condecimal(ge=Decimal("0.0"))]
     total_discharge_count: Optional[condecimal(ge=Decimal("0.0"))]
     total_cost_report_day_count: Optional[condecimal(ge=Decimal("0.0"))]
     total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
     total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
     total_noncovered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
-    total_msp_passthrough_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_msp_passthrough_amount: Optional[Decimal]
     average_drg_weight: Optional[condecimal(ge=Decimal("0.0"))]
-    total_pps_capital_fsp_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_pps_capital_hsp_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_pps_dsh_drg_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pps_capital_fsp_drg_amount: Optional[Decimal]
+    total_pps_capital_hsp_drg_amount: Optional[Decimal]
+    total_pps_dsh_drg_amount: Optional[Decimal]
 
 
 class Ts3Segment(X12Segment):
@@ -2668,26 +2669,26 @@ class Ts3Segment(X12Segment):
     facility_type_code: str = Field(min_length=1, max_length=2)
     fiscal_period_date: Union[str, datetime.date]
     total_claim_count: conint(ge=0)
-    total_claim_charge_amount: condecimal(ge=Decimal("0.0"))
-    monetary_amount_1: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_2: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_3: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_4: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_5: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_6: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_7: Optional[condecimal(ge=Decimal("0.0"))]
-    total_msp_payer_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_8: Optional[condecimal(ge=Decimal("0.0"))]
-    total_non_lab_charge_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_9: Optional[condecimal(ge=Decimal("0.0"))]
-    total_hcpcs_reported_charge_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_hcpcs_payable_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    monetary_amount_10: Optional[condecimal(ge=Decimal("0.0"))]
-    total_professional_component_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_msp_patient_liability_met_amount: Optional[condecimal(ge=Decimal("0.0"))]
-    total_patient_reimbursement_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_claim_charge_amount: Decimal
+    monetary_amount_1: Optional[Decimal]
+    monetary_amount_2: Optional[Decimal]
+    monetary_amount_3: Optional[Decimal]
+    monetary_amount_4: Optional[Decimal]
+    monetary_amount_5: Optional[Decimal]
+    monetary_amount_6: Optional[Decimal]
+    monetary_amount_7: Optional[Decimal]
+    total_msp_payer_amount: Optional[Decimal]
+    monetary_amount_8: Optional[Decimal]
+    total_non_lab_charge_amount: Optional[Decimal]
+    monetary_amount_9: Optional[Decimal]
+    total_hcpcs_reported_charge_amount: Optional[Decimal]
+    total_hcpcs_payable_amount: Optional[Decimal]
+    monetary_amount_10: Optional[Decimal]
+    total_professional_component_amount: Optional[Decimal]
+    total_msp_patient_liability_met_amount: Optional[Decimal]
+    total_patient_reimbursement_amount: Optional[Decimal]
     total_pip_claim_count: Optional[condecimal(ge=Decimal("0.0"))]
-    total_pip_adjustment_amount: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pip_adjustment_amount: Optional[Decimal]
 
     _validate_fiscal_period_date = field_validator("fiscal_period_date")(parse_x12_date)
 

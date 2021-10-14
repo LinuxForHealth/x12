@@ -46,7 +46,8 @@ from .segments import (
     Loop2110LqSegment,
 )
 from typing import Optional, List
-from pydantic import Field
+from pydantic import Field, root_validator
+from decimal import Decimal
 
 
 class Header(X12SegmentGroup):
@@ -117,6 +118,42 @@ class Loop2100(X12SegmentGroup):
     qty_segment: Optional[List[Loop2100QtySegment]] = Field(min_items=0, max_items=14)
     loop_2110: Optional[List[Loop2110]] = Field(min_items=0, max_items=99)
 
+    @root_validator
+    def validate_balance(cls, values):
+        """
+        Validates the claim totals reported in the CLP segment against the adjustments made in CAS segments.
+        The balance is calculated as:
+            clp.charge amount - cas.adjustments = clp.payment_amount
+
+        CAS segments exist within loops 2100 and 2110
+        """
+        clp_segment = values.get("clp_segment")
+        charge_amount = clp_segment.total_claim_charge_amount
+        payment_amount = clp_segment.claim_payment_amount
+        adjustment_amount = Decimal("0.0")
+
+        cas_segments = values.get("cas_segment", [])
+        for adjustment in cas_segments:
+            adjustment_data = adjustment.dict()
+            for i in range(1, 7, 1):
+                amount = adjustment_data.get(f"monetary_amount_{i}")
+                adjustment_amount += amount if amount else Decimal("0.0")
+
+        loop_2110 = values.get("loop_2110")
+        for service_payment in loop_2110:
+            for adjustment in service_payment.cas_segment:
+                adjustment_data = adjustment.dict()
+                for i in range(1, 7, 1):
+                    amount = adjustment_data.get(f"monetary_amount_{i}")
+                    adjustment_amount += amount if amount else Decimal("0.0")
+
+        if charge_amount - payment_amount != adjustment_amount:
+            raise ValueError(
+                f"Unable to balance charge amount {charge_amount} paid amount {payment_amount} against adjustments {adjustment_amount}"
+            )
+
+        return values
+
 
 class Loop2000(X12SegmentGroup):
     """
@@ -133,5 +170,6 @@ class Footer(X12SegmentGroup):
     """
     Transaction Footer Information
     """
+
     plb_segment: Optional[PlbSegment]
     se_segment: SeSegment

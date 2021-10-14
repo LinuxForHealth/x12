@@ -514,7 +514,7 @@ def test_plb_segment():
         "provider_identifier": "1234567890",
         "fiscal_period_date": "20000930",
         "adjustment_reason_code_1": "CV:9876514",
-        "provider_adjustment_amount_1": "-1.27"
+        "provider_adjustment_amount_1": "-1.27",
     }
     plb_segment: PlbSegment = PlbSegment(**segment_data)
     assert plb_segment.x12() == "PLB*1234567890*20000930*CV:9876514*-1.27~"
