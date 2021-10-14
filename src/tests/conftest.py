@@ -460,7 +460,7 @@ def x12_837_commercial_insurance_subscriber_input(
 def x12_835_managed_care_transaction():
     """
     A sample 835 transaction for a managed care environment.
-    "Managed" care is a tern used when the a managing/admin entity not the provider receives monetary funds.
+    "Managed" care is a term used when the a managing/admin entity not the provider receives monetary funds.
     """
     return "\n".join(
         [
