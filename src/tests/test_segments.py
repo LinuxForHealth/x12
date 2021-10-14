@@ -41,15 +41,41 @@ def test_bht_segment():
     )
 
 
+def test_bpr_segment():
+    segment_data = {
+        "transaction_handling_code": "C",
+        "total_actual_provider_payment_amount": "150000.00",
+        "credit_debit_flag_code": "C",
+        "payment_method_code": "ACH",
+        "payment_format_code": "CTX",
+        "sender_dfi_qualifier": "01",
+        "sender_dfi_id": "999999992",
+        "sender_account_qualifier": "DA",
+        "sender_account_number": "123456",
+        "payer_identifier": "1512345678",
+        "payer_supplemental_code": "999999999",
+        "receiver_dfi_qualifier": "01",
+        "receiver_bank_id_number": "999988880",
+        "receiver_account_qualifier": "DA",
+        "receiver_account_number": "98765",
+        "eft_effective_date": "20030901",
+    }
+    bpr_segment: BprSegment = BprSegment(**segment_data)
+    assert (
+        bpr_segment.x12()
+        == "BPR*C*150000.00*C*ACH*CTX*01*999999992*DA*123456*1512345678*999999999*01*999988880*DA*98765*20030901~"
+    )
+
+
 def test_cas_segment():
     segment_data = {
-        "adjustment_reason_code_1": "PR",
-        "monetary_amount_1": 1.0,
-        "quantity_1": 7.93,
+        "adjustment_group_code": "PR",
+        "adjustment_reason_code_1": "1",
+        "monetary_amount_1": "7.93",
     }
 
     cas_segment: CasSegment = CasSegment(**segment_data)
-    assert cas_segment.x12() == "CAS*PR*1.00*7.93~"
+    assert cas_segment.x12() == "CAS*PR*1*7.93~"
 
 
 def test_clm_segment():
@@ -65,6 +91,19 @@ def test_clm_segment():
 
     clm_segment: ClmSegment = ClmSegment(**segment_data)
     assert clm_segment.x12() == "CLM*26463774*100.00***11:B:1*Y*A*Y*I~"
+
+
+def test_clp_segment():
+    segment_data = {
+        "patient_control_number": "7722337",
+        "claim_status_code": "1",
+        "total_claim_charge_amount": "211366.97",
+        "claim_payment_amount": "138018.40",
+        "claim_filing_indicator_code": "12",
+        "payer_claim_control_number": "119932404007801",
+    }
+    clp_segment: ClpSegment = ClpSegment(**segment_data)
+    assert clp_segment.x12() == "CLP*7722337*1*211366.97*138018.40**12*119932404007801~"
 
 
 def test_cn1_segment():
@@ -136,6 +175,12 @@ def test_dmg_segment():
 
     dmg_segment: DmgSegment = DmgSegment(**segment_data)
     assert dmg_segment.x12() == "DMG*D8*19430917*M~"
+
+
+def test_dtm_segment():
+    segment_data = {"date_time_qualifier": "405", "production_date": "20020317"}
+    dtm_segment: DtmSegment = DtmSegment(**segment_data)
+    assert dtm_segment.x12() == "DTM*405*20020317~"
 
 
 def test_dtp_segment_date_period():
@@ -383,6 +428,12 @@ def test_mea_segment():
     assert mea_segment.x12() == "MEA*TR*R1*113.40~"
 
 
+def test_mia_segment():
+    segment_data = {"covered_days_visit_count": "0", "claim_drg_amount": "138018.40"}
+    mia_segment: MiaSegment = MiaSegment(**segment_data)
+    assert mia_segment.x12() == "MIA*0***138018.40~"
+
+
 def test_moa_segment():
     segment_data = {"claim_payment_remark_code_1": "A4"}
     moa_segment: MoaSegment = MoaSegment(**segment_data)
@@ -458,6 +509,17 @@ def test_pat_segment():
     assert pat_segment.x12() == "PAT******01*146.00~"
 
 
+def test_plb_segment():
+    segment_data = {
+        "provider_identifier": "1234567890",
+        "fiscal_period_date": "20000930",
+        "adjustment_reason_code_1": "CV:9876514",
+        "provider_adjustment_amount_1": "-1.27",
+    }
+    plb_segment: PlbSegment = PlbSegment(**segment_data)
+    assert plb_segment.x12() == "PLB*1234567890*20000930*CV:9876514*-1.27~"
+
+
 def test_prv_segment():
     segment_data = {
         "provider_code": "RF",
@@ -494,6 +556,12 @@ def test_qty_segment():
     segment_data = {"quantity_qualifier": "PT", "quantity": "2.00"}
     qty_segment: QtySegment = QtySegment(**segment_data)
     assert qty_segment.x12() == "QTY*PT*2.00~"
+
+
+def test_rdm_segment():
+    segment_data = {"report_transmission_code": "BM", "name": "JANE DOE"}
+    rdm_segment: RdmSegment = RdmSegment(**segment_data)
+    assert rdm_segment.x12() == "RDM*BM*JANE DOE~"
 
 
 def test_ref_segment():
@@ -534,6 +602,16 @@ def test_st_segment():
 
     st_segment: StSegment = StSegment(**segment_data)
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
+
+
+def test_svc_segment():
+    segment_data = {
+        "composite_medical_procedure_identifier_1": "HC:99214",
+        "line_item_charge_amount": "100.00",
+        "line_item_provider_payment_amount": "80.00",
+    }
+    svc_segment: SvcSegment = SvcSegment(**segment_data)
+    assert svc_segment.x12() == "SVC*HC:99214*100.00*80.00~"
 
 
 def test_sv1_segment():
@@ -582,6 +660,27 @@ def test_trn_segment():
 
     trn_segment: TrnSegment = TrnSegment(**segment_data)
     assert trn_segment.x12() == "TRN*1*98175-012547*8877281234*RADIOLOGY~"
+
+
+def test_ts2_segment():
+    segment_data = {
+        "total_drg_amount": "59786.00",
+        "total_federal_specific_amount": "55375.77",
+    }
+    ts2_segment: Ts2Segment = Ts2Segment(**segment_data)
+    assert ts2_segment.x12() == "TS2*59786.00*55375.77~"
+
+
+def test_ts3_segment():
+    segment_data = {
+        "provider_identifier": "123456",
+        "facility_type_code": "11",
+        "fiscal_period_date": "20021031",
+        "total_claim_count": "10",
+        "total_claim_charge_amount": "130957.66",
+    }
+    ts3_segment: Ts3Segment = Ts3Segment(**segment_data)
+    assert ts3_segment.x12() == "TS3*123456*11*20021031*10*130957.66~"
 
 
 def test_segment_lookup():

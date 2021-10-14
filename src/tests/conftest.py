@@ -454,3 +454,54 @@ def x12_837_commercial_insurance_subscriber_input(
     )
 
     return f"{x12_837_header}{x12_837_commercial_insurance_subscriber_transaction}{x12_control_footer}"
+
+
+@pytest.fixture
+def x12_835_managed_care_transaction():
+    """
+    A sample 835 transaction for a managed care environment.
+    "Managed" care is a term used when the a managing/admin entity not the provider receives monetary funds.
+    """
+    return "\n".join(
+        [
+            "ST*835*112233~",
+            "BPR*I*945.00*C*ACH*CCP*01*888999777*DA*24681012*1935665544**01*111333555*DA*144444*20002316~",
+            "TRN*1*7170066655*1935665544~",
+            "DTM*405*20020314~",
+            "N1*PR*RUSHMORE LIFE~",
+            "N3*10 SOUTH AVENUE~",
+            "N4*RAPID CITY*SD*55111~",
+            "N1*PE*ACME MEDICAL CENTER*XX*5544667733~",
+            "REF*TJ*777667755~",
+            "LX*1~",
+            "CLP*5554555444*1*800.00*450.00*300.00*12*94060555410000~",
+            "CAS*CO*A2*50.00~",
+            "NM1*QC*1*BUDD*WILLIAM****MI*33344555510~",
+            "SVC*HC:99211*800.00*500.00~",
+            "DTM*150*20020301~",
+            "DTM*151*20020304~",
+            "CAS*PR*1*300.00~",
+            "CLP*8765432112*1*1200.00*495.00*600.00*12*94077799230000~",
+            "CAS*CO*A2*55.00~",
+            "NM1*QC*1*SETTLE*SUSAN****MI*44455666610~",
+            "SVC*HC:93555*1200.00*550.00~",
+            "DTM*150*20020310~",
+            "DTM*151*20020312~",
+            "CAS*PR*1*600.00~",
+            "CAS*CO*45*50.00~",
+            "SE*26*112233~",
+        ]
+    )
+
+
+@pytest.fixture
+def x12_835_managed_care_input(
+    x12_control_header,
+    x12_835_managed_care_transaction,
+    x12_control_footer,
+) -> str:
+    x12_835_header: str = x12_control_header.replace("GS01", "HP").replace(
+        "GS08", "005010X221A1"
+    )
+
+    return f"{x12_835_header}{x12_835_managed_care_transaction}{x12_control_footer}"

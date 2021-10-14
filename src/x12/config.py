@@ -22,11 +22,17 @@ class IsaDelimiters(IntEnum):
 
 class TransactionSetVersionIds(IntEnum):
     """
-    The indices used to parse transaction set version identifiers
+    The indices used to parse transaction set version identifiers.
+    Transaction set version identifiers are distributed across the ST (transaction set header) and GS (functional group
+    header) segments.
     """
 
+    # ST01
     TRANSACTION_SET_CODE = 1
-    IMPLEMENTATION_VERSION = 3
+    # GS08
+    IMPLEMENTATION_VERSION = 8
+    # ST03
+    FALLBACK_IMPLEMENTATION_VERSION = 3
 
 
 class X12VersionFields(IntEnum):

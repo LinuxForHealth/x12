@@ -54,7 +54,7 @@ class AmtSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.AMT
     amount_qualifier_code: str = Field(min_length=1, max_length=3)
-    monetary_amount: condecimal(ge=Decimal("0.00"))
+    monetary_amount: Decimal
     credit_debit_flag_code: Optional[str]
 
 
@@ -81,6 +81,135 @@ class BhtSegment(X12Segment):
     )
 
 
+class BprSegment(X12Segment):
+    """
+    Financial Information
+    Example:
+        BPR*C*150000*C*ACH*CTX*01*999999992*DA*123456*1512345678*999999999*01*999988880*DA*98765*20030901~
+    """
+
+    class TransactionHandlingCode(str, Enum):
+        """
+        Code values for BPR01
+        """
+
+        PAYMENT_ACCOMPANIES_REMITTANCE_ADVICE = "C"
+        MAKE_PAYMENT_ONLY = "D"
+        NOTIFICATION_ONLY = "H"
+        REMITTANCE_INFORMATION_ONLY = "I"
+        PRENOTIFICATION_FUTURE_TRANSFERS = "P"
+        SPLIT_PAYMENT_REMITTANCE = "U"
+        HANDLING_PARTY_OPTION_TO_SPLIT_PAYMENT_REMITTANCE = "X"
+
+    class CreditDebitFlagCode(str, Enum):
+        """
+        Code values for BPR03
+        """
+
+        CREDIT = "C"
+        DEBIT = "D"
+
+    class PaymentMethodCode(str, Enum):
+        """
+        Code values for BPR04
+        """
+
+        AUTOMATED_CLEARING_HOUSE = "ACH"
+        FINANCIAL_INSTITUTION_OPTION = "BOP"
+        CHECK = "CHK"
+        FEDERAL_RESERVE_WIRE_TRANSFER = "FWT"
+        NON_PAYMENT_DATA = "NON"
+
+    class PaymentFormatCode(str, Enum):
+        """
+        Code values for BPR05
+        """
+
+        CASH_DISBURSEMENT_PLUS_ADDENDA = "CCP"
+        CORPORATE_TAX_EXCHANGE = "CTX"
+
+    class FinancialInstitutionIdQualifier(str, Enum):
+        """
+        Code values for BPR06
+        """
+
+        ABA_TRANSIT_ROUTING_NUMBER = "01"
+        CANADIAN_BANK_BRANCH_INSTITUTION_NUMBER = "04"
+
+    class DfiIdentificationQualifier(str, Enum):
+        """
+        Code values for BPR12
+        """
+
+        ABA_TRANSIT_ROUTING_NUMBER = "01"
+        CANADIAN_BANK_BRANCH_INSTITUTION_NUMBER = "04"
+
+    class AccountNumberQualifier(str, Enum):
+        """
+        Code values for BPR14
+        """
+
+        DEMAND_DEPOSIT = "DA"
+        SAVINGS = "SG"
+
+    segment_name: X12SegmentName = X12SegmentName.BPR
+    transaction_handling_code: TransactionHandlingCode
+    total_actual_provider_payment_amount: Decimal
+    credit_debit_flag_code: CreditDebitFlagCode
+    payment_method_code: PaymentMethodCode
+    payment_format_code: Optional[PaymentFormatCode]
+    sender_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
+    sender_dfi_id: Optional[str]
+    sender_account_qualifier: Optional[Literal["DA"]]
+    sender_account_number: Optional[str]
+    payer_identifier: Optional[str]
+    payer_supplemental_code: Optional[str]
+    receiver_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
+    receiver_bank_id_number: Optional[str]
+    receiver_account_qualifier: Optional[AccountNumberQualifier]
+    receiver_account_number: Optional[str]
+    eft_effective_date: Optional[Union[str, datetime.date]]
+
+    _validate_x12_date = field_validator("eft_effective_date")(validate_date_field)
+
+    @validator("payment_format_code")
+    def validate_payment_format_code(cls, v, values):
+        """
+        Validates that the payment format code is present for ACH transactions
+        """
+        is_ach = values.get("payment_method_code") == "ACH"
+        if is_ach and not v:
+            raise ValueError("payment_format_code is required for ACH transactions")
+        return v
+
+    @root_validator(pre=True)
+    def validate_electronic_payment_fields(cls, values):
+        """
+        Validates the required fields for electronic transactions
+        """
+        payment_code = values.get("payment_method_code")
+
+        if payment_code not in ("ACH", "BOP", "FTW"):
+            return values
+
+        for f in (
+            "sender_dfi_qualifier",
+            "sender_dfi_id",
+            "sender_account_qualifier",
+            "sender_account_number",
+            "payer_identifier",
+            "receiver_dfi_qualifier",
+            "receiver_bank_id_number",
+            "receiver_account_qualifier",
+            "receiver_account_number",
+        ):
+
+            if not values.get(f):
+                raise ValueError(f"{f} is required for electronic transactions")
+
+        return values
+
+
 class CasSegment(X12Segment):
     """
     Claim level adjustments
@@ -100,9 +229,11 @@ class CasSegment(X12Segment):
         PATIENT_RESPONSIBILITY = "PR"
 
     segment_name: X12SegmentName = X12SegmentName.CAS
+    adjustment_group_code: ClaimAdjustmentGroupCode
+
     adjustment_reason_code_1: str
     monetary_amount_1: Decimal
-    quantity_1: Decimal
+    quantity_1: Optional[Decimal]
 
     adjustment_reason_code_2: Optional[str]
     monetary_amount_2: Optional[Decimal]
@@ -135,7 +266,6 @@ class CasSegment(X12Segment):
             adjustment_fields: Tuple = (
                 values.get(f"adjustment_reason_code_{i}"),
                 values.get(f"monetary_amount_{i}"),
-                values.get(f"quantity_{i}"),
             )
 
             if any(adjustment_fields) and not all(adjustment_fields):
@@ -236,6 +366,72 @@ class ClmSegment(X12Segment):
     yes_no_condition_response_code_3: Optional[str]
     claim_submission_reason_code: Optional[str]
     delay_reason_code: Optional[DelayReasonCode]
+
+
+class ClpSegment(X12Segment):
+    """
+    Claim Payment
+    Example:
+        CLP*7722337*1*211366.97*138018.40**12*119932404007801~
+
+    """
+
+    class ClaimStatusCode(str, Enum):
+        """
+        Code values for CLP02
+        """
+
+        PROCESSED_AS_PRIMARY = "1"
+        PROCESSED_AS_SECONDARY = "2"
+        PROCESSED_AS_TERTIARY = "3"
+        DENIED = "4"
+        PROCESSED_AS_PRIMARY_FORWARDED = "19"
+        PROCESSED_AS_SECONDARY_FORWARDED = "20"
+        PROCESSED_AS_TERTIARY_FORWARDED = "21"
+        REVERSAL_PREVIOUS_PAYMENT = "22"
+        NOT_OUR_CLAIM_FORWARDED = "23"
+        PREDETERMINATION_PRICING_NO_PAYMENT = "25"
+
+    class ClaimFilingIndicatorCode(str, Enum):
+        """
+        Code values for CLP06
+        """
+
+        PPO = "12"
+        POS = "13"
+        EPO = "14"
+        INDEMNITY_INSURANCE = "15"
+        HMO_MEDICARE_RISK = "16"
+        DENTAL_MAINTENANCE_ORGANIZATION = "17"
+        AUTOMOBILE_MEDICAL = "AM"
+        CHAMPUS = "CH"
+        DISABILITY = "DS"
+        HMO = "HM"
+        LIABILITY_MEDICAL = "LM"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        OTHER_FEDERAL_PROGRAM = "OF"
+        TITLE_V = "TV"
+        VETERANS_AFFAIRS_PLAN = "VA"
+        WORKERS_COMPENSATION_HEALTH_CLAIM = "WC"
+        MUTUALLY_DEFINED = "ZZ"
+
+    segment_name: X12SegmentName = X12SegmentName.CLP
+    patient_control_number: str = Field(min_length=1, max_length=38)
+    claim_status_code: ClaimStatusCode
+    total_claim_charge_amount: Decimal
+    claim_payment_amount: Decimal
+    patient_responsibility_amount: Optional[Decimal]
+    claim_filing_indicator_code: ClaimFilingIndicatorCode
+    payer_claim_control_number: Optional[str] = Field(min_length=1, max_length=50)
+    facility_type_code: Optional[str] = Field(min_length=1, max_length=2)
+    claim_frequency_type_code: Optional[str] = Field(min_length=1, max_length=1)
+    patient_status_code: Optional[str]
+    drg_code: Optional[str] = Field(min_length=1, max_length=4)
+    drg_weight: Optional[condecimal(gt=Decimal("0.0"))]
+    discharge_fraction: Optional[condecimal(ge=Decimal("0.0"))]
+    condition_response_code: Optional[str]
 
 
 class Cn1Segment(X12Segment):
@@ -433,6 +629,20 @@ class DmgSegment(X12Segment):
             )
 
         return values
+
+
+class DtmSegment(X12Segment):
+    """
+    Production Date
+    Example:
+        DTM*405*20020317~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.DTM
+    date_time_qualifier: str = Field(min_length=3, max_length=3)
+    production_date: Union[str, datetime.date]
+
+    _validate_x12_date = field_validator("production_date")(validate_date_field)
 
 
 class DtpSegment(X12Segment):
@@ -1511,6 +1721,40 @@ class MeaSegment(X12Segment):
     measurement_value: Decimal
 
 
+class MiaSegment(X12Segment):
+    """
+    Medicare Inpatient Adjudication
+    Example:
+        MIA*0***138018.40~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.MIA
+    covered_days_visit_count: Literal["0"]
+    pps_operating_outlier_amount: Optional[Decimal]
+    lifetime_psychiatric_days_count: Optional[Decimal]
+    claim_drg_amount: Optional[Decimal]
+    claim_payment_remark_code: Optional[str] = Field(min_length=1, max_length=20)
+    claim_disproportionate_share_amount: Optional[Decimal]
+    claim_msp_passthrough_amount: Optional[Decimal]
+    claim_pps_capital_amount: Optional[Decimal]
+    pps_capital_fsp_drg_amount: Optional[Decimal]
+    pps_capital_hsp_drg_amount: Optional[Decimal]
+    pps_capital_dsh_drg_amount: Optional[Decimal]
+    old_capital_amount: Optional[Decimal]
+    pps_capital_ime_amount: Optional[Decimal]
+    pps_operating_hospital_specific_drg_amount: Optional[Decimal]
+    cost_report_day_count: Optional[Decimal]
+    pps_operating_federal_specific_drg_amount: Optional[Decimal]
+    claim_pps_capital_outlier_amount: Optional[Decimal]
+    claim_indirect_teaching_amount: Optional[Decimal]
+    nonpayable_professional_component_amount: Optional[Decimal]
+    claim_payment_remark_code_1: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_2: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_3: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_4: Optional[str] = Field(min_length=1, max_length=50)
+    pps_capital_exception_amount: Optional[Decimal]
+
+
 class MoaSegment(X12Segment):
     """
     Outpatient Adjudication Information
@@ -1699,6 +1943,18 @@ class MsgSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.MSG
     free_form_text: str
+
+
+class N1Segment(X12Segment):
+    """
+    Payer Identification
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.N1
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    name: str = Field(min_length=1, max_length=60)
+    identification_code_qualifier: str = Field(min_length=1, max_length=2)
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
 
 class N3Segment(X12Segment):
@@ -1967,6 +2223,32 @@ class PerSegment(X12Segment):
         return values
 
 
+class PlbSegment(X12Segment):
+    """
+    Provider Level Adjustment
+    Example:
+        PLB*1234567890*20000930*CV:9876514*-1.27~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PLB
+    provider_identifier: str = Field(min_length=1, max_length=50)
+    fiscal_period_date: Union[str, datetime.date]
+    adjustment_reason_code_1: str
+    provider_adjustment_amount_1: Decimal
+    adjustment_reason_code_2: Optional[str]
+    provider_adjustment_amount_2: Optional[Decimal]
+    adjustment_reason_code_3: Optional[str]
+    provider_adjustment_amount_3: Optional[Decimal]
+    adjustment_reason_code_4: Optional[str]
+    provider_adjustment_amount_4: Optional[Decimal]
+    adjustment_reason_code_5: Optional[str]
+    provider_adjustment_amount_5: Optional[Decimal]
+    adjustment_reason_code_6: Optional[str]
+    provider_adjustment_amount_6: Optional[Decimal]
+
+    _validate_x12_date = field_validator("fiscal_period_date")(validate_date_field)
+
+
 class PrvSegment(X12Segment):
     """
     Provider Information
@@ -2009,7 +2291,7 @@ class Ps1Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.PS1
     purchased_service_provider_identifier: str
-    purchased_service_charge_amount: condecimal(gt=Decimal("0.0"))
+    purchased_service_charge_amount: Decimal
     state_province_code: Optional[str]
 
 
@@ -2141,6 +2423,41 @@ class QtySegment(X12Segment):
     free_form_message: Optional[str]
 
 
+class RdmSegment(X12Segment):
+    """
+    Remittance Delivery Method
+    Example:
+        RDM*
+    """
+
+    class ReportTransmissionCode(str, Enum):
+        """
+        Code values for RDM01
+        """
+
+        BY_MAIL = "BM"
+        EMAIL = "EM"
+        FILE_TRANSFER = "FT"
+        ONLINE = "OL"
+
+    segment_name: X12SegmentName = X12SegmentName.RDM
+    report_transmission_code: ReportTransmissionCode
+    name: Optional[str] = Field(min_length=1, max_length=60)
+    communication_number: Optional[str] = Field(min_length=1, max_length=256)
+
+    @root_validator(pre=True)
+    def validate_remittance_destination(cls, values):
+        """Validates that appropriate fields are populated"""
+        code = values.get("report_transmission_code")
+
+        if code == "BM" and not values.get("name"):
+            raise ValueError("name is required for mail remittance")
+        elif code != "BM" and not values.get("communication_number"):
+            raise ValueError("communication_number is required for online remittance")
+
+        return values
+
+
 class RefSegment(X12Segment):
     """
     Reference Identification
@@ -2257,10 +2574,27 @@ class Sv5Segment(X12Segment):
     product_service_id_qualifier: str
     unit_basis_measurement_code: Literal["DA"]
     length_of_medical_necessity: condecimal(gt=Decimal("0.0"))
-    dme_rental_price: condecimal(gt=Decimal("0.0"))
-    dme_purchase_price: condecimal(gt=Decimal("0.0"))
+    dme_rental_price: Decimal
+    dme_purchase_price: Decimal
     rental_unit_price_indicator: RentalUnitPriceIndicator
     prognosis_code: Optional[str]
+
+
+class SvcSegment(X12Segment):
+    """
+    Service Information
+    Example:
+        SVC*HC:99214*100.00*80.00~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.SVC
+    composite_medical_procedure_identifier_1: str
+    line_item_charge_amount: Decimal
+    line_item_provider_payment_amount: Decimal
+    national_uniform_billing_committee_revenue_code: Optional[str]
+    units_of_service_paid_count: Optional[Decimal]
+    composite_medical_procedure_identifier_2: Optional[str]
+    original_units_of_service_count: Optional[Decimal]
 
 
 class SvdSegment(X12Segment):
@@ -2291,6 +2625,72 @@ class TrnSegment(X12Segment):
     reference_identification_1: str = Field(min_length=1, max_length=50)
     originating_company_identifier: str = Field(min_length=10, max_length=10)
     reference_identification_2: Optional[str] = Field(min_length=1, max_length=50)
+
+
+class Ts2Segment(X12Segment):
+    """
+    Provider supplemental information
+    Example:
+        TS2*59786.00*55375.77~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.TS2
+    total_drg_amount: Optional[Decimal]
+    total_federal_specific_amount: Optional[Decimal]
+    total_hospital_specific_amount: Optional[Decimal]
+    total_disproportionate_share_amount: Optional[Decimal]
+    total_capital_amount: Optional[Decimal]
+    total_indirect_medical_education_amount: Optional[Decimal]
+    total_outlier_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_day_outlier_amount: Optional[Decimal]
+    total_cost_outlier_amount: Optional[Decimal]
+    average_drg_length_of_stay: Optional[condecimal(ge=Decimal("0.0"))]
+    total_discharge_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_cost_report_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_covered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_noncovered_day_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_msp_passthrough_amount: Optional[Decimal]
+    average_drg_weight: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pps_capital_fsp_drg_amount: Optional[Decimal]
+    total_pps_capital_hsp_drg_amount: Optional[Decimal]
+    total_pps_dsh_drg_amount: Optional[Decimal]
+
+
+class Ts3Segment(X12Segment):
+    """
+    Provider summary information
+    Example:
+        TS3*123456*11*20021031*10*130957.66~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.TS3
+    provider_identifier: str = Field(min_length=1, max_length=50)
+    facility_type_code: str = Field(min_length=1, max_length=2)
+    fiscal_period_date: Union[str, datetime.date]
+    total_claim_count: conint(ge=0)
+    total_claim_charge_amount: Decimal
+    monetary_amount_1: Optional[Decimal]
+    monetary_amount_2: Optional[Decimal]
+    monetary_amount_3: Optional[Decimal]
+    monetary_amount_4: Optional[Decimal]
+    monetary_amount_5: Optional[Decimal]
+    monetary_amount_6: Optional[Decimal]
+    monetary_amount_7: Optional[Decimal]
+    total_msp_payer_amount: Optional[Decimal]
+    monetary_amount_8: Optional[Decimal]
+    total_non_lab_charge_amount: Optional[Decimal]
+    monetary_amount_9: Optional[Decimal]
+    total_hcpcs_reported_charge_amount: Optional[Decimal]
+    total_hcpcs_payable_amount: Optional[Decimal]
+    monetary_amount_10: Optional[Decimal]
+    total_professional_component_amount: Optional[Decimal]
+    total_msp_patient_liability_met_amount: Optional[Decimal]
+    total_patient_reimbursement_amount: Optional[Decimal]
+    total_pip_claim_count: Optional[condecimal(ge=Decimal("0.0"))]
+    total_pip_adjustment_amount: Optional[Decimal]
+
+    _validate_fiscal_period_date = field_validator("fiscal_period_date")(parse_x12_date)
 
 
 # load segment classes into a lookup table indexed by segment name
