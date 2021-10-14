@@ -9,6 +9,10 @@ from x12.io import X12ModelReader
 def test_multiple_transactions(
     x12_control_header, x12_control_footer, x12_270_subscriber_transaction
 ):
+
+    x12_control_header: str = x12_control_header.replace("GS01", "HS").replace(
+        "GS08", "005010X279A1"
+    )
     transactions: str = x12_270_subscriber_transaction * 2
     x12_input = f"{x12_control_header}{transactions}{x12_control_footer}"
 
