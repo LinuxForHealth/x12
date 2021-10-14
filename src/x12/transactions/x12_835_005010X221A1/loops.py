@@ -20,6 +20,7 @@ from x12.segments import (
     MiaSegment,
     MoaSegment,
     SvcSegment,
+    PlbSegment,
 )
 from .segments import (
     HeaderStSegment,
@@ -132,5 +133,5 @@ class Footer(X12SegmentGroup):
     """
     Transaction Footer Information
     """
-
+    plb_segment: Optional[PlbSegment]
     se_segment: SeSegment

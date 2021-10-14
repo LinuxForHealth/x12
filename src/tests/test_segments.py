@@ -509,6 +509,17 @@ def test_pat_segment():
     assert pat_segment.x12() == "PAT******01*146.00~"
 
 
+def test_plb_segment():
+    segment_data = {
+        "provider_identifier": "1234567890",
+        "fiscal_period_date": "20000930",
+        "adjustment_reason_code_1": "CV:9876514",
+        "provider_adjustment_amount_1": "-1.27"
+    }
+    plb_segment: PlbSegment = PlbSegment(**segment_data)
+    assert plb_segment.x12() == "PLB*1234567890*20000930*CV:9876514*-1.27~"
+
+
 def test_prv_segment():
     segment_data = {
         "provider_code": "RF",

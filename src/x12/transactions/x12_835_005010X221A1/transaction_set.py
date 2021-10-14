@@ -23,14 +23,14 @@ class HealthCareClaimPayment(X12SegmentGroup):
 
     _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
 
-    @root_validator(pre=True)
+    @root_validator()
     def validate_lx_header(cls, values):
         """
         Validates that LX numbers within a transaction set are unique.
         """
         numbers: Set = set()
         for loop in values.get("loop_2000", []):
-            n: int = loop.get("assigned_number")
+            n: int = loop.lx_segment.assigned_number
             if n in numbers:
                 raise ValueError(f"duplicate assigned_numbers {n}")
             numbers.add(n)

@@ -170,8 +170,22 @@ def set_service_payment_information_loop(
     context.set_loop_context(TransactionLoops.SERVICE_PAYMENT_INFORMATION, loop_data)
 
 
+@match("PLB")
+def set_plb_footer_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the transaction set footer loop if the PLB optional segment is encountered.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+
+    context.set_loop_context(
+        TransactionLoops.FOOTER, context.transaction_data["footer"]
+    )
+
+
 @match("SE")
-def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
+def set_footer_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the transaction set footer loop.
 

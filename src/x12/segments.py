@@ -2223,6 +2223,31 @@ class PerSegment(X12Segment):
         return values
 
 
+class PlbSegment(X12Segment):
+    """
+    Provider Level Adjustment
+    Example:
+        PLB*1234567890*20000930*CV:9876514*-1.27~
+    """
+    segment_name: X12SegmentName = X12SegmentName.PLB
+    provider_identifier: str = Field(min_length=1, max_length=50)
+    fiscal_period_date: Union[str, datetime.date]
+    adjustment_reason_code_1: str
+    provider_adjustment_amount_1: Decimal
+    adjustment_reason_code_2: Optional[str]
+    provider_adjustment_amount_2: Optional[Decimal]
+    adjustment_reason_code_3: Optional[str]
+    provider_adjustment_amount_3: Optional[Decimal]
+    adjustment_reason_code_4: Optional[str]
+    provider_adjustment_amount_4: Optional[Decimal]
+    adjustment_reason_code_5: Optional[str]
+    provider_adjustment_amount_5: Optional[Decimal]
+    adjustment_reason_code_6: Optional[str]
+    provider_adjustment_amount_6: Optional[Decimal]
+
+    _validate_x12_date = field_validator("fiscal_period_date")(validate_date_field)
+
+
 class PrvSegment(X12Segment):
     """
     Provider Information
