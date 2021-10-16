@@ -389,43 +389,40 @@ def x12_837_commercial_insurance_dependent_transaction() -> str:
 
 
 @pytest.fixture
-def x12_837_commercial_insurance_subscriber_transaction() -> str:
+def x12_837_subscriber_drug_in_office_transaction() -> str:
     return "\n".join(
         [
-            "ST*837*0021*005010X222A2~",
-            "BHT*0019*00*244579*20061015*1023*CH~",
-            "NM1*41*2*PREMIER BILLING SERVICE*****46*TGJ23~",
-            "PER*IC*JERRY*TE*3055552222*EX*231~",
-            "NM1*40*2*KEY INSURANCE COMPANY*****46*66783JJT~",
+            "ST*837*0711*005010X222A2~",
+            "BHT*0019*00*0013*20040801*1200*CH~",
+            "NM1*41*2*ASSOCIATES IN MEDICINE*****46*587654321~",
+            "PER*IC*BUD HOLLY*TE*8017268899~",
+            "NM1*40*2*XYZ RECEIVER*****46*369852758~",
             "HL*1**20*1~",
-            "PRV*BI*PXC*203BF0100Y~",
-            "NM1*85*2*BEN KILDARE SERVICE*****XX*1912301953~",
-            "N3*234 SEAWAY ST~",
-            "N4*MIAMI*FL*331110000~",
+            "NM1*85*2*ASSOCIATES IN MEDICINE*****XX*1234567893~",
+            "N3*1313 LAS VEGAS BOULEVARD~",
+            "N4*LAS VEGAS*NV*89109~",
             "REF*EI*587654321~",
-            "NM1*87*2~",
-            "N3*2345 OCEAN BLVD~",
-            "N4*MIAMI*FL*33111~",
             "HL*2*1*22*0~",
-            "SBR*P**2222-SJ******CI~",
-            "NM1*IL*1*SMITH*JANE****MI*JS00111223333~",
-            "NM1*PR*2*KEY INSURANCE COMPANY*****PI*999996666~",
-            "CLM*26463774*100.00***11:B:1*Y*A*Y*I~",
-            "REF*D9*17312345600006351~",
-            "HI*BK:0340*BF:V7389~",
+            "SBR*P*18*GRP01020102******CI~",
+            "NM1*IL*1*VAUGHN*STEVE*R***MI*MBRID12345~",
+            "N3*236 DIAMOND ST~",
+            "N4*LAS VEGAS*NV*89109~",
+            "DMG*D8*19430501*M~",
+            "NM1*PR*2*R&R HEALTH PLAN*****XV*PLANID12345~",
+            "CLM*CLMNO12345*103.37***11:B:1*Y*A*Y*Y~",
+            "HI*BK:03591~",
+            "NM1*82*1*HENDRIX*JIM****XX*1122333341~",
+            "PRV*PE*PXC*208D00000X~",
             "LX*1~",
-            "SV1*HC:99213*40.00*UN*1.00***1~",
-            "DTP*472*D8*20061003~",
+            "SV1*HC:90782*50.00*UN*1.00*11**1~",
+            "DTP*472*D8*20040711~",
             "LX*2~",
-            "SV1*HC:87070*15.00*UN*1.00***1~",
-            "DTP*472*D8*20061003~",
-            "LX*3~",
-            "SV1*HC:99214*35.00*UN*1.00***2~",
-            "DTP*472*D8*20061010~",
-            "LX*4~",
-            "SV1*HC:86663*10.00*UN*1.00***2~",
-            "DTP*472*D8*20061010~",
-            "SE*34*0021~",
+            "SV1*HC:J1550*53.37*UN*1.00*11**1~",
+            "DTP*472*D8*20040711~",
+            "AMT*T*3.37~",
+            "LIN**N4*00026063512~",
+            "CTP****10.00*ML~",
+            "SE*31*0711~",
         ]
     )
 
@@ -444,16 +441,16 @@ def x12_837_commercial_insurance_dependent_input(
 
 
 @pytest.fixture
-def x12_837_commercial_insurance_subscriber_input(
+def x12_837_subscriber_drug_in_office_input(
     x12_control_header,
-    x12_837_commercial_insurance_subscriber_transaction,
+    x12_837_subscriber_drug_in_office_transaction,
     x12_control_footer,
 ) -> str:
     x12_837_header: str = x12_control_header.replace("GS01", "HC").replace(
         "GS08", "005010X222A2"
     )
 
-    return f"{x12_837_header}{x12_837_commercial_insurance_subscriber_transaction}{x12_control_footer}"
+    return f"{x12_837_header}{x12_837_subscriber_drug_in_office_transaction}{x12_control_footer}"
 
 
 @pytest.fixture

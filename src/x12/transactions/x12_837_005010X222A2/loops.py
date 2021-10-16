@@ -134,6 +134,7 @@ from .segments import (
     Loop2420HNm1Segment,
     Loop2430DtpSegment,
     Loop2430AmtSegment,
+    Loop2010AaPerSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -201,6 +202,7 @@ class Loop2010Aa(X12SegmentGroup):
     n3_segment: N3Segment
     n4_segment: N4Segment
     ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=3)
+    per_segment: Optional[List[Loop2010AaPerSegment]] = Field(min_items=0, max_items=2)
 
     _validate_ref_segments = root_validator(allow_reuse=True)(
         validate_duplicate_ref_codes
@@ -554,7 +556,7 @@ class Loop2410(X12SegmentGroup):
 
     lin_segment: LinSegment
     ctp_segment: CtpSegment
-    ref_segment: Loop2410RefSegment
+    ref_segment: Optional[Loop2410RefSegment]
 
 
 class Loop2400(X12SegmentGroup):
@@ -698,10 +700,10 @@ class Loop2000A(X12SegmentGroup):
     """
 
     hl_segment: Loop2000AHlSegment
-    prv_segment: Loop2000APrvSegment
+    prv_segment: Optional[Loop2000APrvSegment]
     cur_segment: Optional[CurSegment]
     loop_2010aa: Loop2010Aa
-    loop_2010ab: Loop2010Ab
+    loop_2010ab: Optional[Loop2010Ab]
     loop_2010ac: Optional[Loop2010Ac]
     loop_2000b: List[Loop2000B]
 

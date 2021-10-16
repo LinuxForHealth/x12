@@ -268,6 +268,22 @@ class Loop2010AaRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
+class Loop2010AaPerSegment(PerSegment):
+    """
+    Billing Provider Contact Information
+    """
+
+    class CommunicationNumberQualifier(str, Enum):
+        ELECTRONIC_MAIL = "EM"
+        TELEPHONE_EXTENSION = "EX"
+        FACSIMILE = "FX"
+        TELEPHONE = "TE"
+
+    communication_number_qualifier_1: CommunicationNumberQualifier
+    communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
+    communication_number_qualifier_3: Optional[CommunicationNumberQualifier]
+
+
 class Loop2010AbNm1Segment(Nm1Segment):
     """
     Billing Provider Name and Identification
