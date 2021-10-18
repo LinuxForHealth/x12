@@ -4,24 +4,91 @@ Tests use-cases for the 270 005010X279A1 (Eligibility Inquiry) transaction
 
 from x12.io import X12ModelReader
 import pytest
-from pydantic import ValidationError
+from tests.support import assert_eq_model
 
 
-def test_270_subscriber(x12_270_subscriber_input, x12_270_subscriber_transaction):
-    with X12ModelReader(x12_270_subscriber_input) as r:
-        model_result = [m for m in r.models()]
-        assert len(model_result) == 1
-        assert model_result[0].x12() == x12_270_subscriber_transaction
+@pytest.fixture
+def x12_270_subscriber() -> str:
+    return "\n".join(
+        [
+            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
+            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
+            "ST*270*0001*005010X279A1~",
+            "BHT*0022*13*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "REF*4A*000111222~",
+            "N3*123 MAIN ST.*SUITE 42~",
+            "N4*SAN MATEO*CA*94401~",
+            "HL*3*2*22*0~",
+            "TRN*1*930000000000*9800000004*PD~",
+            "NM1*IL*1*DOE*JOHN****MI*00000000001~",
+            "REF*6P*0123456789~",
+            "N3*1400 ANYHOO LANE*APT 270~",
+            "N4*SPARTANBURG*SC*29302~",
+            "PRV*PC*HPI*3435612668~",
+            "DMG*D8*19700101~",
+            "INS*Y*18***************3~",
+            "HI*BK:8901*BF:87200*BF:559~",
+            "DTP*291*D8*20131031~",
+            "EQ*30~",
+            "AMT*R*37.50~",
+            "AMT*PB*37.50~",
+            "III*ZZ*21~",
+            "REF*9F*660415~",
+            "DTP*291*D8*20131031~",
+            "SE*27*0001~",
+            "GE*1*1~",
+            "IEA*1*000000907~",
+        ]
+    )
 
 
-def test_270_dependent(x12_270_dependent_input, x12_270_dependent_transaction):
-    with X12ModelReader(x12_270_dependent_input) as r:
-        model_result = [m for m in r.models()]
-        assert len(model_result) == 1
-        assert model_result[0].x12() == x12_270_dependent_transaction
+@pytest.fixture
+def x12_270_dependent() -> str:
+    return "\n".join(
+        [
+            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
+            "GS*HS*000000005*54321*20131031*1147*1*X*005010X279A1~",
+            "ST*270*0001*005010X279A1~",
+            "BHT*0022*13*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "REF*4A*000111222~",
+            "N3*123 MAIN ST.*SUITE 42~",
+            "N4*SAN MATEO*CA*94401~",
+            "HL*3*2*22*1~",
+            "NM1*IL*1******MI*00000000001~",
+            "HL*4*3*23*0~",
+            "TRN*1*930000000000*9800000004*PD~",
+            "NM1*03*1*DOE*JANE~",
+            "REF*6P*0123456789~",
+            "N3*1400 ANYHOO LANE*APT 270~",
+            "N4*SPARTANBURG*SC*29302~",
+            "PRV*PC*HPI*3435612668~",
+            "DMG*D8*19700101~",
+            "INS*N*01~",
+            "HI*BK:8901*BF:87200*BF:559~",
+            "DTP*291*D8*20131031~",
+            "EQ*30~",
+            "SE*24*0001~",
+            "GE*1*1~",
+            "IEA*1*000000907~",
+        ]
+    )
 
 
-def test_270_properties_subscriber_use_case(x12_270_subscriber_input):
+@pytest.mark.parametrize("test_input", ["x12_270_subscriber", "x12_270_dependent"])
+def test_270_model(request, test_input: str):
+    input_value = request.getfixturevalue(test_input)
+    assert_eq_model(input_value)
+
+
+def test_270_properties_subscriber_use_case(x12_270_subscriber):
     """
     Tests the Eligibility Inquiry property accessors with the subscriber use-case.
     The subscriber use-case does not include a dependent record.
@@ -29,7 +96,7 @@ def test_270_properties_subscriber_use_case(x12_270_subscriber_input):
     information receiver, information source, subscriber, and optionally dependent.
     """
 
-    with X12ModelReader(x12_270_subscriber_input) as r:
+    with X12ModelReader(x12_270_subscriber) as r:
         transaction_model = [m for m in r.models()][0]
 
         information_source = transaction_model.information_source
@@ -55,7 +122,7 @@ def test_270_properties_subscriber_use_case(x12_270_subscriber_input):
         assert dependent is None
 
 
-def test_270_properties_dependent_use_case(x12_270_dependent_input):
+def test_270_properties_dependent_use_case(x12_270_dependent):
     """
     Tests the Eligibility Inquiry property accessors with the dependent use-case.
     The dependent use-case exercises all available properties.
@@ -63,7 +130,7 @@ def test_270_properties_dependent_use_case(x12_270_dependent_input):
     information receiver, information source, subscriber, and optionally dependent.
     """
 
-    with X12ModelReader(x12_270_dependent_input) as r:
+    with X12ModelReader(x12_270_dependent) as r:
         transaction_model = [m for m in r.models()][0]
 
         information_source = transaction_model.information_source
@@ -87,133 +154,3 @@ def test_270_properties_dependent_use_case(x12_270_dependent_input):
         assert "hl_segment" in dependent
         assert "trn_segment" in dependent
         assert "loop_2100d" in dependent
-
-
-def test_property_usage(x12_270_subscriber_input):
-    """A test case used to exercise property usage"""
-
-    with X12ModelReader(x12_270_subscriber_input) as r:
-        transaction_model = [m for m in r.models()][0]
-
-        # the property isn't cached so fetch the subscriber into a variable
-        subscriber = transaction_model.subscriber
-        subscriber_name = subscriber["loop_2100c"]["nm1_segment"]
-        assert subscriber_name["name_last_or_organization_name"] == "DOE"
-        assert subscriber_name["name_first"] == "JOHN"
-        assert subscriber_name["identification_code"] == "00000000001"
-
-        subscriber_transaction = subscriber["trn_segment"][0]
-        assert subscriber_transaction["originating_company_identifier"] == "9800000004"
-
-        info_source_name = transaction_model.information_source["loop_2100a"][
-            "nm1_segment"
-        ]
-        assert info_source_name["name_last_or_organization_name"] == "PAYER C"
-        assert info_source_name["identification_code"] == "12345"
-
-
-def test_hl_segment_id_increment_validation(x12_270_subscriber_input):
-    """
-    Validates the hl segment id validation where ids are expected to auto-increment
-    """
-    # increment the id to trigger a validation error
-    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*4*1*22*0~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_hl_segment_id_reference_validations(x12_270_subscriber_input):
-    """
-    Validates the hl segment id links throughout the transaction set
-    """
-    # update the parent id to an invalid value to trigger a validation error
-    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*3*10*22*0~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_subscriber_hierarchy_child_code(x12_270_subscriber_input):
-    # update the hierarchy child code to "1" to trigger a validation error
-    # update the parent id to an invalid value to trigger a validation error
-    test_input = x12_270_subscriber_input.replace("HL*3*2*22*0~", "HL*3*2*22*1~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_subscriber_name(x12_270_subscriber_input):
-    # remove the first name from the subscriber segment to trigger a validation error
-    test_input = x12_270_subscriber_input.replace(
-        "NM1*IL*1*DOE*JOHN****MI*00000000001~", "NM1*IL*1*DOE*****MI*00000000001~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_information_source_id_codes(x12_270_subscriber_input):
-    # remote the id code value from the information source to trigger a validation error
-    test_input = x12_270_subscriber_input.replace(
-        "NM1*PR*2*PAYER C*****PI*12345~", "NM1*PR*2*PAYER C*****PI~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_ref_segment_usage(x12_270_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_270_subscriber_input.replace(
-        "REF*4A*000111222~", "REF*4A*000111222~REF*4A*444222999~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_n4_state_codes(x12_270_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_270_subscriber_input.replace(
-        "N4*SAN MATEO*CA*94401~", "N4*SAN MATEO*CA*94401****US-AS~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_prv_reference_codes(x12_270_subscriber_input):
-    # update the input to include duplicate REF segments
-    test_input = x12_270_subscriber_input.replace(
-        "PRV*PC*HPI*3435612668~", "PRV*PC*HPI~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_date_fields(x12_270_subscriber_input):
-    # update the input to remove the date_time_format_qualifier field
-    test_input = x12_270_subscriber_input.replace("DMG*D8*19700101~", "DMG**19700101~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_eq_segment_coding(x12_270_subscriber_input):
-    # update the input to remove the date_time_format_qualifier field
-    test_input = x12_270_subscriber_input.replace("EQ*30~", "EQ~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass

@@ -3,24 +3,91 @@ Tests use-cases for the 271 005010X279A1 (Eligibility Benefit Response) transact
 """
 from x12.io import X12ModelReader
 import pytest
-from pydantic import ValidationError
+from tests.support import assert_eq_model
 
 
-def test_271_subscriber(x12_271_subscriber_input, x12_271_subscriber_transaction):
-    with X12ModelReader(x12_271_subscriber_input) as r:
-        model_result = [m for m in r.models()]
-        assert len(model_result) == 1
-        assert model_result[0].x12() == x12_271_subscriber_transaction
+@pytest.fixture
+def x12_271_subscriber() -> str:
+    return "\n".join(
+        [
+            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
+            "GS*HB*000000005*54321*20131031*1147*1*X*005010X279A1~",
+            "ST*271*0001*005010X279A1~",
+            "BHT*0022*11*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "PRV*RF*PXC*207Q00000X~",
+            "HL*3*2*22*0~",
+            "TRN*2*930000000000*9800000004~",
+            "NM1*IL*1*DOE*JOHN****MI*00000000001~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*19700101*M~",
+            "DTP*346*D8*20210101~",
+            "EB*1**30**GOLD 123 PLAN~",
+            "EB*L~",
+            "LS*2120~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "LE*2120~",
+            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
+            "SE*23*0001~",
+            "GE*1*1~",
+            "IEA*1*000000907~",
+        ]
+    )
 
 
-def test_271_dependent(x12_271_dependent_input, x12_271_dependent_transaction):
-    with X12ModelReader(x12_271_dependent_input) as r:
-        model_result = [m for m in r.models()]
-        assert len(model_result) == 1
-        assert model_result[0].x12() == x12_271_dependent_transaction
+@pytest.fixture
+def x12_271_dependent() -> str:
+    return "\n".join(
+        [
+            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
+            "GS*HB*000000005*54321*20131031*1147*1*X*005010X279A1~",
+            "ST*271*0001*005010X279A1~",
+            "BHT*0022*11*10001234*20131031*1147~",
+            "HL*1**20*1~",
+            "NM1*PR*2*PAYER C*****PI*12345~",
+            "HL*2*1*21*1~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "PRV*RF*PXC*207Q00000X~",
+            "HL*3*2*22*1~",
+            "NM1*IL*1*DOE*JAMES****MI*00000000001~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*19700101*M~",
+            "HL*4*3*23*0~",
+            "TRN*2*930000000000*9800000004~",
+            "NM1*IL*1*DOE*JAMES****MI*00000000002~",
+            "N3*1500 ANYHOO AVENUE*APT 215~",
+            "N4*SAN MATEO*CA*94401~",
+            "DMG*D8*20150101*M~",
+            "DTP*346*D8*20210101~",
+            "EB*1**30**GOLD 123 PLAN~",
+            "EB*L~",
+            "LS*2120~",
+            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
+            "LE*2120~",
+            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
+            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
+            "SE*28*0001~",
+            "GE*1*1~",
+            "IEA*1*000000907~",
+        ]
+    )
 
 
-def test_271_properties_subscriber_use_case(x12_271_subscriber_input):
+@pytest.mark.parametrize("test_input", ["x12_271_subscriber", "x12_271_dependent"])
+def test_271_model(request, test_input: str):
+    input_value = request.getfixturevalue(test_input)
+    assert_eq_model(input_value)
+
+
+def test_271_properties_subscriber_use_case(x12_271_subscriber):
     """
     Tests the Eligibility Benefit property accessors with the subscriber use-case.
     The subscriber use-case does not include a dependent record.
@@ -28,7 +95,7 @@ def test_271_properties_subscriber_use_case(x12_271_subscriber_input):
     information receiver, information source, subscriber, and optionally dependent.
     """
 
-    with X12ModelReader(x12_271_subscriber_input) as r:
+    with X12ModelReader(x12_271_subscriber) as r:
         transaction_model = [m for m in r.models()][0]
 
         information_source = transaction_model.information_source
@@ -54,102 +121,38 @@ def test_271_properties_subscriber_use_case(x12_271_subscriber_input):
         assert dependent is None
 
 
-def test_property_usage(x12_271_subscriber_input):
-    """A test case used to exercise property usage"""
+def test_271_properties_dependent_use_case(x12_271_dependent):
+    """
+    Tests the Eligibility Benefit property accessors with the dependent use-case.
+    The input data fixture reflects conventional Eligibility usage where a transaction contains a single
+    information receiver, information source, subscriber, and optionally dependent.
+    """
 
-    with X12ModelReader(x12_271_subscriber_input) as r:
+    with X12ModelReader(x12_271_dependent) as r:
         transaction_model = [m for m in r.models()][0]
 
-        # the property isn't cached so fetch the subscriber into a variable
+        information_source = transaction_model.information_source
+        assert isinstance(information_source, dict)
+        assert len(information_source) == 3
+        assert "hl_segment" in information_source
+        assert "loop_2100a" in information_source
+
+        information_receiver = transaction_model.information_receiver
+        assert isinstance(information_receiver, dict)
+        assert len(information_receiver) == 2
+        assert "hl_segment" in information_receiver
+        assert "loop_2100b" in information_receiver
+
         subscriber = transaction_model.subscriber
-        subscriber_name = subscriber["loop_2100c"]["nm1_segment"]
-        assert subscriber_name["name_last_or_organization_name"] == "DOE"
-        assert subscriber_name["name_first"] == "JOHN"
-        assert subscriber_name["identification_code"] == "00000000001"
+        assert isinstance(subscriber, dict)
+        assert len(subscriber) == 3
+        assert "hl_segment" in subscriber
+        assert "trn_segment" in subscriber
+        assert "loop_2100c" in subscriber
 
-        subscriber_transaction = subscriber["trn_segment"][0]
-        assert subscriber_transaction["originating_company_identifier"] == "9800000004"
-
-        info_source_name = transaction_model.information_source["loop_2100a"][
-            "nm1_segment"
-        ]
-        assert info_source_name["name_last_or_organization_name"] == "PAYER C"
-        assert info_source_name["identification_code"] == "12345"
-
-
-def test_hl_segment_id_increment_validation(x12_271_subscriber_input):
-    """
-    Validates the hl segment id validation where ids are expected to auto-increment
-    """
-    # increment the id to trigger a validation error
-    test_input = x12_271_subscriber_input.replace("HL*3*2*22*0~", "HL*4*1*22*0~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_hl_segment_id_reference_validations(x12_271_subscriber_input):
-    """
-    Validates the hl segment id links throughout the transaction set
-    """
-    # update the parent id to an invalid value to trigger a validation error
-    test_input = x12_271_subscriber_input.replace("HL*3*2*22*0~", "HL*3*10*22*0~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_subscriber_hierarchy_child_code(x12_271_subscriber_input):
-    # update the hierarchy child code to "1" to trigger a validation error
-    # update the parent id to an invalid value to trigger a validation error
-    test_input = x12_271_subscriber_input.replace("HL*3*2*22*0~", "HL*3*2*22*1~")
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_subscriber_name(x12_271_subscriber_input):
-    # remove the first name from the subscriber segment to trigger a validation error
-    test_input = x12_271_subscriber_input.replace(
-        "NM1*IL*1*DOE*JOHN****MI*00000000001~", "NM1*IL*1*DOE*****MI*00000000001~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_information_source_id_codes(x12_271_subscriber_input):
-    # remote the id code value from the information source to trigger a validation error
-    test_input = x12_271_subscriber_input.replace(
-        "NM1*PR*2*PAYER C*****PI*12345~", "NM1*PR*2*PAYER C*****PI~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_n4_state_codes(x12_271_subscriber_input):
-    # update the input to include an invalid country code
-    test_input = x12_271_subscriber_input.replace(
-        "N4*SAN MATEO*CA*94401~", "N4*SAN MATEO*CA*94401****US-AS~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
-
-
-def test_validate_date_fields(x12_271_subscriber_input):
-    # update the input to remove the date_time_format_qualifier field
-    test_input = x12_271_subscriber_input.replace(
-        "DMG*D8*19700101*M~", "DMG**19700101~"
-    )
-    with X12ModelReader(test_input) as r:
-        with pytest.raises(ValidationError):
-            for _ in r.models():
-                pass
+        dependent = transaction_model.dependent
+        assert isinstance(dependent, dict)
+        assert len(dependent) == 3
+        assert "hl_segment" in dependent
+        assert "trn_segment" in dependent
+        assert "loop_2100d" in dependent
