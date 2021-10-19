@@ -3,99 +3,38 @@ Tests use-cases for the 271 005010X279A1 (Eligibility Benefit Response) transact
 """
 from x12.io import X12ModelReader
 import pytest
-from tests.support import assert_eq_model
+from tests.support import assert_eq_model, resources_directory
+import os
 
 
 @pytest.fixture
-def x12_271_subscriber() -> str:
-    return "\n".join(
-        [
-            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HB*000000005*54321*20131031*1147*1*X*005010X279A1~",
-            "ST*271*0001*005010X279A1~",
-            "BHT*0022*11*10001234*20131031*1147~",
-            "HL*1**20*1~",
-            "NM1*PR*2*PAYER C*****PI*12345~",
-            "HL*2*1*21*1~",
-            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-            "PRV*RF*PXC*207Q00000X~",
-            "HL*3*2*22*0~",
-            "TRN*2*930000000000*9800000004~",
-            "NM1*IL*1*DOE*JOHN****MI*00000000001~",
-            "N3*1500 ANYHOO AVENUE*APT 215~",
-            "N4*SAN MATEO*CA*94401~",
-            "DMG*D8*19700101*M~",
-            "DTP*346*D8*20210101~",
-            "EB*1**30**GOLD 123 PLAN~",
-            "EB*L~",
-            "LS*2120~",
-            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-            "LE*2120~",
-            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
-            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
-            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
-            "SE*23*0001~",
-            "GE*1*1~",
-            "IEA*1*000000907~",
-        ]
-    )
+def resource_path() -> str:
+    return os.path.join(resources_directory, "271_005010X279A1")
 
 
-@pytest.fixture
-def x12_271_dependent() -> str:
-    return "\n".join(
-        [
-            "ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*1147*^*00501*000000907*1*T*:~",
-            "GS*HB*000000005*54321*20131031*1147*1*X*005010X279A1~",
-            "ST*271*0001*005010X279A1~",
-            "BHT*0022*11*10001234*20131031*1147~",
-            "HL*1**20*1~",
-            "NM1*PR*2*PAYER C*****PI*12345~",
-            "HL*2*1*21*1~",
-            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-            "PRV*RF*PXC*207Q00000X~",
-            "HL*3*2*22*1~",
-            "NM1*IL*1*DOE*JAMES****MI*00000000001~",
-            "N3*1500 ANYHOO AVENUE*APT 215~",
-            "N4*SAN MATEO*CA*94401~",
-            "DMG*D8*19700101*M~",
-            "HL*4*3*23*0~",
-            "TRN*2*930000000000*9800000004~",
-            "NM1*IL*1*DOE*JAMES****MI*00000000002~",
-            "N3*1500 ANYHOO AVENUE*APT 215~",
-            "N4*SAN MATEO*CA*94401~",
-            "DMG*D8*20150101*M~",
-            "DTP*346*D8*20210101~",
-            "EB*1**30**GOLD 123 PLAN~",
-            "EB*L~",
-            "LS*2120~",
-            "NM1*1P*1*DOE*JOHN****XX*1467857193~",
-            "LE*2120~",
-            "EB*1**1^33^35^47^86^88^98^AL^MH^UC~",
-            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*10.00*****Y~",
-            "EB*B**1^33^35^47^86^88^98^AL^MH^UC*HM*GOLD 123 PLAN*27*30.00*****N~",
-            "SE*28*0001~",
-            "GE*1*1~",
-            "IEA*1*000000907~",
-        ]
-    )
+@pytest.mark.parametrize(
+    "file_name",
+    ["dependent.271", "subscriber.271"],
+)
+def test_271_model(resource_path, file_name: str):
+    x12_file_path = os.path.join(resource_path, file_name)
+    assert os.path.exists(x12_file_path)
+    assert_eq_model(x12_file_path)
 
 
-@pytest.mark.parametrize("test_input", ["x12_271_subscriber", "x12_271_dependent"])
-def test_271_model(request, test_input: str):
-    input_value = request.getfixturevalue(test_input)
-    assert_eq_model(input_value)
-
-
-def test_271_properties_subscriber_use_case(x12_271_subscriber):
+def test_271_properties_subscriber_use_case(resource_path: str):
     """
     Tests the Eligibility Benefit property accessors with the subscriber use-case.
     The subscriber use-case does not include a dependent record.
     The input data fixture reflects conventional Eligibility usage where a transaction contains a single
     information receiver, information source, subscriber, and optionally dependent.
-    """
 
-    with X12ModelReader(x12_271_subscriber) as r:
+    :param resource_path: The path to the directory containing x12 test files
+    """
+    x12_file = os.path.join(resource_path, "subscriber.271")
+    assert os.path.exists(x12_file)
+
+    with X12ModelReader(x12_file) as r:
         transaction_model = [m for m in r.models()][0]
 
         information_source = transaction_model.information_source
@@ -121,14 +60,18 @@ def test_271_properties_subscriber_use_case(x12_271_subscriber):
         assert dependent is None
 
 
-def test_271_properties_dependent_use_case(x12_271_dependent):
+def test_271_properties_dependent_use_case(resource_path: str):
     """
     Tests the Eligibility Benefit property accessors with the dependent use-case.
     The input data fixture reflects conventional Eligibility usage where a transaction contains a single
     information receiver, information source, subscriber, and optionally dependent.
-    """
 
-    with X12ModelReader(x12_271_dependent) as r:
+    :param resource_path: The path to the directory containing x12 test files
+    """
+    x12_file = os.path.join(resource_path, "dependent.271")
+    assert os.path.exists(x12_file)
+
+    with X12ModelReader(x12_file) as r:
         transaction_model = [m for m in r.models()][0]
 
         information_source = transaction_model.information_source
