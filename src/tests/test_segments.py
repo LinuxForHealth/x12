@@ -506,7 +506,7 @@ def test_pat_segment():
         "patient_weight": "146.00",
     }
     pat_segment: PatSegment = PatSegment(**segment_data)
-    assert pat_segment.x12() == "PAT******01*146.00~"
+    assert pat_segment.x12() == "PAT*******01*146.00~"
 
 
 def test_plb_segment():

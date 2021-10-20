@@ -381,7 +381,7 @@ def set_claim_entity_loop(context: X12ParserContext, segment_data: Dict) -> None
     * Service Facility Location Name - Loop 2310C
     * Supervising Provider Name - Loop 2310D
     """
-    if "loop_23" in context.loop_name:
+    if "loop_2300" in context.loop_name or "loop_2310" in context.loop_name:
         identifier = segment_data.get("entity_identifier_code")
         loop_name = None
 
@@ -481,7 +481,7 @@ def set_other_subscriber_name_loop(
     "NM1",
     conditions={"entity_identifier_code": ["PR", "DN", "P3", "82", "77", "DQ", "85"]},
 )
-def set_other_subscriber_entities(
+def set_other_subscriber_entities_loop(
     context: X12ParserContext, segment_data: Dict
 ) -> None:
     """
@@ -494,7 +494,7 @@ def set_other_subscriber_entities(
     * Other Payer Supervising Provider - 2330F
     * Other Payer Billing Provider - 2330G
     """
-    if "loop_2330" in context.loop_name:
+    if "loop_2320" in context.loop_name or "loop_2330" in context.loop_name:
         identifier = segment_data.get("entity_identifier_code")
         loop_name = None
 

@@ -115,6 +115,7 @@ class X12Segment(abc.ABC, BaseModel):
         """
 
         use_enum_values = True
+        extra = "forbid"
 
     def _process_multivalue_field(self, field_name: str, field_value: List) -> str:
         """

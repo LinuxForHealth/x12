@@ -820,7 +820,8 @@ class Loop2310CNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["77"]
     entity_type_qualifier: Literal["2"]
-    identification_code_qualifier: Literal["XX"]
+    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code: Optional[str]
 
 
 class Loop2310CRefSegment(RefSegment):
@@ -884,6 +885,7 @@ class Loop2310ENm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["PW"]
     entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
 
 
 class Loop2310FNm1Segment(Nm1Segment):
@@ -893,6 +895,7 @@ class Loop2310FNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["45"]
     entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
 
 
 class Loop2320SbrSegment(SbrSegment):
@@ -1244,7 +1247,7 @@ class Loop2400QtySegment(QtySegment):
         """
 
         UNITS = "FL"
-        PATIENTS = "PL"
+        PATIENTS = "PT"
 
     quantity_qualifier: QuantityQualifier
 

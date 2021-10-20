@@ -60,13 +60,6 @@ def parse_x12_date(date_string: str) -> Union[datetime.date, None]:
     return datetime.datetime.strptime(date_string, "%Y%m%d").date()
 
 
-def parse_x12_time(time_string: str) -> Union[datetime.time, None]:
-    """Parses a datetime.time from time fields in X12 transaction segments"""
-    if not time_string:
-        return None
-    return datetime.datetime.strptime(time_string, "%H%M").time()
-
-
 def count_segments(values: Dict) -> int:
     """
     Returns the number of segment records contained within a X12 data model.

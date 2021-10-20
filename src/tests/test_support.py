@@ -9,7 +9,6 @@ from x12.support import (
     is_x12_data,
     is_x12_file,
     parse_x12_date,
-    parse_x12_time,
     parse_interchange_date,
     count_segments,
 )
@@ -71,12 +70,6 @@ def test_parse_x12_date():
     assert parse_x12_date("20120501") == datetime.date(2012, 5, 1)
     assert parse_x12_date("") is None
     assert parse_x12_date(None) is None
-
-
-def test_parse_x12_time():
-    assert parse_x12_time("1147") == datetime.time(11, 47)
-    assert parse_x12_time("") is None
-    assert parse_x12_time(None) is None
 
 
 def test_count_segments(simple_270_with_new_lines):
