@@ -115,6 +115,7 @@ class X12Segment(abc.ABC, BaseModel):
         """
 
         use_enum_values = True
+        extra = "forbid"
 
     def _process_multivalue_field(self, field_name: str, field_value: List) -> str:
         """
@@ -181,12 +182,17 @@ class X12SegmentGroup(abc.ABC, BaseModel):
 
             if field_instance is None:
                 continue
-
-            if isinstance(field_instance, list):
+            elif isinstance(field_instance, list):
                 for item in field_instance:
-                    x12_segments.append(item.x12())
+                    if isinstance(item, X12Segment):
+                        x12_segments.append(item.x12())
+                    else:
+                        x12_segments.append(item.x12(use_new_lines=use_new_lines))
             else:
-                x12_segments.append(field_instance.x12())
+                if isinstance(field_instance, X12Segment):
+                    x12_segments.append(field_instance.x12())
+                else:
+                    x12_segments.append(field_instance.x12(use_new_lines=use_new_lines))
 
         join_char: str = "\n" if use_new_lines else ""
         return join_char.join(x12_segments)

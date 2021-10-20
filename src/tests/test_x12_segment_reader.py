@@ -143,4 +143,4 @@ def test_large_x12_message(monkeypatch, large_x12_message, config):
                 segment_counter += 1
 
         assert r._x12_stream.closed
-        assert segment_counter == 85_004
+        assert segment_counter == 174

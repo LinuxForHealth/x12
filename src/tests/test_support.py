@@ -9,7 +9,6 @@ from x12.support import (
     is_x12_data,
     is_x12_file,
     parse_x12_date,
-    parse_x12_time,
     parse_interchange_date,
     count_segments,
 )
@@ -73,28 +72,9 @@ def test_parse_x12_date():
     assert parse_x12_date(None) is None
 
 
-def test_parse_x12_time():
-    assert parse_x12_time("1147") == datetime.time(11, 47)
-    assert parse_x12_time("") is None
-    assert parse_x12_time(None) is None
-
-
-@pytest.mark.parametrize(
-    "test_input, expected_count",
-    [("x12_270_subscriber_input", 27), ("x12_270_dependent_input", 24)],
-)
-def test_count_segments(request, test_input, expected_count):
-    """
-    Parameterized test to validate the SE segment's total segment count.
-
-    :param request: The pytest request object used to load fixtures
-    :param test_input: The name of the test x12 transaction.
-    :param expected_count: The expected segment count
-    """
-    input_value = request.getfixturevalue(test_input)
-
-    with X12ModelReader(input_value) as r:
+def test_count_segments(simple_270_with_new_lines):
+    with X12ModelReader(simple_270_with_new_lines) as r:
         model = [m for m in r.models()][0]
         model_data = model.dict()
         segment_count: int = count_segments(model_data)
-        assert segment_count == expected_count
+        assert segment_count == 17

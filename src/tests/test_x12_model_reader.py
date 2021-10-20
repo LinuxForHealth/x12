@@ -6,20 +6,11 @@ Supports general model streaming tests validating the number of models returned,
 from x12.io import X12ModelReader
 
 
-def test_multiple_transactions(
-    x12_control_header, x12_control_footer, x12_270_subscriber_transaction
-):
+def test_multiple_transactions(large_x12_message):
 
-    x12_control_header: str = x12_control_header.replace("GS01", "HS").replace(
-        "GS08", "005010X279A1"
-    )
-    transactions: str = x12_270_subscriber_transaction * 2
-    x12_input = f"{x12_control_header}{transactions}{x12_control_footer}"
-
-    with X12ModelReader(x12_input) as r:
+    with X12ModelReader(large_x12_message) as r:
         model_result = [m for m in r.models()]
-        assert len(model_result) == 2
-        assert model_result[0].x12() == x12_270_subscriber_transaction
+        assert len(model_result) == 10
 
 
 def test_custom_delimiters(x12_with_custom_delimiters):

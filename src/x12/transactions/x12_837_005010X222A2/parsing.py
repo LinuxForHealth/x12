@@ -3,7 +3,7 @@ parsing.py
 
 Parses X12 837 005010X222A2 segments into a transactional domain model.
 
-The parsing module includes a specific parser for the 837 transaction and loop parsing functions to create new loops
+The parsing module includes a specific parser for the 837 transaction anxd loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
 Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
@@ -56,7 +56,7 @@ class TransactionLoops(str, Enum):
     CLAIM_SERVICE_LINE_REFERRING_PROVIDER_NAME = "loop_2420f"
     CLAIM_SERVICE_LINE_AMBULANCE_PICKUP_LOCATION = "loop_2420g"
     CLAIM_SERVICE_LINE_AMBULANCE_DROPOFF_LOCATION = "loop_2420h"
-    CLAIM_SERVICE_LINE_LINE_AJUDICATION_INFORMATION = "loop_2430"
+    CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION = "loop_2430"
     CLAIM_SERVICE_LINE_LINE_FORM_IDENTIFICATION = "loop_2440"
     FOOTER = "footer"
 
@@ -135,8 +135,7 @@ def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
 @match("NM1", conditions={"entity_identifier_code": "41"})
 def set_submitter_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the submitter name loop for the 837 transaction set.
-    The submitter name loop is nested within the header loop.
+    Set the Header Submitter Name Loop 1000A
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
@@ -150,8 +149,7 @@ def set_submitter_name_loop(context: X12ParserContext, segment_data: Dict) -> No
 @match("NM1", conditions={"entity_identifier_code": "40"})
 def set_receiver_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the receiver name loop for the 837 transaction set.
-    The receiver name loop is nested within the header loop.
+    Set the Header Receiver Name Loop 1000B
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
@@ -165,18 +163,19 @@ def set_receiver_name_loop(context: X12ParserContext, segment_data: Dict) -> Non
 @match("HL", conditions={"hierarchical_level_code": "20"})
 def set_billing_provider_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the billing provider loop for the 837 transaction set.
+    Sets the Billing Provider Loop 2000A
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     if TransactionLoops.BILLING_PROVIDER not in context.transaction_data:
-        context.transaction_data[TransactionLoops.BILLING_PROVIDER] = [{}]
-    else:
-        context.transaction_data[TransactionLoops.BILLING_PROVIDER].append({})
+        context.transaction_data[TransactionLoops.BILLING_PROVIDER] = []
 
-    billing_provider = context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
-    context.set_loop_context(TransactionLoops.BILLING_PROVIDER, billing_provider)
+    context.transaction_data[TransactionLoops.BILLING_PROVIDER].append({})
+    billing_provider_loop = context.transaction_data[TransactionLoops.BILLING_PROVIDER][
+        -1
+    ]
+    context.set_loop_context(TransactionLoops.BILLING_PROVIDER, billing_provider_loop)
 
 
 @match("NM1", conditions={"entity_identifier_code": "85"})
@@ -184,127 +183,148 @@ def set_billing_provider_name_loop(
     context: X12ParserContext, segment_data: Dict
 ) -> None:
     """
-    Sets the billing provider name loop for the 837 transaction set.
+    Sets the Billing Provider Name Loop 2010AA
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     if context.loop_name == TransactionLoops.BILLING_PROVIDER:
         billing_provider = _get_billing_provider(context)
-        billing_provider[TransactionLoops.BILLING_PROVIDER_NAME] = {"ref_segment": []}
-        billing_provider_name = billing_provider[TransactionLoops.BILLING_PROVIDER_NAME]
+
+        if TransactionLoops.BILLING_PROVIDER_NAME not in billing_provider:
+            billing_provider[TransactionLoops.BILLING_PROVIDER_NAME] = {
+                "ref_segment": [],
+                "per_segment": [],
+            }
+        billing_provider_name_loop = billing_provider[
+            TransactionLoops.BILLING_PROVIDER_NAME
+        ]
         context.set_loop_context(
-            TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name
+            TransactionLoops.BILLING_PROVIDER_NAME, billing_provider_name_loop
         )
 
 
 @match("NM1", conditions={"entity_identifier_code": "87"})
 def set_pay_to_address_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the pay to address name loop for the 837 transaction set.
+    Sets the Billing Provider Pay to Address Name Loop 2010AB
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    if context.loop_name == TransactionLoops.BILLING_PROVIDER_NAME:
+    if "loop_2010a" in context.loop_name:
         billing_provider = _get_billing_provider(context)
-        billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS] = {}
-        pay_to_address = billing_provider[
-            TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS
-        ]
-        context.set_loop_context(
-            TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address
-        )
+
+        if TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS not in billing_provider:
+            billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS] = {
+                "ref_segment": [],
+                "per_segment": [],
+            }
+            pay_to_address_loop = billing_provider[
+                TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS
+            ]
+            context.set_loop_context(
+                TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS, pay_to_address_loop
+            )
 
 
 @match("NM1", conditions={"entity_identifier_code": "PE"})
 def set_pay_to_plan_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the pay to plan name loop for the 837 transaction set.
+    Sets the Billing Provider Pay to Plan Name Loop 2010AC
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    if context.loop_name in (
-        TransactionLoops.BILLING_PROVIDER_NAME,
-        TransactionLoops.BILLING_PROVIDER_PAY_TO_ADDRESS,
-    ):
+    if "loop_2010a" in context.loop_name:
         billing_provider = _get_billing_provider(context)
-        billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME] = {
-            "ref_segment": []
-        }
-        pay_to_plan = billing_provider[
-            TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME
-        ]
-        context.set_loop_context(
-            TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME, pay_to_plan
-        )
+
+        if TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME not in billing_provider:
+            billing_provider[TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME] = {
+                "ref_segment": [],
+            }
+            pay_to_plan_loop = billing_provider[
+                TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME
+            ]
+            context.set_loop_context(
+                TransactionLoops.BILLING_PROVIDER_PAY_TO_PLAN_NAME, pay_to_plan_loop
+            )
 
 
 @match("HL", conditions={"hierarchical_level_code": "22"})
 def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the subscriber loop for the 837 transaction set.
+    Sets the subscriber loop 2000B
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
+
     billing_provider = _get_billing_provider(context)
 
     if TransactionLoops.SUBSCRIBER not in billing_provider:
-        billing_provider[TransactionLoops.SUBSCRIBER] = [{}]
-    else:
-        billing_provider[TransactionLoops.SUBSCRIBER].append({})
+        billing_provider[TransactionLoops.SUBSCRIBER] = []
 
-    subscriber = billing_provider[TransactionLoops.SUBSCRIBER][-1]
-
-    has_dependent_patient = segment_data.get("hierarchical_child_code", "0") == "1"
-    if has_dependent_patient and TransactionLoops.PATIENT_LOOP not in subscriber:
-        subscriber[TransactionLoops.PATIENT_LOOP] = [{}]
-
-    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
+    billing_provider[TransactionLoops.SUBSCRIBER].append({})
+    subscriber_loop = billing_provider[TransactionLoops.SUBSCRIBER][-1]
+    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber_loop)
 
 
 @match("NM1", conditions={"entity_identifier_code": "IL"})
 def set_subscriber_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the subscriber name for the 837 transaction set
+    Sets the subscriber name loop 2010BA
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
+
     if context.loop_name == TransactionLoops.SUBSCRIBER:
         subscriber = _get_subscriber(context)
-        subscriber[TransactionLoops.SUBSCRIBER_NAME] = {"ref_segment": []}
-        subscriber_name = subscriber[TransactionLoops.SUBSCRIBER_NAME]
-        context.set_loop_context(TransactionLoops.SUBSCRIBER_NAME, subscriber_name)
+
+        if TransactionLoops.SUBSCRIBER_NAME not in subscriber:
+            subscriber[TransactionLoops.SUBSCRIBER_NAME] = {"ref_segment": []}
+
+        subscriber_name_loop = subscriber[TransactionLoops.SUBSCRIBER_NAME]
+        context.set_loop_context(TransactionLoops.SUBSCRIBER_NAME, subscriber_name_loop)
 
 
 @match("NM1", conditions={"entity_identifier_code": "PR"})
-def set_payer_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
+def set_subscriber_payer_name_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
-    Sets the payer name for the 837 transaction set
+    Sets the subscriber payer name loop 2010BB
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
         subscriber = _get_subscriber(context)
-        subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
-        payer_name = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
-        context.set_loop_context(TransactionLoops.SUBSCRIBER_PAYER_NAME, payer_name)
+
+        if TransactionLoops.SUBSCRIBER_PAYER_NAME not in subscriber:
+            subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
+
+        subscriber_payer_name_loop = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
+        context.set_loop_context(
+            TransactionLoops.SUBSCRIBER_NAME, subscriber_payer_name_loop
+        )
 
 
 @match("HL", conditions={"hierarchical_level_code": "23"})
 def set_patient_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the patient loop.
-    The patient loop is used when the patient is not the subscriber, or cannot be identified as a subscriber.
+    Sets the patient loop 2000C
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     subscriber = _get_subscriber(context)
+
+    if TransactionLoops.PATIENT_LOOP not in subscriber:
+        subscriber[TransactionLoops.PATIENT_LOOP] = []
+
+    subscriber[TransactionLoops.PATIENT_LOOP].append({})
     patient_loop = subscriber[TransactionLoops.PATIENT_LOOP][-1]
     context.set_loop_context(TransactionLoops.PATIENT_LOOP, patient_loop)
 
@@ -312,160 +332,148 @@ def set_patient_loop(context: X12ParserContext, segment_data: Dict) -> None:
 @match("NM1", conditions={"entity_identifier_code": "QC"})
 def set_patient_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the patient name loop
+    Sets the patient name loop 2010CA
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     patient = _get_patient(context)
-
-    if TransactionLoops.PATIENT_LOOP_NAME not in patient:
-        patient[TransactionLoops.PATIENT_LOOP_NAME] = {}
-
-    patient_name = patient[TransactionLoops.PATIENT_LOOP_NAME]
-    context.set_loop_context(TransactionLoops.PATIENT_LOOP_NAME, patient_name)
+    patient[TransactionLoops.PATIENT_LOOP_NAME] = {"ref_segment": []}
+    patient_name_loop = patient[TransactionLoops.PATIENT_LOOP_NAME]
+    context.set_loop_context(TransactionLoops.PATIENT_LOOP_NAME, patient_name_loop)
 
 
 @match("CLM")
-def set_claim_information_loop(context: X12ParserContext, segment_data: Dict) -> None:
+def set_claim_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the claim information loop for a subscriber or dependent
+    Sets the claim loop 2300
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    is_dependent_claim = (
-        _get_subscriber(context)
-        .get("hl_segment", {})
-        .get("hierarchical_child_code", "0")
-        == "1"
-    )
-
-    if not is_dependent_claim:
-        patient = _get_subscriber(context)
-    else:
-        patient = _get_patient(context)
-
-    patient_claim = {
-        "dtp_segment": [],
-        "ref_segment": [],
-        "pwk_segment": [],
-        "k3_segment": [],
-        "crc_segment": [],
-        "hi_segment": [],
-    }
+    # patient is either subscriber or dependent
+    patient = _get_patient(context)
 
     if TransactionLoops.CLAIM_INFORMATION not in patient:
-        patient[TransactionLoops.CLAIM_INFORMATION] = [patient_claim]
-    else:
-        patient[TransactionLoops.CLAIM_INFORMATION].append(patient_claim)
+        patient[TransactionLoops.CLAIM_INFORMATION] = []
 
-    patient_claim = patient[TransactionLoops.CLAIM_INFORMATION][-1]
-    context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, patient_claim)
+    patient[TransactionLoops.CLAIM_INFORMATION].append(
+        {
+            "dtp_segment": [],
+            "pwk_segment": [],
+            "ref_segment": [],
+            "k3_segment": [],
+            "crc_segment": [],
+            "hi_segment": [],
+        }
+    )
+
+    claim_loop = patient[TransactionLoops.CLAIM_INFORMATION][-1]
+    context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, claim_loop)
 
 
-@match(
-    "NM1",
-    conditions={"entity_identifier_code": ["DN", "P3", "B2", "77", "DQ", "PW", "45"]},
-)
-def set_claim_sub_loop(context: X12ParserContext, segment_data: Dict):
+@match("NM1", conditions={"entity_identifier_code": ["DN", "P3", "82", "77", "DQ"]})
+def set_claim_entity_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Matches Claim 2300 "sub-loops" 2310A-2310F
+    Sets the "entity" loops within the 2300 claims loop, including:
+    * Referring Provider Name - Loop 2310A
+    * Rendering Provider Name - Loop 2310B
+    * Service Facility Location Name - Loop 2310C
+    * Supervising Provider Name - Loop 2310D
+    """
+    if "loop_2300" in context.loop_name or "loop_2310" in context.loop_name:
+        identifier = segment_data.get("entity_identifier_code")
+        loop_name = None
+
+        if identifier in ("DN", "P3"):
+            loop_name = TransactionLoops.CLAIM_REFERRING_PROVIDER_NAME
+        elif identifier == "82":
+            loop_name = TransactionLoops.CLAIM_RENDERING_PROVIDER_NAME
+        elif identifier == "77":
+            loop_name = TransactionLoops.CLAIM_SERVICE_FACILITY_LOCATION_NAME
+        elif identifier == "DQ":
+            loop_name = TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME
+
+        if not loop_name:
+            raise ValueError(
+                f"unable to map identifier {identifier} to a claim entity loop"
+            )
+
+        claim = _get_claim(context)
+        if loop_name not in claim:
+            claim[loop_name] = {"ref_segment": []}
+
+        loop_record = claim[loop_name]
+        context.set_loop_context(loop_name, loop_record)
+
+
+@match("NM1", conditions={"entity_identifier_code": ["PW", "45"]})
+def set_ambulance_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the claim (loop 2300) ambulance loops 2310E and 2310F
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    # confirm we are in loop 2300 or loop 2310x
-    if (
-        context.loop_name.value.rfind("2300") < 0
-        or context.loop_name.value.rfind("2310") < 0
-    ):
-        return
+    if "loop_23" in context.loop_name:
+        claim = _get_claim(context)
+        identifier = segment_data.get("entity_identifier_code")
 
-    identifier_code = segment_data.get("entity_identifier_code")
-    claim = _get_claim(context)
-    loop_name = None
+        if identifier == "PW":
+            loop_name = TransactionLoops.CLAIM_AMBULANCE_PICKUP_LOCATION
+        else:
+            loop_name = TransactionLoops.CLAIM_AMBULANCE_DROPOFF_LOCATION
 
-    if identifier_code in ("PW", "45"):
-        loop_data = {}
-    else:
-        loop_data = {"ref_segment": []}
-
-    if identifier_code in ("DN", "P3"):
-        loop_name = TransactionLoops.CLAIM_REFERRING_PROVIDER_NAME
-    elif identifier_code == "B2":
-        loop_name = TransactionLoops.CLAIM_RENDERING_PROVIDER_NAME
-    elif identifier_code == "77":
-        loop_name = TransactionLoops.CLAIM_SERVICE_FACILITY_LOCATION_NAME
-    elif identifier_code == "DQ":
-        loop_name = TransactionLoops.CLAIM_SUPERVISING_PROVIDER_NAME
-    elif identifier_code == "PW":
-        loop_name = TransactionLoops.CLAIM_AMBULANCE_PICKUP_LOCATION
-    elif identifier_code == "45":
-        loop_name = TransactionLoops.CLAIM_AMBULANCE_DROPOFF_LOCATION
-
-    if not loop_name:
-        raise RuntimeError(f"Unable to parse entity identifier {identifier_code}")
-
-    claim[loop_name] = loop_data
-    record = claim[loop_name]
-    context.set_loop_context(loop_name, record)
+        claim[loop_name] = {}
+        context.set_loop_context(loop_name, claim[loop_name])
 
 
 @match("SBR")
-def set_other_subscriber(context: X12ParserContext, segment_data: Dict):
+def set_other_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the claim other subscriber loop used to coordinate payment and other insurance carriers.
+    Sets the claim other subscriber loop 2320
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    # confirm we are in loop 2300 or loop 2310x
-    if (
-        context.loop_name.value.rfind("2300") > 0
-        or context.loop_name.value.rfind("2310") > 0
-    ):
+    if "loop_23" in context.loop_name:
         claim = _get_claim(context)
-        other_subscriber = {"cas_segment": [], "amt_segment": []}
-
         if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION not in claim:
-            claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION] = [
-                other_subscriber
-            ]
-        else:
-            claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION].append(
-                other_subscriber
-            )
+            claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION] = []
 
-        other_subscriber = claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION][
-            -1
-        ]
+        claim[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION].append(
+            {
+                "cas_segment": [],
+                "amt_segment": [],
+            }
+        )
+        other_subscriber_loop = claim[
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION
+        ][-1]
         context.set_loop_context(
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, other_subscriber
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION, other_subscriber_loop
         )
 
 
 @match("NM1", conditions={"entity_identifier_code": "IL"})
-def set_other_subscriber_name(context: X12ParserContext, segment_data: Dict):
+def set_other_subscriber_name_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
-    Sets the claim other subscriber name loop.
+    Sets the claim other subscriber name loop 2330A
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    # confirm we are in loop 2300 or loop 2310x
-    if (
-        context.loop_name.value.rfind("2300") > 0
-        or context.loop_name.value.rfind("2310") > 0
-    ):
+    if context.loop_name == TransactionLoops.CLAIM_OTHER_SUBSCRIBER_INFORMATION:
         other_subscriber = _get_other_subscriber(context)
+        other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME] = {}
 
-        if TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME not in other_subscriber:
-            other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME] = {}
-
+        other_subscriber_name = other_subscriber[
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME
+        ]
         context.set_loop_context(
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME,
-            other_subscriber[TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME],
+            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_NAME, other_subscriber_name
         )
 
 
@@ -473,101 +481,60 @@ def set_other_subscriber_name(context: X12ParserContext, segment_data: Dict):
     "NM1",
     conditions={"entity_identifier_code": ["PR", "DN", "P3", "82", "77", "DQ", "85"]},
 )
-def set_other_subscriber_other_payer_loop(
+def set_other_subscriber_entities_loop(
     context: X12ParserContext, segment_data: Dict
-):
+) -> None:
     """
-    Sets the other subscriber other payer information for loops 2330B - 2330G
-
-    :param context: The X12Parsing context which contains the current loop and transaction record.
-    :param segment_data: The current segment data
+    Sets the other subscriber entities within the claim 2300 loop:
+    * Other Subscriber Name - Loop 2330A
+    * Other Payer Name - Loop 2330B
+    * Other Payer Referring Provider - Loop 2330C
+    * Other Payer Rendering Provider - Loop 2330D
+    * Other Payer Service Facility Location - 2330E
+    * Other Payer Supervising Provider - 2330F
+    * Other Payer Billing Provider - 2330G
     """
-    # confirm we are in loop 2300 or loop 2310x
-    if (
-        context.loop_name.value.rfind("2300") < 0
-        or context.loop_name.value.rfind("2310") < 0
-    ):
-        return
-
-    other_subscriber = _get_other_subscriber(context)
-    identifier_code = segment_data.get("entity_identifier_code")
-
-    if identifier_code == "PR":
-        loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME
-    elif identifier_code in ("DN", "P3"):
-        loop_name = (
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
-        )
-    elif identifier_code == "82":
-        loop_name = (
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
-        )
-    elif identifier_code == "77":
-        loop_name = (
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
-        )
-    elif identifier_code == "DQ":
-        loop_name = (
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SUPERVISING_PROVIDER_NAME
-        )
-    elif identifier_code == "85":
-        loop_name = (
-            TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
-        )
-    else:
+    if "loop_2320" in context.loop_name or "loop_2330" in context.loop_name:
+        identifier = segment_data.get("entity_identifier_code")
         loop_name = None
 
-    if not loop_name:
-        raise RuntimeError(
-            f"Unable to assign loop to other subscriber identifier {identifier_code}"
-        )
+        if identifier == "PR":
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME
+        elif identifier in ("DN", "P3"):
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            )
+        elif identifier == "82":
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
+            )
+        elif identifier == "77":
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
+            )
+        elif identifier == "DQ":
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SUPERVISING_PROVIDER_NAME
+            )
+        elif identifier == "85":
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
+            )
 
-    if (
-        loop_name
-        == TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
-    ):
-        if loop_name not in other_subscriber:
-            other_subscriber[loop_name] = [{"ref_segment": []}]
-        else:
-            other_subscriber[loop_name].append({"ref_segment": {}})
-        loop_record = other_subscriber[loop_name][-1]
-    else:
+        if not loop_name:
+            raise ValueError(
+                f"unable to map identifier {identifier} to a claim entity loop"
+            )
+
+        other_subscriber = _get_other_subscriber(context)
         other_subscriber[loop_name] = {"ref_segment": []}
-        loop_record = other_subscriber[loop_name]
-
-    context.set_loop_context(loop_name, loop_record)
+        context.set_loop_context(loop_name, other_subscriber[loop_name])
 
 
 @match("LX")
 def set_service_line_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
-    Sets the claim service line loop
-    """
-    claim = _get_claim(context)
-    new_service_line = {
-        "pwk_segment": [],
-        "crc_segment": [],
-        "dtp_segment": [],
-        "qty_segment": [],
-        "mea_segment": [],
-        "ref_segment": [],
-        "amt_segment": [],
-        "k3_segment": [],
-        "nte_segment": [],
-    }
-    if TransactionLoops.CLAIM_SERVICE_LINE not in claim:
-        claim[TransactionLoops.CLAIM_SERVICE_LINE] = [new_service_line]
-    else:
-        claim[TransactionLoops.CLAIM_SERVICE_LINE].append(new_service_line)
-
-    service_line = claim[TransactionLoops.CLAIM_SERVICE_LINE][-1]
-    context.set_loop_context(TransactionLoops.CLAIM_SERVICE_LINE, service_line)
-
-
-@match("LIN")
-def set_drug_identification_loop(context: X12ParserContext, segment_data: Dict) -> None:
-    """
-    Sets the Claim Service Line (Loop 2400) Drug Identification Loop
+    Sets the claim service line loop 2400
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
@@ -575,84 +542,151 @@ def set_drug_identification_loop(context: X12ParserContext, segment_data: Dict) 
     claim = _get_claim(context)
 
     if TransactionLoops.CLAIM_SERVICE_LINE not in claim:
-        claim[TransactionLoops.CLAIM_SERVICE_LINE] = [{}]
-    else:
-        claim[TransactionLoops.CLAIM_SERVICE_LINE].append([{}])
+        claim[TransactionLoops.CLAIM_SERVICE_LINE] = []
 
-    service_line = claim[TransactionLoops.CLAIM_SERVICE_LINE][-1]
-    context.set_loop_context(TransactionLoops.CLAIM_SERVICE_LINE, service_line)
+    claim[TransactionLoops.CLAIM_SERVICE_LINE].append(
+        {
+            "pwk_segment": [],
+            "crc_segment": [],
+            "dtp_segment": [],
+            "qty_segment": [],
+            "mea_segment": [],
+            "ref_segment": [],
+            "amt_segment": [],
+            "k3_segment": [],
+            "nte_segment": [],
+        }
+    )
+
+    service_line_loop = claim[TransactionLoops.CLAIM_SERVICE_LINE][-1]
+    context.set_loop_context(TransactionLoops.CLAIM_SERVICE_LINE, service_line_loop)
+
+
+@match("LIN")
+def set_drug_identification_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the service line drug identification loop 2410
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if "loop_24" in context.loop_name:
+        service_line = _get_service_line(context)
+        service_line[TransactionLoops.CLAIM_SERVICE_LINE_DRUG_IDENTIFICATION_NAME] = {}
+        loop_record = service_line[
+            TransactionLoops.CLAIM_SERVICE_LINE_DRUG_IDENTIFICATION_NAME
+        ]
+        context.set_loop_context(
+            TransactionLoops.CLAIM_SERVICE_LINE_DRUG_IDENTIFICATION_NAME, loop_record
+        )
 
 
 @match(
     "NM1",
     conditions={"entity_identifier_code": ["82", "QB", "77", "DQ", "DK", "DN", "P3"]},
 )
-def set_service_line_entity_loop(context: X12ParserContext, segment_data: Dict) -> None:
+def set_service_line_entities_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
-    Sets entity loops (rendering provider, order provider, etc) within Loop 2400/Service Line
+    Sets the entities within the service line loop 2400:
+    *
+
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    if not context.loop_name.value.rfind("loop_24"):
-        return
-
-    service_line = _get_service_line(context)
-    if service_line:
+    if "loop_24" in context.loop_name:
+        identifier = segment_data.get("entity_identifier_code")
         loop_name = None
-        loop_data = {"ref_segment": []}
-        identifier_code = segment_data.get("entity_identifier_code")
 
-        if identifier_code == "82":
+        if identifier == "82":
             loop_name = TransactionLoops.CLAIM_SERVICE_LINE_RENDERING_PROVIDER_NAME
-        elif identifier_code == "QB":
+        elif identifier == "QB":
             loop_name = (
                 TransactionLoops.CLAIM_SERVICE_LINE_PURCHASED_SERVICE_PROVIDER_NAME
             )
-        elif identifier_code == "77":
+        elif identifier == "77":
             loop_name = (
                 TransactionLoops.CLAIM_SERVICE_LINE_SERVICE_FACILITY_LOCATION_NAME
             )
-        elif identifier_code == "DQ":
+        elif identifier == "DQ":
             loop_name = TransactionLoops.CLAIM_SERVICE_LINE_SUPERVISING_PROVIDER_NAME
-        elif identifier_code == "DK":
+        elif identifier == "DK":
             loop_name = TransactionLoops.CLAIM_SERVICE_LINE_ORDERING_PROVIDER_NAME
-        elif identifier_code in ("DN", "P3"):
+        elif identifier in ("DN", "P3"):
             loop_name = TransactionLoops.CLAIM_SERVICE_LINE_REFERRING_PROVIDER_NAME
 
-        if loop_name is None:
-            raise RuntimeError(f"unknown identifier {identifier_code}")
+        if not loop_name:
+            raise ValueError(
+                f"unable to map identifier {identifier} to a claim entity loop"
+            )
+        service_line = _get_service_line(context)
+        service_line[loop_name] = {"ref_segment": []}
+        loop_record = service_line[loop_name]
+        context.set_loop_context(loop_name, loop_record)
 
-        context.set_loop_context(loop_name, loop_data)
+
+@match("NM1", conditions={"entity_identifier_code": ["PW", "45"]})
+def set_ambulance_service_line_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the service line (loop 2400) ambulance loops 2420G and 2420H
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if "loop_24" in context.loop_name:
+        service_line = _get_service_line(context)
+        identifier = segment_data.get("entity_identifier_code")
+
+        if identifier == "PW":
+            loop_name = TransactionLoops.CLAIM_SERVICE_LINE_AMBULANCE_PICKUP_LOCATION
+        else:
+            loop_name = TransactionLoops.CLAIM_SERVICE_LINE_AMBULANCE_DROPOFF_LOCATION
+
+        service_line[loop_name] = {}
+        context.set_loop_context(loop_name, service_line[loop_name])
 
 
 @match("SVD")
-def set_line_adjudication_loop(context: X12ParserContext, segment_data: Dict) -> None:
+def set_service_line_adjudication_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
     """
-    Sets the claim service line adjudication loop
+    Sets service line adjudication loop 2430
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
     service_line = _get_service_line(context)
 
-    loop_data = {"cas_segment": []}
-    loop_name = TransactionLoops.CLAIM_SERVICE_LINE_LINE_AJUDICATION_INFORMATION
+    if TransactionLoops.CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION:
+        service_line[
+            TransactionLoops.CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION
+        ] = []
 
-    if loop_name not in service_line:
-        service_line[loop_name] = loop_data
-    else:
-        service_line[loop_name].append(loop_data)
+    service_line[
+        TransactionLoops.CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION
+    ].append(
+        {
+            "cas_segment": [],
+        }
+    )
 
-    loop_record = service_line[loop_name][-1]
-
-    context.set_loop_context(loop_name, loop_record)
+    adjudication_loop = service_line[
+        TransactionLoops.CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION
+    ][-1]
+    context.set_loop_context(
+        TransactionLoops.CLAIM_SERVICE_LINE_LINE_ADJUDICATION_INFORMATION,
+        adjudication_loop,
+    )
 
 
 @match("LQ")
 def set_form_identification_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the form identification loop.
-
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """

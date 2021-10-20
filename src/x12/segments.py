@@ -16,7 +16,6 @@ from pydantic import Field, PositiveInt, condecimal, validator, root_validator, 
 from x12.models import X12Segment, X12SegmentName
 from x12.support import (
     parse_x12_date,
-    parse_x12_time,
     parse_interchange_date,
     field_validator,
 )
@@ -70,14 +69,11 @@ class BhtSegment(X12Segment):
     transaction_set_purpose_code: str = Field(min_length=2, max_length=2)
     submitter_transactional_identifier: str = Field(min_length=1, max_length=50)
     transaction_set_creation_date: Union[str, datetime.date]
-    transaction_set_creation_time: Union[str, datetime.time]
+    transaction_set_creation_time: str
     transaction_type_code: str = Field(min_length=2, max_length=2)
 
     _validate_transaction_date = field_validator("transaction_set_creation_date")(
         parse_x12_date
-    )
-    _validate_transaction_time = field_validator("transaction_set_creation_time")(
-        parse_x12_time
     )
 
 
@@ -1158,16 +1154,13 @@ class GsSegment(X12Segment):
     application_sender_code: str = Field(min_length=2, max_length=15)
     application_receiver_code: str = Field(min_length=2, max_length=15)
     functional_group_creation_date: Union[str, datetime.date]
-    functional_group_creation_time: Union[str, datetime.time]
+    functional_group_creation_time: str
     group_control_number: str = Field(min_length=1, max_length=9)
     responsible_agency_code: Literal["X"]
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
     _validate_creation_date = field_validator("functional_group_creation_date")(
         parse_x12_date
-    )
-    _validate_creation_time = field_validator("functional_group_creation_time")(
-        parse_x12_time
     )
 
 
@@ -1569,7 +1562,7 @@ class IsaSegment(X12Segment):
     interchange_receiver_qualifier: str = Field(min_length=2, max_length=2)
     interchange_receiver_id: str = Field(min_length=15, max_length=15)
     interchange_date: Union[str, datetime.date]
-    interchange_time: Union[str, datetime.time]
+    interchange_time: str
     repetition_separator: str = Field(min_length=1, max_length=1)
     interchange_control_version_number: str = Field(min_length=5, max_length=5)
     interchange_control_number: str = Field(min_length=9, max_length=9)
@@ -1580,7 +1573,6 @@ class IsaSegment(X12Segment):
     _validate_interchange_date = field_validator("interchange_date")(
         parse_interchange_date
     )
-    _validate_interchange_time = field_validator("interchange_time")(parse_x12_time)
 
     def x12(self) -> str:
         """
@@ -2129,6 +2121,7 @@ class PatSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.PAT
     individual_relationship_code: Optional[str]
     patient_location_code: Optional[str]
+    employment_status_code: Optional[str]
     student_status_code: Optional[str]
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     patient_death_date: Optional[Union[str, datetime.date]]
@@ -2379,6 +2372,11 @@ class PwkSegment(X12Segment):
         EMAIL = "EM"
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
+        PREVIOUSLY_SUBMITTED_TO_PAYER = "AB"
+        CERTIFICATION_INCLUDED_IN_THIS_CLAIM = "AD"
+        NARRATIVE_SEGMENT_INCLUDED_IN_THIS_CLAIM = "AF"
+        NO_DOCUMENTATION_IS_REQUIRED = "AG"
+        NOT_SPECIFIED = "NS"
 
     segment_name: X12SegmentName = X12SegmentName.PWK
     report_type_code: AttachmentReportTypeCode

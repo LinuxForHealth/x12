@@ -134,6 +134,7 @@ from .segments import (
     Loop2420HNm1Segment,
     Loop2430DtpSegment,
     Loop2430AmtSegment,
+    Loop2010AaPerSegment,
 )
 from x12.segments import (
     SeSegment,
@@ -169,7 +170,6 @@ from x12.segments import (
 from typing import List, Optional, Dict
 from pydantic import Field, root_validator
 from x12.validators import (
-    validate_duplicate_ref_codes,
     validate_duplicate_date_qualifiers,
     validate_duplicate_amt_codes,
 )
@@ -201,10 +201,7 @@ class Loop2010Aa(X12SegmentGroup):
     n3_segment: N3Segment
     n4_segment: N4Segment
     ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=3)
-
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
+    per_segment: Optional[List[Loop2010AaPerSegment]] = Field(min_items=0, max_items=2)
 
 
 class Loop2010Ab(X12SegmentGroup):
@@ -227,10 +224,6 @@ class Loop2010Ac(X12SegmentGroup):
     n4_segment: N4Segment
     ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=2)
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2010Ba(X12SegmentGroup):
     """
@@ -244,10 +237,6 @@ class Loop2010Ba(X12SegmentGroup):
     ref_segment: List[Optional[RefSegment]] = Field(min_items=0, max_items=2)
     per_segment: Optional[Loop2010BaPerSegment]
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2010Bb(X12SegmentGroup):
     """
@@ -259,10 +248,6 @@ class Loop2010Bb(X12SegmentGroup):
     n4_segment: Optional[N4Segment]
     ref_segment: Optional[List[Loop2010BbRefSegment]]
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2330G(X12SegmentGroup):
     """
@@ -271,10 +256,6 @@ class Loop2330G(X12SegmentGroup):
 
     nm1_segment: Loop2330gNm1Segment
     ref_segment: List[Loop2330gRefSegment] = Field(min_items=1, max_items=3)
-
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
 
 
 class Loop2330F(X12SegmentGroup):
@@ -285,10 +266,6 @@ class Loop2330F(X12SegmentGroup):
     nm1_segment: Loop2330fNm1Segment
     ref_segment: List[Loop2330fRefSegment] = Field(min_items=1, max_items=3)
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2330E(X12SegmentGroup):
     """
@@ -297,10 +274,6 @@ class Loop2330E(X12SegmentGroup):
 
     nm1_segment: Loop2330eNm1Segment
     ref_segment: List[Loop2330eRefSegment] = Field(min_items=1, max_items=3)
-
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
 
 
 class Loop2330D(X12SegmentGroup):
@@ -311,10 +284,6 @@ class Loop2330D(X12SegmentGroup):
     nm1_segment: Loop2330dNm1Segment
     ref_segment: List[Loop2330dRefSegment] = Field(min_items=1, max_items=3)
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2330C(X12SegmentGroup):
     """
@@ -323,10 +292,6 @@ class Loop2330C(X12SegmentGroup):
 
     nm1_segment: Loop2330cNm1Segment
     ref_segment: List[Loop2330cRefSegment] = Field(min_items=1, max_items=3)
-
-    _validate_ref_segments = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
 
 
 class Loop2330B(X12SegmentGroup):
@@ -339,10 +304,6 @@ class Loop2330B(X12SegmentGroup):
     n4_segment: Optional[N4Segment]
     dtp_segment: Optional[Loop2330BDtpSegment]
     ref_segment: Optional[List[Loop2300BRefSegment]] = Field(min_items=0, max_items=6)
-
-    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
 
 
 class Loop2330A(X12SegmentGroup):
@@ -362,7 +323,7 @@ class Loop2320(X12SegmentGroup):
     """
 
     sbr_segment: Loop2320SbrSegment
-    cas_segment: Optional[CasSegment]
+    cas_segment: Optional[List[CasSegment]] = Field(min_items=0, max_items=5)
     amt_segment: Optional[List[AmtSegment]] = Field(min_items=0, max_items=3)
     oi_segment: Optional[OiSegment]
     moa_segment: Optional[MoaSegment]
@@ -417,7 +378,7 @@ class Loop2310C(X12SegmentGroup):
     n3_segment: N3Segment
     n4_segment: N4Segment
     ref_segment: Optional[List[Loop2310CRefSegment]] = Field(min_items=0, max_items=3)
-    per_segment: Loop2310CPerSegment
+    per_segment: Optional[Loop2310CPerSegment]
 
 
 class Loop2310B(X12SegmentGroup):
@@ -429,10 +390,6 @@ class Loop2310B(X12SegmentGroup):
     prv_segment: Optional[Loop2310BPrvSegment]
     ref_segment: Optional[List[Loop2310BRefSegment]] = Field(min_items=0, max_items=4)
 
-    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2310A(X12SegmentGroup):
     """
@@ -442,17 +399,13 @@ class Loop2310A(X12SegmentGroup):
     nm1_segment: Loop2310ANm1Segment
     ref_segment: Optional[List[Loop2310ARefSegment]] = Field(min_items=0, max_items=3)
 
-    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2440(X12SegmentGroup):
     """
     Form Identification Code
     """
 
-    lq_segment: List[LqSegment] = Field(min_items=1)
+    lq_segment: LqSegment
     frm_segment: List[FrmSegment] = Field(min_items=1, max_items=99)
 
 
@@ -464,7 +417,7 @@ class Loop2430(X12SegmentGroup):
     svd_segment: SvdSegment
     cas_segment: Optional[List[CasSegment]] = Field()
     dtp_segment: Loop2430DtpSegment
-    amt_segment: Loop2430AmtSegment
+    amt_segment: Optional[Loop2430AmtSegment]
 
 
 class Loop2420H(X12SegmentGroup):
@@ -502,8 +455,8 @@ class Loop2420E(X12SegmentGroup):
     """
 
     nm1_segment: Loop2420ENm1Segment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
     ref_segment: Optional[List[Loop2420ERefSegment]] = Field(min_items=0, max_items=20)
     per_segment: Optional[Loop2420EPerSegment]
 
@@ -554,7 +507,7 @@ class Loop2410(X12SegmentGroup):
 
     lin_segment: LinSegment
     ctp_segment: CtpSegment
-    ref_segment: Loop2410RefSegment
+    ref_segment: Optional[Loop2410RefSegment]
 
 
 class Loop2400(X12SegmentGroup):
@@ -595,10 +548,6 @@ class Loop2400(X12SegmentGroup):
         validate_duplicate_date_qualifiers
     )
 
-    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
-    )
-
 
 class Loop2300(X12SegmentGroup):
     """
@@ -629,10 +578,6 @@ class Loop2300(X12SegmentGroup):
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers
-    )
-
-    _validate_duplicate_ref_codes = root_validator(allow_reuse=True)(
-        validate_duplicate_ref_codes
     )
 
     @root_validator
@@ -698,10 +643,10 @@ class Loop2000A(X12SegmentGroup):
     """
 
     hl_segment: Loop2000AHlSegment
-    prv_segment: Loop2000APrvSegment
+    prv_segment: Optional[Loop2000APrvSegment]
     cur_segment: Optional[CurSegment]
     loop_2010aa: Loop2010Aa
-    loop_2010ab: Loop2010Ab
+    loop_2010ab: Optional[Loop2010Ab]
     loop_2010ac: Optional[Loop2010Ac]
     loop_2000b: List[Loop2000B]
 
