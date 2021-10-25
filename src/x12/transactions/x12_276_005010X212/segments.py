@@ -72,3 +72,31 @@ class Loop2100BNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["41"]
     identification_code_qualifier: Literal["46"]
+
+
+class Loop2000CHlSegment(HlSegment):
+    """
+    Service Provider HL Segment
+    """
+
+    hierarchical_level_code: Literal["19"]
+    hierarchical_child_code: Literal["1"]
+
+
+class Loop2100CNm1Segment(Nm1Segment):
+    """
+    Service Provider NM1 Segment
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        FEDERAL_TAXPAYER_IDENTIFIER_NUMBER = "FI"
+        SERVICE_PROVIDER_NUMBER = "SV"
+        CMS_NATIONAL_PROVIDER_IDENTIFIER = "XX"
+
+    entity_identifier_code: Literal["1P"]
+    name_last_or_organization_name: Optional[str]
+    identification_code_qualifier: IdentificationCodeQualifier

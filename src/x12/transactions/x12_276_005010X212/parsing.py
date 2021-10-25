@@ -24,7 +24,7 @@ class TransactionLoops(str, Enum):
     INFORMATION_RECEIVER_LEVEL = "loop_2000b"
     INFORMATION_RECEIVER_NAME = "loop_2100b"
     SERVICE_PROVIDER_LEVEL = "loop_2000c"
-    PROVIDER_NAME = "loop_2100c"
+    SERVICE_PROVIDER_NAME = "loop_2100c"
     SUBSCRIBER_LEVEL = "loop_2000d"
     SUBSCRIBER_NAME = "loop_2100d"
     SUBSCRIBER_CLAIM_STATUS_TRACKING_NUMBER = "loop_2200d"
@@ -45,6 +45,12 @@ def _get_information_receiver(context: X12ParserContext) -> Dict:
     """Returns the current information receiver record"""
     information_source = _get_information_source(context)
     return information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL][-1]
+
+
+def _get_service_provider(context: X12ParserContext) -> Dict:
+    """Returns the current service provider record"""
+    information_receiver = _get_information_receiver(context)
+    return information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL][-1]
 
 
 @match("ST")
@@ -130,6 +136,40 @@ def set_information_receiver_name_loop(
         context.set_loop_context(
             TransactionLoops.INFORMATION_RECEIVER_NAME, loop_record
         )
+
+
+@match("HL", {"hierarchical_level_code": "19"})
+def set_service_provider_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the service provider loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    information_receiver = _get_information_receiver(context)
+    if TransactionLoops.SERVICE_PROVIDER_LEVEL not in information_receiver:
+        information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL] = []
+
+    information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL].append({})
+    loop_record = information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL][-1]
+    context.set_loop_context(TransactionLoops.SERVICE_PROVIDER_LEVEL, loop_record)
+
+
+@match("NM1", {"entity_identifier_code": "1P"})
+def set_service_provider_name_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the Service Provider Name Loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if context.loop_name == TransactionLoops.SERVICE_PROVIDER_LEVEL:
+        service_provider = _get_service_provider(context)
+        service_provider[TransactionLoops.SERVICE_PROVIDER_NAME] = {}
+        loop_record = service_provider[TransactionLoops.SERVICE_PROVIDER_NAME]
+        context.set_loop_context(TransactionLoops.SERVICE_PROVIDER_NAME, loop_record)
 
 
 @match("SE")

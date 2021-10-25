@@ -29,6 +29,8 @@ from .segments import (
     Loop2100ANm1Segment,
     Loop2000BHlSegment,
     Loop2100BNm1Segment,
+    Loop2000CHlSegment,
+    Loop2100CNm1Segment,
 )
 from x12.segments import SeSegment
 from typing import List
@@ -42,6 +44,23 @@ class Header(X12SegmentGroup):
 
     st_segment: HeaderStSegment
     bht_segment: HeaderBhtSegment
+
+
+class Loop2100C(X12SegmentGroup):
+    """
+    Loop 2100C - Service Provider Name
+    """
+
+    nm1_segment: Loop2100CNm1Segment
+
+
+class Loop2000C(X12SegmentGroup):
+    """
+    Loop 2000C - Service Provider
+    """
+
+    hl_segment: Loop2000CHlSegment
+    loop_2100c: Loop2100C
 
 
 class Loop2100B(X12SegmentGroup):
@@ -59,6 +78,7 @@ class Loop2000B(X12SegmentGroup):
 
     hl_segment: Loop2000BHlSegment
     loop_2100b: Loop2100B
+    loop_2000c: List[Loop2000C] = Field(min_items=1)
 
 
 class Loop2100A(X12SegmentGroup):
