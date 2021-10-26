@@ -17,6 +17,9 @@ def resource_path() -> str:
     "file_name",
     [
         "claim-level-status.276",
+        "claim-level-status-ncpdp.276",
+        "information-receiver-level-status.276",
+        "provider-level-status.276",
     ],
 )
 def test_837_model(resource_path, file_name: str):

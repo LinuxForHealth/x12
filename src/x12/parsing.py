@@ -120,6 +120,8 @@ class X12ParserContext:
         self.transaction_data["header"] = {}
         self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
+        self.subscriber_record = None
+        self.patient_record = None
 
     def mark_transaction_complete(self) -> None:
         """Marks the current transaction as complete"""
@@ -137,6 +139,8 @@ class X12ParserContext:
         self.loop_container: Optional[Dict] = {}
         self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
+        self.subscriber_record = None
+        self.patient_record: Optional[Dict] = None
 
 
 class X12Parser(ABC):
