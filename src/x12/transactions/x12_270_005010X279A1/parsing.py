@@ -46,12 +46,6 @@ def _get_info_receiver(context) -> Dict:
     return info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
 
 
-def _get_subscriber(context) -> Dict:
-    """Returns the current subscriber"""
-    info_receiver = _get_info_receiver(context)
-    return info_receiver[TransactionLoops.SUBSCRIBER][-1]
-
-
 # eligibility 270 loop parsing functions
 @match("ST")
 def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
@@ -77,12 +71,10 @@ def set_information_source_hl_loop(
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment's data
     """
-
     if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
-        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = [{}]
-    else:
-        context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = []
 
+    context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
     info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
     context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
 
@@ -97,16 +89,13 @@ def set_information_receiver_hl_loop(
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment's data
     """
-
     info_source = _get_info_source(context)
 
     if TransactionLoops.INFORMATION_RECEIVER not in info_source:
-        info_source[TransactionLoops.INFORMATION_RECEIVER] = [{}]
-    else:
-        info_source[TransactionLoops.INFORMATION_RECEIVER].append({})
+        info_source[TransactionLoops.INFORMATION_RECEIVER] = []
 
+    info_source[TransactionLoops.INFORMATION_RECEIVER].append({})
     info_receiver = info_source[TransactionLoops.INFORMATION_RECEIVER][-1]
-
     context.set_loop_context(TransactionLoops.INFORMATION_RECEIVER, info_receiver)
 
 
@@ -123,14 +112,14 @@ def set_subscriber_hl_loop(context: X12ParserContext, segment_data: Dict) -> Non
     info_receiver = _get_info_receiver(context)
 
     if TransactionLoops.SUBSCRIBER not in info_receiver:
-        info_receiver[TransactionLoops.SUBSCRIBER] = [{}]
-    else:
-        info_receiver[TransactionLoops.SUBSCRIBER].append({})
+        info_receiver[TransactionLoops.SUBSCRIBER] = []
 
-    subscriber = info_receiver[TransactionLoops.SUBSCRIBER][-1]
-    subscriber["trn_segment"] = []
+    info_receiver[TransactionLoops.SUBSCRIBER].append({"trn_segment": []})
+    context.subscriber_record = info_receiver[TransactionLoops.SUBSCRIBER][-1]
+    context.set_loop_context(TransactionLoops.SUBSCRIBER, context.subscriber_record)
 
-    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber)
+    if context.hl_segment.get("hierarchical_child_code", "0") == "0":
+        context.patient_record = context.subscriber_record
 
 
 @match("NM1")
@@ -167,15 +156,14 @@ def set_eligibility_inquiry_loop(context: X12ParserContext, segment_data: Dict) 
     :param segment_data: The current segment's data
     """
 
-    new_loop_name: Optional[str] = None
-
     if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
-        new_loop_name = TransactionLoops.SUBSCRIBER_ELIGIBILITY
-    elif context.loop_name == TransactionLoops.DEPENDENT_NAME:
-        new_loop_name = TransactionLoops.DEPENDENT_ELIGIBILITY
+        loop_name = TransactionLoops.SUBSCRIBER_ELIGIBILITY
+    else:
+        loop_name = TransactionLoops.DEPENDENT_ELIGIBILITY
 
-    context.loop_container[new_loop_name] = {"amt_segment": []}
-    context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
+    patient_record = context.patient_record[context.loop_name]
+    patient_record[loop_name] = {"amt_segment": []}
+    context.set_loop_context(loop_name, patient_record[loop_name])
 
 
 @match("HL", conditions={"hierarchical_level_code": "23"})
@@ -186,17 +174,13 @@ def set_dependent_hl_loop(context: X12ParserContext, segment_data: Dict) -> None
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment's data
     """
-    subscriber = _get_subscriber(context)
+    if TransactionLoops.DEPENDENT not in context.subscriber_record:
+        context.subscriber_record[TransactionLoops.DEPENDENT] = []
 
-    if TransactionLoops.DEPENDENT not in subscriber:
-        subscriber[TransactionLoops.DEPENDENT] = [{}]
-    else:
-        subscriber[TransactionLoops.DEPENDENT].append({})
+    context.subscriber_record[TransactionLoops.DEPENDENT].append({"trn_segment": []})
 
-    dependent = subscriber[TransactionLoops.DEPENDENT][-1]
-    dependent["trn_segment"] = []
-
-    context.set_loop_context(TransactionLoops.DEPENDENT, dependent)
+    context.patient_record = context.subscriber_record[TransactionLoops.DEPENDENT][-1]
+    context.set_loop_context(TransactionLoops.DEPENDENT, context.patient_record)
 
 
 @match("SE")

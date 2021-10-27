@@ -172,22 +172,48 @@ Each parsing module includes parsing functions which are used to create loop con
 data record. Loop parsing functions use the `match` decorator to identify the loop's first segment and provide additional
 matching conditions, if needed.
 
+Parsing functions load during application startup and are evaluated at runtime, during segment parsing.
+The requirements for implementing a parsing function include:
+
+* function name ends with "loop"
+* has two parameters: X12ParserContext and segment_data
+
+segment_data is the current data segment presented as a dictionary.
+
+The X12ParserContext object provides metadata for the current loop in "the stream".
+
+### X12ParserContext Loop Based Metadata
+
+* loop_name: The current loop name 
+* loop_container: The current loop data structure (dictionary)
+
+### X12ParserContext Cached Records Used for Hierarchical Transactions
+
+* subscriber_record: The current subscriber record
+* patient_record: The current patient record
+* hl_segment: The most recent hl segment
+
+segment_data is the current data segment represented as a python dictionary.
+
+
 ```python
 from x12.parsing import match, X12ParserContext
 from x12.transactions.x12_270_005010X279A1.parsing import TransactionLoops
+from typing import Dict
 
 @match("HL", conditions={"hierarchical_level_code": "20"})
-def set_information_source_hl_loop(context: X12ParserContext):
+def set_information_source_hl_loop(context: X12ParserContext, segment_data: Dict):
     """
     Sets the Information Source (Payer/Clearinghouse) loop.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
     """
 
     if TransactionLoops.INFORMATION_SOURCE not in context.transaction_data:
-        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = [{}]
-    else:
-        context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
+        context.transaction_data[TransactionLoops.INFORMATION_SOURCE] = []
+        
+    context.transaction_data[TransactionLoops.INFORMATION_SOURCE].append({})
 
     info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
     context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)

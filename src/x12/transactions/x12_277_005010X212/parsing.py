@@ -97,8 +97,6 @@ def set_information_source_loop(context: X12ParserContext, segment_data: Dict):
     if TransactionLoops.INFORMATION_SOURCE_LEVEL not in context.transaction_data:
         context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL] = []
 
-    context.hl_segment = segment_data
-
     context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL].append({})
     loop_record = context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL][
         -1
@@ -134,8 +132,6 @@ def set_information_receiver_loop(
     information_source = _get_information_source(context)
     if TransactionLoops.INFORMATION_RECEIVER_LEVEL not in information_source:
         information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL] = []
-
-    context.hl_segment = segment_data
 
     information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL].append({})
     loop_record = information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL][-1]
@@ -191,8 +187,6 @@ def set_service_provider_loop(context: X12ParserContext, segment_data: Dict) -> 
     if TransactionLoops.SERVICE_PROVIDER_LEVEL not in information_receiver:
         information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL] = []
 
-    context.hl_segment = segment_data
-
     information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL].append({})
     loop_record = information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL][-1]
     context.set_loop_context(TransactionLoops.SERVICE_PROVIDER_LEVEL, loop_record)
@@ -243,8 +237,6 @@ def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    context.hl_segment = segment_data
-
     service_provider_id = segment_data.get("hierarchical_parent_id_number")
     service_provider = _get_service_provider(context, service_provider_id)
 
@@ -341,8 +333,6 @@ def set_dependent_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     if TransactionLoops.DEPENDENT_LEVEL not in context.subscriber_record:
         context.subscriber_record[TransactionLoops.DEPENDENT_LEVEL] = []
-
-    context.hl_segment = segment_data
 
     context.subscriber_record[TransactionLoops.DEPENDENT_LEVEL].append({})
     context.patient_record = context.subscriber_record[
