@@ -36,22 +36,3 @@ class HealthCareClaimPayment(X12SegmentGroup):
             numbers.add(n)
 
         return values
-
-    @property
-    def payer(self):
-        """Returns the Claim Payer"""
-        return self.loop_1000a.dict()
-
-    @property
-    def payee(self):
-        """Returns the Claim Payee receiving payment"""
-        return self.loop_1000b.dict()
-
-    @property
-    def claim(self, return_first=True):
-        """Returns the Claim Payment Information"""
-        result = []
-        for header in self.loop_2000:
-            for claim in header.loop_2100:
-                result.append(claim.dict())
-        return result[0] if return_first else result
