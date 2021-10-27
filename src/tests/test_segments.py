@@ -604,6 +604,16 @@ def test_st_segment():
     assert st_segment.x12() == "ST*270*0001*005010X279A1~"
 
 
+def test_stc_segment():
+    segment_data = {
+        "health_care_claim_status_1": "E0:24:41",
+        "status_effective_date": "20050830",
+    }
+
+    stc_segment: StcSegment = StcSegment(**segment_data)
+    assert stc_segment.x12() == "STC*E0:24:41*20050830~"
+
+
 def test_svc_segment():
     segment_data = {
         "composite_medical_procedure_identifier_1": "HC:99214",

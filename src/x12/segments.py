@@ -2500,6 +2500,36 @@ class SeSegment(X12Segment):
     transaction_set_control_number: str = Field(min_length=4, max_length=9)
 
 
+class StcSegment(X12Segment):
+    """
+    Status Information
+    Example:
+        STC*E0:24:41*20050830~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.STC
+    health_care_claim_status_1: str
+    status_effective_date: Union[str, datetime.date]
+    action_code: Optional[str]
+    total_claim_charge_amount: Optional[Decimal]
+    claim_payment_amount: Optional[Decimal]
+    adjudication_finalized_date: Optional[Union[str, datetime.date]]
+    payment_method_code: Optional[str]
+    remittance_date: Optional[Union[str, datetime.date]]
+    remittance_trace_number: Optional[str]
+    health_care_claim_status_2: Optional[str]
+    health_care_claim_status_3: Optional[str]
+    free_form_message_text: Optional[str]
+
+    _validate_status_effective_date = field_validator("status_effective_date")(
+        parse_x12_date
+    )
+    _validate_adjudication_finalized_date = field_validator(
+        "adjudication_finalized_date"
+    )(parse_x12_date)
+    _validate_remittance_date = field_validator("remittance_date")(parse_x12_date)
+
+
 class StSegment(X12Segment):
     """
     Transaction Set Header.
@@ -2589,7 +2619,7 @@ class SvcSegment(X12Segment):
     composite_medical_procedure_identifier_1: str
     line_item_charge_amount: Decimal
     line_item_provider_payment_amount: Decimal
-    national_uniform_billing_committee_revenue_code: Optional[str]
+    revenue_code: Optional[str]
     units_of_service_paid_count: Optional[Decimal]
     composite_medical_procedure_identifier_2: Optional[str]
     original_units_of_service_count: Optional[Decimal]

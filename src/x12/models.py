@@ -92,6 +92,7 @@ class X12SegmentName(str, Enum):
     SBR = "SBR"
     SE = "SE"
     ST = "ST"
+    STC = "STC"
     SVC = "SVC"
     SV1 = "SV1"
     SV5 = "SV5"

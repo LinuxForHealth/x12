@@ -1,9 +1,9 @@
 """
 parsing.py
 
-Parses X12 276 005010X212 segments into a transactional domain model.
+Parses X12 277 005010X212 segments into a transactional domain model.
 
-The parsing module includes a specific parser for the 276 transaction and loop parsing functions to create new loops
+The parsing module includes a specific parser for the 277 transaction and loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
 Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
@@ -23,16 +23,18 @@ class TransactionLoops(str, Enum):
     PAYER_NAME = "loop_2100a"
     INFORMATION_RECEIVER_LEVEL = "loop_2000b"
     INFORMATION_RECEIVER_NAME = "loop_2100b"
+    INFORMATION_RECEIVER_TRACE_IDENTIFIER = "loop_2200b"
     SERVICE_PROVIDER_LEVEL = "loop_2000c"
     SERVICE_PROVIDER_NAME = "loop_2100c"
+    SERVICE_PROVIDER_TRACE_IDENTIFIER = "loop_2200c"
     SUBSCRIBER_LEVEL = "loop_2000d"
     SUBSCRIBER_NAME = "loop_2100d"
     SUBSCRIBER_CLAIM_STATUS_TRACKING_NUMBER = "loop_2200d"
-    SUBSCRIBER_SERVICE_LINE_INFORMATION = "loop_2210d"
+    SUBSCRIBER_SERVICE_LINE_INFORMATION = "loop_2220d"
     DEPENDENT_LEVEL = "loop_2000e"
     DEPENDENT_NAME = "loop_2100e"
     DEPENDENT_CLAIM_STATUS_TRACKING_NUMBER = "loop_2200e"
-    DEPENDENT_SERVICE_LINE_INFORMATION = "loop_2210e"
+    DEPENDENT_SERVICE_LINE_INFORMATION = "loop_2220e"
     FOOTER = "footer"
 
 
@@ -95,6 +97,8 @@ def set_information_source_loop(context: X12ParserContext, segment_data: Dict):
     if TransactionLoops.INFORMATION_SOURCE_LEVEL not in context.transaction_data:
         context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL] = []
 
+    context.hl_segment = segment_data
+
     context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL].append({})
     loop_record = context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL][
         -1
@@ -131,6 +135,8 @@ def set_information_receiver_loop(
     if TransactionLoops.INFORMATION_RECEIVER_LEVEL not in information_source:
         information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL] = []
 
+    context.hl_segment = segment_data
+
     information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL].append({})
     loop_record = information_source[TransactionLoops.INFORMATION_RECEIVER_LEVEL][-1]
     context.set_loop_context(TransactionLoops.INFORMATION_RECEIVER_LEVEL, loop_record)
@@ -155,6 +161,24 @@ def set_information_receiver_name_loop(
         )
 
 
+@match("TRN")
+def set_receiver_trace_identifier_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the trace identifier loop for the information receiverp.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if context.loop_name.value.endswith("b"):
+        loop_name = TransactionLoops.INFORMATION_RECEIVER_TRACE_IDENTIFIER
+        information_receiver = _get_information_receiver(context)
+        information_receiver[loop_name] = {"stc_segment": []}
+        loop_record = information_receiver[loop_name]
+        context.set_loop_context(loop_name, loop_record)
+
+
 @match("HL", {"hierarchical_level_code": "19"})
 def set_service_provider_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
@@ -166,6 +190,8 @@ def set_service_provider_loop(context: X12ParserContext, segment_data: Dict) -> 
     information_receiver = _get_information_receiver(context)
     if TransactionLoops.SERVICE_PROVIDER_LEVEL not in information_receiver:
         information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL] = []
+
+    context.hl_segment = segment_data
 
     information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL].append({})
     loop_record = information_receiver[TransactionLoops.SERVICE_PROVIDER_LEVEL][-1]
@@ -188,6 +214,27 @@ def set_service_provider_name_loop(
         context.set_loop_context(TransactionLoops.SERVICE_PROVIDER_NAME, loop_record)
 
 
+@match("TRN")
+def set_service_provider_trace_identifier_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the trace identifier loop for the service provider.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment data
+    """
+    if context.loop_name.value.endswith("c"):
+        loop_name = TransactionLoops.SERVICE_PROVIDER_TRACE_IDENTIFIER
+
+        service_provider_id = context.hl_segment.get("hierarchical_id_number")
+        service_provider = _get_service_provider(context, service_provider_id)
+        service_provider[loop_name] = {"stc_segment": []}
+
+        loop_record = service_provider[loop_name]
+        context.set_loop_context(loop_name, loop_record)
+
+
 @match("HL", {"hierarchical_level_code": "22"})
 def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
@@ -196,6 +243,8 @@ def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
+    context.hl_segment = segment_data
+
     service_provider_id = segment_data.get("hierarchical_parent_id_number")
     service_provider = _get_service_provider(context, service_provider_id)
 
@@ -239,6 +288,11 @@ def set_claim_status_tracking_loop(
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
+    # exit if the current context is not the subscriber or dependent loop
+    current_loop = context.loop_name.value
+    if not current_loop.endswith("d") and not current_loop.endswith("e"):
+        return
+
     if _is_subscriber(context.patient_record):
         loop_name = TransactionLoops.SUBSCRIBER_CLAIM_STATUS_TRACKING_NUMBER
     else:
@@ -247,7 +301,12 @@ def set_claim_status_tracking_loop(
     if loop_name not in context.patient_record:
         context.patient_record[loop_name] = []
 
-    context.patient_record[loop_name].append({"ref_segment": []})
+    context.patient_record[loop_name].append(
+        {
+            "ref_segment": [],
+            "stc_segment": [],
+        }
+    )
     loop_record = context.patient_record[loop_name][-1]
     context.set_loop_context(loop_name, loop_record)
 
@@ -270,7 +329,7 @@ def set_service_line_loop(context: X12ParserContext, segment_data: Dict) -> None
     if loop_name not in claim_status:
         claim_status[loop_name] = []
 
-    claim_status[loop_name].append({})
+    claim_status[loop_name].append({"stc_segment": []})
     loop_record = claim_status[loop_name][-1]
     context.set_loop_context(loop_name, loop_record)
 
@@ -282,6 +341,8 @@ def set_dependent_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     if TransactionLoops.DEPENDENT_LEVEL not in context.subscriber_record:
         context.subscriber_record[TransactionLoops.DEPENDENT_LEVEL] = []
+
+    context.hl_segment = segment_data
 
     context.subscriber_record[TransactionLoops.DEPENDENT_LEVEL].append({})
     context.patient_record = context.subscriber_record[
