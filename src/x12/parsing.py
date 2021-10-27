@@ -89,7 +89,17 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
 
 class X12ParserContext:
     """
-    The X12ParserContext maintains the current loop position within the larger x12 transactional data structure.
+    The X12ParserContext maintains the current parsing position and provides a record cache.
+
+    The parsing position is set using `set_loop_context`, which sets the current loop name and the data structure,
+    usually a dictionary, for the loop.
+
+    Cached records include:
+    * The current subscriber record
+    * The current patient record
+    * The current hierarchical segment
+
+    Cached record usage varies based on transaction type.
     """
 
     @property
@@ -120,6 +130,9 @@ class X12ParserContext:
         self.transaction_data["header"] = {}
         self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
+        self.subscriber_record = None
+        self.patient_record = None
+        self.hl_segment = None
 
     def mark_transaction_complete(self) -> None:
         """Marks the current transaction as complete"""
@@ -137,6 +150,9 @@ class X12ParserContext:
         self.loop_container: Optional[Dict] = {}
         self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
+        self.subscriber_record: Optional[Dict] = None
+        self.patient_record: Optional[Dict] = None
+        self.hl_segment: Optional[Dict] = None
 
 
 class X12Parser(ABC):
