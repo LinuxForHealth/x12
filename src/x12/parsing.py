@@ -150,9 +150,9 @@ class X12ParserContext:
         self.loop_container: Optional[Dict] = {}
         self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
-        self.subscriber_record = None
+        self.subscriber_record: Optional[Dict] = None
         self.patient_record: Optional[Dict] = None
-        self.hl_segment: Dict = None
+        self.hl_segment: Optional[Dict] = None
 
 
 class X12Parser(ABC):

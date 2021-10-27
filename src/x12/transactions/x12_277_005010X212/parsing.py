@@ -166,7 +166,7 @@ def set_receiver_trace_identifier_loop(
     context: X12ParserContext, segment_data: Dict
 ) -> None:
     """
-    Sets the trace identifier loop for the information receiverp.
+    Sets the trace identifier loop for the information receiver.
 
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data

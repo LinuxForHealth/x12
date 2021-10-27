@@ -1,7 +1,7 @@
 """
-test_x12_276_005010X212.py
+test_x12_277_005010X212.py
 
-Tests the Health Care Claim Status Request Transaction
+Tests the Health Care Claim Status Response Transaction
 """
 import pytest
 from tests.support import assert_eq_model, resources_directory
