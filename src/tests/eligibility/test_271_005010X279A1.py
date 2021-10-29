@@ -14,7 +14,11 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["dependent.271", "subscriber.271"],
+    [
+        "subscriber-health-benefit-check.271",
+        "subscriber-health-benefit-check-error.271",
+        "dependent-health-benefit-check.271",
+    ],
 )
 def test_271_model(resource_path, file_name: str):
     x12_file_path = os.path.join(resource_path, file_name)

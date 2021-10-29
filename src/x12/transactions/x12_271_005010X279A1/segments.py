@@ -203,7 +203,6 @@ class Loop2000BHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["21"]
-    hierarchical_child_code: Literal["1"]
 
 
 class Loop2100BNm1Segment(Nm1Segment):
@@ -429,6 +428,32 @@ class Loop2100CInsSegment(InsSegment):
 
     member_indicator: Literal["Y"]
     individual_relationship_code: Literal["18"]
+    maintenance_type_code: Optional[str]
+    benefit_status_code: Optional[str]
+
+
+class Loop2100DInsSegment(InsSegment):
+    """
+    Used if the dependent falls within a "multiple birth" condition and cannot be resolved using a lookup by name
+    and birth date.
+    """
+
+    class IndividualRelationshipCode(str, Enum):
+        """
+        Code values for INS02
+        """
+
+        SPOUSE = "01"
+        CHILD = "19"
+        EMPLOYEE = "20"
+        UNKNOWN = "21"
+        ORGAN_DONOR = "39"
+        CADAVER_DONOR = "40"
+        LIFE_PARTNER = "53"
+        OTHER_RELATIONSHIP = "G8"
+
+    member_indicator: Literal["N"]
+    individual_relationship_code: IndividualRelationshipCode
     maintenance_type_code: Optional[str]
     benefit_status_code: Optional[str]
 

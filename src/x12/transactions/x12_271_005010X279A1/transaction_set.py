@@ -22,7 +22,7 @@ class EligibilityBenefit(X12SegmentGroup):
     loop_2000a: List[Loop2000A]
     footer: Footer
 
-    # _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
+    _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
 
     @root_validator
     def validate_subscriber_name(cls, values):
@@ -33,7 +33,8 @@ class EligibilityBenefit(X12SegmentGroup):
         """
         for info_source in values.get("loop_2000a", []):
             for info_receiver in info_source.loop_2000b:
-                for subscriber in info_receiver.loop_2000c:
+                info_receivers = info_receiver.loop_2000c or []
+                for subscriber in info_receivers:
                     child_code = subscriber.hl_segment.hierarchical_child_code
                     first_name = subscriber.loop_2100c.nm1_segment.name_first
 
@@ -53,7 +54,8 @@ class EligibilityBenefit(X12SegmentGroup):
         """
         for info_source in values.get("loop_2000a", []):
             for info_receiver in info_source.loop_2000b:
-                for subscriber in info_receiver.loop_2000c:
+                info_receivers = info_receiver.loop_2000c or []
+                for subscriber in info_receivers:
                     child_code = subscriber.hl_segment.hierarchical_child_code
 
                     if child_code == "1" and not subscriber.loop_2000d:
@@ -96,7 +98,8 @@ class EligibilityBenefit(X12SegmentGroup):
 
                 previous_id = receiver_id
 
-                for subscriber in info_receiver.loop_2000c:
+                info_receivers = info_receiver.loop_2000c or []
+                for subscriber in info_receivers:
                     subscriber_id, subscriber_parent_id = get_ids(subscriber.hl_segment)
 
                     if subscriber_parent_id != previous_id:
