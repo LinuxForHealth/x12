@@ -3,7 +3,7 @@ parsing.py
 
 Parses X12 837 005010X222A2 segments into a transactional domain model.
 
-The parsing module includes a specific parser for the 837 transaction anxd loop parsing functions to create new loops
+The parsing module includes a specific parser for the 837 transaction and loop parsing functions to create new loops
 as segments are streamed to the transactional data model.
 
 Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
@@ -71,25 +71,6 @@ def _get_billing_provider(context: X12ParserContext) -> Dict:
     return context.transaction_data[TransactionLoops.BILLING_PROVIDER][-1]
 
 
-def _get_subscriber(context: X12ParserContext) -> Dict:
-    """Returns the current subscriber record"""
-    billing_provider = _get_billing_provider(context)
-    return billing_provider[TransactionLoops.SUBSCRIBER][-1]
-
-
-def _get_patient(context: X12ParserContext) -> Optional[Dict]:
-    """Returns the current patient record (subscriber or dependent)"""
-    subscriber = _get_subscriber(context)
-    is_subscriber_patient = (
-        subscriber.get("hl_segment", {}).get("hierarchical_child_code", "0") == "0"
-    )
-
-    if is_subscriber_patient:
-        return subscriber
-    else:
-        return subscriber.get(TransactionLoops.PATIENT_LOOP, [{}])[-1]
-
-
 def _is_patient_a_dependent(patient_record: Dict):
     """Returns true if the patient is a dependent record"""
     return patient_record.get("hl_segment", {}).get("hierarchical_level_code") == "23"
@@ -97,12 +78,10 @@ def _is_patient_a_dependent(patient_record: Dict):
 
 def _get_claim(context: X12ParserContext) -> Dict:
     """Returns the current claim record for the patient (either subscriber or dependent)"""
-    patient = _get_patient(context)
-    if _is_patient_a_dependent(patient):
-        claim = patient[TransactionLoops.CLAIM_INFORMATION][-1]
+    if _is_patient_a_dependent(context.patient_record):
+        claim = context.patient_record[TransactionLoops.CLAIM_INFORMATION][-1]
     else:
-        subscriber = _get_subscriber(context)
-        claim = subscriber[TransactionLoops.CLAIM_INFORMATION][-1]
+        claim = context.subscriber_record[TransactionLoops.CLAIM_INFORMATION][-1]
     return claim
 
 
@@ -266,8 +245,11 @@ def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
         billing_provider[TransactionLoops.SUBSCRIBER] = []
 
     billing_provider[TransactionLoops.SUBSCRIBER].append({})
-    subscriber_loop = billing_provider[TransactionLoops.SUBSCRIBER][-1]
-    context.set_loop_context(TransactionLoops.SUBSCRIBER, subscriber_loop)
+    context.subscriber_record = billing_provider[TransactionLoops.SUBSCRIBER][-1]
+    context.set_loop_context(TransactionLoops.SUBSCRIBER, context.subscriber_record)
+
+    if context.hl_segment.get("hierarchical_child_code", "0") == "0":
+        context.patient_record = context.subscriber_record
 
 
 @match("NM1", conditions={"entity_identifier_code": "IL"})
@@ -280,12 +262,15 @@ def set_subscriber_name_loop(context: X12ParserContext, segment_data: Dict) -> N
     """
 
     if context.loop_name == TransactionLoops.SUBSCRIBER:
-        subscriber = _get_subscriber(context)
 
-        if TransactionLoops.SUBSCRIBER_NAME not in subscriber:
-            subscriber[TransactionLoops.SUBSCRIBER_NAME] = {"ref_segment": []}
+        if TransactionLoops.SUBSCRIBER_NAME not in context.subscriber_record:
+            context.subscriber_record[TransactionLoops.SUBSCRIBER_NAME] = {
+                "ref_segment": []
+            }
 
-        subscriber_name_loop = subscriber[TransactionLoops.SUBSCRIBER_NAME]
+        subscriber_name_loop = context.subscriber_record[
+            TransactionLoops.SUBSCRIBER_NAME
+        ]
         context.set_loop_context(TransactionLoops.SUBSCRIBER_NAME, subscriber_name_loop)
 
 
@@ -300,12 +285,15 @@ def set_subscriber_payer_name_loop(
     :param segment_data: The current segment data
     """
     if context.loop_name == TransactionLoops.SUBSCRIBER_NAME:
-        subscriber = _get_subscriber(context)
 
-        if TransactionLoops.SUBSCRIBER_PAYER_NAME not in subscriber:
-            subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {"ref_segment": []}
+        if TransactionLoops.SUBSCRIBER_PAYER_NAME not in context.subscriber_record:
+            context.subscriber_record[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {
+                "ref_segment": []
+            }
 
-        subscriber_payer_name_loop = subscriber[TransactionLoops.SUBSCRIBER_PAYER_NAME]
+        subscriber_payer_name_loop = context.subscriber_record[
+            TransactionLoops.SUBSCRIBER_PAYER_NAME
+        ]
         context.set_loop_context(
             TransactionLoops.SUBSCRIBER_NAME, subscriber_payer_name_loop
         )
@@ -319,14 +307,14 @@ def set_patient_loop(context: X12ParserContext, segment_data: Dict) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    subscriber = _get_subscriber(context)
+    if TransactionLoops.PATIENT_LOOP not in context.subscriber_record:
+        context.subscriber_record[TransactionLoops.PATIENT_LOOP] = []
 
-    if TransactionLoops.PATIENT_LOOP not in subscriber:
-        subscriber[TransactionLoops.PATIENT_LOOP] = []
-
-    subscriber[TransactionLoops.PATIENT_LOOP].append({})
-    patient_loop = subscriber[TransactionLoops.PATIENT_LOOP][-1]
-    context.set_loop_context(TransactionLoops.PATIENT_LOOP, patient_loop)
+    context.subscriber_record[TransactionLoops.PATIENT_LOOP].append({})
+    context.patient_record = context.subscriber_record[TransactionLoops.PATIENT_LOOP][
+        -1
+    ]
+    context.set_loop_context(TransactionLoops.PATIENT_LOOP, context.patient_record)
 
 
 @match("NM1", conditions={"entity_identifier_code": "QC"})
@@ -337,9 +325,8 @@ def set_patient_name_loop(context: X12ParserContext, segment_data: Dict) -> None
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    patient = _get_patient(context)
-    patient[TransactionLoops.PATIENT_LOOP_NAME] = {"ref_segment": []}
-    patient_name_loop = patient[TransactionLoops.PATIENT_LOOP_NAME]
+    context.patient_record[TransactionLoops.PATIENT_LOOP_NAME] = {"ref_segment": []}
+    patient_name_loop = context.patient_record[TransactionLoops.PATIENT_LOOP_NAME]
     context.set_loop_context(TransactionLoops.PATIENT_LOOP_NAME, patient_name_loop)
 
 
@@ -351,13 +338,10 @@ def set_claim_loop(context: X12ParserContext, segment_data: Dict) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-    # patient is either subscriber or dependent
-    patient = _get_patient(context)
+    if TransactionLoops.CLAIM_INFORMATION not in context.patient_record:
+        context.patient_record[TransactionLoops.CLAIM_INFORMATION] = []
 
-    if TransactionLoops.CLAIM_INFORMATION not in patient:
-        patient[TransactionLoops.CLAIM_INFORMATION] = []
-
-    patient[TransactionLoops.CLAIM_INFORMATION].append(
+    context.patient_record[TransactionLoops.CLAIM_INFORMATION].append(
         {
             "dtp_segment": [],
             "pwk_segment": [],
@@ -368,7 +352,7 @@ def set_claim_loop(context: X12ParserContext, segment_data: Dict) -> None:
         }
     )
 
-    claim_loop = patient[TransactionLoops.CLAIM_INFORMATION][-1]
+    claim_loop = context.patient_record[TransactionLoops.CLAIM_INFORMATION][-1]
     context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, claim_loop)
 
 
