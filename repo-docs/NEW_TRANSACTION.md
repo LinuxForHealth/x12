@@ -175,8 +175,13 @@ matching conditions, if needed.
 Parsing functions load during application startup and are evaluated at runtime, during segment parsing.
 The requirements for implementing a parsing function include:
 
-* function name ends with "loop"
-* has two parameters: X12ParserContext and segment_data
+* The function name ends with "loop".
+* The function has two parameters: X12ParserContext and segment_data.
+* The function is decorated with the `@match` decorator.
+* The function sets the current loop and loop container based on the matched segment.
+* The function initializes list fields within the loop container. Example: `{"ref_segment": []}`
+* The function sets the context.subscriber_record and context.patient_record attributes as needed to simplify processing.
+
 
 segment_data is the current data segment presented as a dictionary.
 
@@ -218,6 +223,10 @@ def set_information_source_hl_loop(context: X12ParserContext, segment_data: Dict
     info_source = context.transaction_data[TransactionLoops.INFORMATION_SOURCE][-1]
     context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
 ```
+
+## Debugging
+
+
 
 ## Testing
 

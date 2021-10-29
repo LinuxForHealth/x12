@@ -364,6 +364,14 @@ class Loop2100CNm1Segment(Nm1Segment):
     name_last_or_organization_name: Optional[str]
 
 
+class Loop2100DNm1Segment(Nm1Segment):
+    """
+    Loop 2100D NM1 segment for Dependent name.
+    """
+
+    entity_identifier_code: Literal["03"]
+
+
 class Loop2100RefSegment(RefSegment):
     """
     Conveys additional Subscriber or Dependent identification data.

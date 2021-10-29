@@ -26,7 +26,6 @@ from x12.segments import (
     SeSegment,
     N3Segment,
     N4Segment,
-    PrvSegment,
     TrnSegment,
     DmgSegment,
     HiSegment,
@@ -52,6 +51,7 @@ from .segments import (
     Loop2000AHlSegment,
     Loop2000AAaaSegment,
     Loop2100CNm1Segment,
+    Loop2100DNm1Segment,
     Loop2100RefSegment,
     Loop2100CInsSegment,
     Loop2100DtpSegment,
@@ -126,7 +126,7 @@ class Loop2100D(X12SegmentGroup):
     Loop 2100D - Dependent Name
     """
 
-    nm1_segment: Loop2100CNm1Segment
+    nm1_segment: Loop2100DNm1Segment
     ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_items=0, max_items=9)
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
@@ -261,7 +261,7 @@ class Loop2100B(X12SegmentGroup):
     ref_segment: Optional[List[Loop2100BRefSegment]]
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
-    aaa_segment: Optional[Loop2100BAaaSegment]
+    aaa_segment: Optional[List[Loop2100BAaaSegment]]
     prv_segment: Optional[Loop2100BPrvSegment]
 
     _validate_ref_segments = root_validator(allow_reuse=True)(
