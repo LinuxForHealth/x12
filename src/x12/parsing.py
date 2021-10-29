@@ -99,6 +99,9 @@ class X12ParserContext:
     * The current patient record
     * The current hierarchical segment
 
+    The current hierarchical segment is set in the core parser. Subscriber and patient records are set manually within a
+    transaction's loop parser.
+
     Cached record usage varies based on transaction type.
     """
 
@@ -271,9 +274,13 @@ class X12Parser(ABC):
     ) -> Optional[X12SegmentGroup]:
         """
         Parses an X12 segment into the instance's data record attribute.
+
+        Sets the following context attributes:
+        * hl_segment
+
         Returns a X12 Transaction Model when all segments are received.
 
-        :param segment_name: The name of the X12 segment
+        :param segment_name: The name of the X12 segment (ST, HL, NM1, etc)
         :param segment_fields: List of segment field values
         :return: The X12 Transaction Model if ready, otherwise None.
         """
@@ -282,6 +289,9 @@ class X12Parser(ABC):
 
         # convert segment data to a dictionary "record"
         segment_data: Dict = self._parse_segment(segment_name, segment_fields)
+
+        if segment_name.lower() == "hl":
+            self._context.hl_segment = segment_data
 
         for loop_parser in self._loop_parsers[segment_name]:
             loop_parser(segment_data, self._context)
