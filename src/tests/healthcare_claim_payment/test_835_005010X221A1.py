@@ -1,7 +1,6 @@
 """
 test_835_005010XX221A1.py
 """
-from x12.io import X12ModelReader
 import pytest
 from tests.support import assert_eq_model, resources_directory
 import os
@@ -14,7 +13,13 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["managed-care.835"],
+    [
+        "medicare-part-a.835",
+        "managed-care.835",
+        "secondary-payment.835",
+        "tertiary-payment.835",
+        "cob-contractural-adjustment.835",
+    ],
 )
 def test_835_model(resource_path, file_name: str):
     x12_file_path = os.path.join(resource_path, file_name)

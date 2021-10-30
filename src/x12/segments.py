@@ -159,7 +159,7 @@ class BprSegment(X12Segment):
     sender_account_qualifier: Optional[Literal["DA"]]
     sender_account_number: Optional[str]
     payer_identifier: Optional[str]
-    payer_supplemental_code: Optional[str]
+    sender_supplemental_code: Optional[str]
     receiver_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
     receiver_bank_id_number: Optional[str]
     receiver_account_qualifier: Optional[AccountNumberQualifier]
