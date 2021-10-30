@@ -128,6 +128,8 @@ class Loop2100(X12SegmentGroup):
         CAS segments exist within loops 2100 and 2110
         """
         clp_segment = values.get("clp_segment")
+        if not clp_segment:
+            return values
         charge_amount = clp_segment.total_claim_charge_amount
         payment_amount = clp_segment.claim_payment_amount
         adjustment_amount = Decimal("0.0")
@@ -139,9 +141,10 @@ class Loop2100(X12SegmentGroup):
                 amount = adjustment_data.get(f"monetary_amount_{i}")
                 adjustment_amount += amount if amount else Decimal("0.0")
 
-        loop_2110 = values.get("loop_2110")
+        loop_2110 = values.get("loop_2110") or []
         for service_payment in loop_2110:
-            for adjustment in service_payment.cas_segment:
+            adjustments = service_payment.cas_segment or []
+            for adjustment in adjustments:
                 adjustment_data = adjustment.dict()
                 for i in range(1, 7, 1):
                     amount = adjustment_data.get(f"monetary_amount_{i}")

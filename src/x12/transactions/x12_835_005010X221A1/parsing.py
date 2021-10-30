@@ -51,10 +51,9 @@ def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
     :param context: The X12Parsing context which contains the current loop and transaction record.
     :param segment_data: The current segment data
     """
-
-    context.set_loop_context(
-        TransactionLoops.HEADER, context.transaction_data[TransactionLoops.HEADER]
-    )
+    context.transaction_data[TransactionLoops.HEADER] = {"ref_segment": []}
+    header = context.transaction_data[TransactionLoops.HEADER]
+    context.set_loop_context(TransactionLoops.HEADER, header)
 
 
 @match("N1", conditions={"entity_identifier_code": "PR"})

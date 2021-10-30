@@ -54,6 +54,7 @@ from .segments import (
     Loop2100DNm1Segment,
     Loop2100RefSegment,
     Loop2100CInsSegment,
+    Loop2100DInsSegment,
     Loop2100DtpSegment,
     Loop2110RefSegment,
     Loop2110DtpSegment,
@@ -134,7 +135,7 @@ class Loop2100D(X12SegmentGroup):
     aaa_segment: Optional[List[Loop2100BAaaSegment]] = Field(min_items=0, max_items=9)
     prv_segment: Optional[PrvSegment]
     dmg_segment: Optional[DmgSegment]
-    ins_segment: Optional[Loop2100CInsSegment]
+    ins_segment: Optional[Loop2100DInsSegment]
     hi_segment: Optional[HiSegment]
     dtp_segment: Optional[List[Loop2100DtpSegment]] = Field(min_items=0, max_items=9)
     mpi_segment: Optional[MpiSegment]
@@ -276,7 +277,7 @@ class Loop2000B(X12SegmentGroup):
 
     hl_segment: Loop2000BHlSegment
     loop_2100b: Loop2100B
-    loop_2000c: List[Loop2000C] = Field(min_items=1)
+    loop_2000c: Optional[List[Loop2000C]]
 
 
 class Loop2100A(X12SegmentGroup):

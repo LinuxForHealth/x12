@@ -53,7 +53,7 @@ def test_bpr_segment():
         "sender_account_qualifier": "DA",
         "sender_account_number": "123456",
         "payer_identifier": "1512345678",
-        "payer_supplemental_code": "999999999",
+        "sender_supplemental_code": "999999999",
         "receiver_dfi_qualifier": "01",
         "receiver_bank_id_number": "999988880",
         "receiver_account_qualifier": "DA",

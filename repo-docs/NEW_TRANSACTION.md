@@ -224,11 +224,18 @@ def set_information_source_hl_loop(context: X12ParserContext, segment_data: Dict
     context.set_loop_context(TransactionLoops.INFORMATION_SOURCE, info_source)
 ```
 
-## Debugging
-
-
-
 ## Testing
 
 Transaction testing verifies x12 generation at the transaction level with use-case specific messages. Loop level and
 segment level testing is omitted due to the overlap with transactional testing.
+
+## Iteration FAQs
+
+Q: A transaction set test failed due to an invalid segment count, but the segment count is correct. How can I find the
+underlying issue?
+A: Try commenting out the `_validate_segment_count` validation. This validation may mask the underlying issue.
+
+Q: What are the requirements for a pydantic validation?
+A: Pydantic validations may operate at the model or field level. If a validation fails, a ValueError must be raised. If
+the validation is successful the function must return the values parameter. For additional information please refer to
+the [pydantic documentation](https://pydantic-docs.helpmanual.io/usage/validators/).

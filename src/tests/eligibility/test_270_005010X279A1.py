@@ -15,7 +15,7 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["dependent-commercial-health-insurance.270", "subscriber-drug-in-office.270"],
+    ["dependent-health-benefit-check.270", "subscriber-health-benefit-check.270"],
 )
 def test_270_model(resource_path, file_name: str):
 
