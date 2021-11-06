@@ -313,16 +313,6 @@ class ClmSegment(X12Segment):
         INFORMED_CONSENT_NO_SIGNATURE = "I"
         SIGNED_STATEMENT = "Y"
 
-    class SpecialProgramCode(str, Enum):
-        """
-        Code values for CLM12
-        """
-
-        PHYSICALLY_HANDICAPPED_CHILDRENS_PROGAM = "02"
-        SPECIAL_FEDERAL_FUNDING = "03"
-        DISABILITY = "05"
-        SECOND_OPINION_OR_SURGERY = "09"
-
     class DelayReasonCode(str, Enum):
         """
         Code values for CLM20
@@ -347,13 +337,13 @@ class ClmSegment(X12Segment):
     claim_filing_indicator_code: Optional[str] = Field(min_length=1, max_length=2)
     non_institutional_claim_type_code: Optional[str] = Field(min_length=1, max_length=2)
     health_care_service_location_information: str
-    provider_or_supplier_signature_indicator: ProviderOrSupplierSignatureIndicator
+    provider_or_supplier_signature_indicator: Optional[str]
     provider_accept_assignment_code: ProviderAcceptAssignmentCode
     benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
     release_of_information_code: ReleaseOfInformationCode
-    patient_signature_source_code: Optional[Literal["P"]]
+    patient_signature_source_code: Optional[str]
     related_causes_code: Optional[str]
-    special_program_code: Optional[SpecialProgramCode]
+    special_program_code: Optional[str]
     yes_no_condition_response_code_1: Optional[str]
     level_of_service_code: Optional[str]
     yes_no_condition_response_code_2: Optional[str]
@@ -361,7 +351,7 @@ class ClmSegment(X12Segment):
     claim_status_code: Optional[str]
     yes_no_condition_response_code_3: Optional[str]
     claim_submission_reason_code: Optional[str]
-    delay_reason_code: Optional[DelayReasonCode]
+    delay_reason_code: DelayReasonCode
 
 
 class ClpSegment(X12Segment):
@@ -428,6 +418,22 @@ class ClpSegment(X12Segment):
     drg_weight: Optional[condecimal(gt=Decimal("0.0"))]
     discharge_fraction: Optional[condecimal(ge=Decimal("0.0"))]
     condition_response_code: Optional[str]
+
+
+class Cl1Segment(X12Segment):
+    """
+    Institutional Claim Code
+    Example:
+        CL1*1*7*30~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CL1
+    admission_type_code: str = Field(min_length=1, max_length=1)
+    admission_source_code: Optional[str] = Field(min_length=1, max_length=1)
+    patient_status_code: str = Field(min_length=1, max_length=2)
+    nursing_home_residential_status_code: Optional[str] = Field(
+        min_length=0, max_length=1
+    )
 
 
 class Cn1Segment(X12Segment):
@@ -2316,6 +2322,7 @@ class PwkSegment(X12Segment):
         AUTOPSY_REPORT = "A4"
         AMBULANCE_CERTIFICATION = "AM"
         ADMISSION_SUMMARY = "AS"
+        PRESCRIPTION = "B2"
         PHYSICIAN_ORDER = "B3"
         REFERRAL_FORM = "B4"
         BENCHMARK_TESTING_RESULTS = "BR"
@@ -2372,11 +2379,6 @@ class PwkSegment(X12Segment):
         EMAIL = "EM"
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
-        PREVIOUSLY_SUBMITTED_TO_PAYER = "AB"
-        CERTIFICATION_INCLUDED_IN_THIS_CLAIM = "AD"
-        NARRATIVE_SEGMENT_INCLUDED_IN_THIS_CLAIM = "AF"
-        NO_DOCUMENTATION_IS_REQUIRED = "AG"
-        NOT_SPECIFIED = "NS"
 
     segment_name: X12SegmentName = X12SegmentName.PWK
     report_type_code: AttachmentReportTypeCode
@@ -2581,6 +2583,11 @@ class Sv1Segment(X12Segment):
     level_of_care_code: Optional[str]
     provider_agreement_code: Optional[str]
 
+
+class Sv2Segment(X12Segment):
+    """
+
+    """
 
 class Sv5Segment(X12Segment):
     """

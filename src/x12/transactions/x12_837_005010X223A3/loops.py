@@ -60,10 +60,11 @@ from .segments import (
     Loop2010AaRefSegment,
     Loop2010AbNm1Segment,
     Loop2010AcNm1Segment,
+    Loop2010AcRefSegment,
     Loop2000BHlSegment,
     Loop2000BSbrSegment,
     Loop2010BaNm1Segment,
-    Loop2010BaPerSegment,
+    Loop2010BaRefSegment,
     Loop2010BbNm1Segment,
     Loop2010BbRefSegment,
     Loop2300DtpSegment,
@@ -71,25 +72,27 @@ from .segments import (
     Loop2300AmtSegment,
     Loop2300RefSegment,
     Loop2300NteSegment,
-    Loop2300CrcSegment,
+    Loop2300CrcEpSdtRefferal,
+    Loop2300HcpSegment,
     Loop2000CHlSegment,
     Loop2000CPatSegment,
     Loop2010CaNm1Segment,
     Loop2010CaRefSegment,
-    Loop2010CaPerSegment,
     Loop2310ANm1Segment,
     Loop2310ARefSegment,
     Loop2310BNm1Segment,
-    Loop2310BPrvSegment,
+    Loop2310APrvSegment,
     Loop2310BRefSegment,
     Loop2310CNm1Segment,
     Loop2310CRefSegment,
-    Loop2310CPerSegment,
     Loop2310DNm1Segment,
     Loop2310DRefSegment,
     Loop2310ENm1Segment,
+    Loop2310ERefSegment,
     Loop2310FNm1Segment,
+    Loop2310FRefSegment,
     Loop2320SbrSegment,
+    Loop2320AmtSegment,
     Loop2330aNm1Segment,
     Loop2330aRefSegment,
     Loop2330bNm1Segment,
@@ -105,6 +108,10 @@ from .segments import (
     Loop2330fRefSegment,
     Loop2330gNm1Segment,
     Loop2330gRefSegment,
+    Loop2330HNm1Segment,
+    Loop2330HRefSegment,
+    Loop2330INm1Segment,
+    Loop2330IRefSegment,
     Loop2400CrcSegment,
     Loop2400DtpSegment,
     Loop2400QtySegment,
@@ -135,20 +142,20 @@ from .segments import (
 )
 from x12.segments import (
     SeSegment,
+    Cl1Segment,
     CurSegment,
     N3Segment,
     N4Segment,
     PatSegment,
     DmgSegment,
-    RefSegment,
     ClmSegment,
     K3Segment,
     Cr1Segment,
-    Cr2Segment,
     HiSegment,
     CasSegment,
     AmtSegment,
     OiSegment,
+    MiaSegment,
     MoaSegment,
     LxSegment,
     Sv1Segment,
@@ -197,7 +204,7 @@ class Loop2010Aa(X12SegmentGroup):
     nm1_segment: Loop2010AaNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=3)
+    ref_segment: Loop2010AaRefSegment
     per_segment: Optional[List[Loop2010AaPerSegment]] = Field(min_items=0, max_items=2)
 
 
@@ -219,7 +226,7 @@ class Loop2010Ac(X12SegmentGroup):
     nm1_segment: Loop2010AcNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: List[Loop2010AaRefSegment] = Field(min_items=1, max_items=2)
+    ref_segment: List[Loop2010AcRefSegment] = Field(min_items=1, max_items=2)
 
 
 class Loop2010Ba(X12SegmentGroup):
@@ -231,8 +238,7 @@ class Loop2010Ba(X12SegmentGroup):
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
     dmg_segment: Optional[DmgSegment]
-    ref_segment: List[Optional[RefSegment]] = Field(min_items=0, max_items=2)
-    per_segment: Optional[Loop2010BaPerSegment]
+    ref_segment: List[Optional[Loop2010BaRefSegment]] = Field(min_items=0, max_items=2)
 
 
 class Loop2010Bb(X12SegmentGroup):
@@ -246,9 +252,27 @@ class Loop2010Bb(X12SegmentGroup):
     ref_segment: Optional[List[Loop2010BbRefSegment]]
 
 
-class Loop2330G(X12SegmentGroup):
+class Loop2330I(X12SegmentGroup):
     """
     Claim - Other Subscriber Other Payer Billing Provider
+    """
+
+    nm1_segment: Loop2330HNm1Segment
+    ref_segment: List[Loop2330HRefSegment] = Field(min_items=1, max_items=2)
+
+
+class Loop2330H(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Referring Provider
+    """
+
+    nm1_segment: Loop2330HNm1Segment
+    ref_segment: List[Loop2330HRefSegment] = Field(min_items=1, max_items=3)
+
+
+class Loop2330G(X12SegmentGroup):
+    """
+    Claim - Other Subscriber Other Payer Rendering Provider
     """
 
     nm1_segment: Loop2330gNm1Segment
@@ -257,7 +281,7 @@ class Loop2330G(X12SegmentGroup):
 
 class Loop2330F(X12SegmentGroup):
     """
-    Claim - Other Subscriber Other Payer Supervising Provider
+    Claim - Other Subscriber Other Payer Service Facility Location
     """
 
     nm1_segment: Loop2330fNm1Segment
@@ -266,7 +290,7 @@ class Loop2330F(X12SegmentGroup):
 
 class Loop2330E(X12SegmentGroup):
     """
-    Claim - Other Subscriber Other Payer Service Facility Location
+    Claim - Other Subscriber Other Payer Other Operating Physician
     """
 
     nm1_segment: Loop2330eNm1Segment
@@ -275,7 +299,7 @@ class Loop2330E(X12SegmentGroup):
 
 class Loop2330D(X12SegmentGroup):
     """
-    Claim - Other Subscriber Other Payer Rendering Provider
+    Claim - Other Subscriber Other Payer Operating Physician
     """
 
     nm1_segment: Loop2330dNm1Segment
@@ -284,7 +308,7 @@ class Loop2330D(X12SegmentGroup):
 
 class Loop2330C(X12SegmentGroup):
     """
-    Claim - Other Subscriber Other Payer Referring Provider
+    Claim - Other Subscriber Other Payer Attending Provider
     """
 
     nm1_segment: Loop2330cNm1Segment
@@ -321,16 +345,19 @@ class Loop2320(X12SegmentGroup):
 
     sbr_segment: Loop2320SbrSegment
     cas_segment: Optional[List[CasSegment]] = Field(min_items=0, max_items=5)
-    amt_segment: Optional[List[AmtSegment]] = Field(min_items=0, max_items=3)
-    oi_segment: Optional[OiSegment]
+    amt_segment: Optional[List[Loop2320AmtSegment]] = Field(min_items=0, max_items=3)
+    oi_segment: OiSegment
+    mia_segment: Optional[MiaSegment]
     moa_segment: Optional[MoaSegment]
     loop_2330a: Optional[Loop2330A]
     loop_2330b: Optional[Loop2330B]
-    loop_2330c: Optional[List[Loop2330C]]
+    loop_2330c: Optional[Loop2330C]
     loop_2330d: Optional[Loop2330D]
     loop_2330e: Optional[Loop2330E]
     loop_2330f: Optional[Loop2330F]
     loop_2330g: Optional[Loop2330G]
+    loop_2330h: Optional[Loop2330H]
+    loop_2330i: Optional[Loop2330I]
 
     _validate_amt_segments = root_validator(allow_reuse=True)(
         validate_duplicate_amt_codes
@@ -339,27 +366,27 @@ class Loop2320(X12SegmentGroup):
 
 class Loop2310F(X12SegmentGroup):
     """
-    Claim ambulance drop-off location
+    Claim referring provider
     """
 
     nm1_segment: Loop2310FNm1Segment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    ref_segment: Optional[List[Loop2310FRefSegment]] = Field(min_items=0, max_items=3)
 
 
 class Loop2310E(X12SegmentGroup):
     """
-    Claim ambulance pickup location
+    Service Facility Location
     """
 
     nm1_segment: Loop2310ENm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
+    ref_segment: Optional[List[Loop2310ERefSegment]] = Field(min_items=0, max_items=3)
 
 
 class Loop2310D(X12SegmentGroup):
     """
-    Claim Supervising Provider
+    Claim Rendering Provider
     """
 
     nm1_segment: Loop2310DNm1Segment
@@ -368,23 +395,19 @@ class Loop2310D(X12SegmentGroup):
 
 class Loop2310C(X12SegmentGroup):
     """
-    Claim Service Facility Location
+    Claim Other Operating Physician Name
     """
 
     nm1_segment: Optional[Loop2310CNm1Segment]
-    n3_segment: N3Segment
-    n4_segment: N4Segment
     ref_segment: Optional[List[Loop2310CRefSegment]] = Field(min_items=0, max_items=3)
-    per_segment: Optional[Loop2310CPerSegment]
 
 
 class Loop2310B(X12SegmentGroup):
     """
-    Claim Rendering Provider
+    Claim Operating Physician Name
     """
 
     nm1_segment: Loop2310BNm1Segment
-    prv_segment: Optional[Loop2310BPrvSegment]
     ref_segment: Optional[List[Loop2310BRefSegment]] = Field(min_items=0, max_items=4)
 
 
@@ -394,7 +417,8 @@ class Loop2310A(X12SegmentGroup):
     """
 
     nm1_segment: Loop2310ANm1Segment
-    ref_segment: Optional[List[Loop2310ARefSegment]] = Field(min_items=0, max_items=3)
+    prv_segment: Optional[Loop2310APrvSegment]
+    ref_segment: Optional[List[Loop2310ARefSegment]] = Field(min_items=0, max_items=4)
 
 
 class Loop2440(X12SegmentGroup):
@@ -552,18 +576,17 @@ class Loop2300(X12SegmentGroup):
     """
 
     clm_segment: ClmSegment
-    dtp_segment: Optional[List[Loop2300DtpSegment]] = Field(min_items=0, max_items=17)
+    dtp_segment: List[Loop2300DtpSegment] = Field(min_items=1, max_items=4)
+    cl1_segment: Cl1Segment
     pwk_segment: Optional[List[PwkSegment]] = Field(min_items=0, max_items=10)
     cn1_segment: Optional[Loop2300Cn1Segment]
     amt_segment: Optional[Loop2300AmtSegment]
-    ref_segment: Optional[List[Loop2300RefSegment]] = Field(min_items=0, max_items=14)
+    ref_segment: Optional[List[Loop2300RefSegment]] = Field(min_items=0, max_items=16)
     k3_segment: Optional[List[K3Segment]] = Field(min_items=0, max_items=10)
-    nte_segment: Optional[Loop2300NteSegment]
-    cr1_segment: Optional[Cr1Segment]
-    cr2_segment: Optional[Cr2Segment]
-    crc_segment: Optional[List[Loop2300CrcSegment]] = Field(min_items=0, max_items=8)
-    hi_segment: Optional[List[HiSegment]] = Field(min_items=1, max_items=4)
-    hcp_segment: Optional[HcpSegment]
+    nte_segment: Optional[List[Loop2300NteSegment]] = Field(min_items=0, max_items=11)
+    crc_segment: Optional[Loop2300CrcEpSdtRefferal]
+    hi_segment: List[HiSegment] = Field(min_items=1, max_items=20)
+    hcp_segment: Optional[Loop2300HcpSegment]
     loop_2310a: Optional[Loop2310A]
     loop_2310b: Optional[Loop2310B]
     loop_2310c: Optional[Loop2310C]
@@ -606,7 +629,6 @@ class Loop2010Ca(X12SegmentGroup):
     n4_segment: N4Segment
     dmg_segment: DmgSegment
     ref_segment: Optional[List[Loop2010CaRefSegment]] = Field(min_items=0, max_items=2)
-    per_segment: Optional[Loop2010CaPerSegment]
 
 
 class Loop2000C(X12SegmentGroup):

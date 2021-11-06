@@ -34,7 +34,7 @@ class HeaderStSegment(StSegment):
     """
 
     transaction_set_identifier_code: Literal["837"]
-    implementation_convention_reference: Literal["005010X222A2"]
+    implementation_convention_reference: Literal["005010X223A3"]
 
 
 class HeaderBhtSegment(BhtSegment):
@@ -71,6 +71,7 @@ class Loop1000ANm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["41"]
     identification_code_qualifier: Literal["46"]
+    identification_code: str = Field(min_length=2, max_length=80)
 
 
 class Loop1000APerSegment(PerSegment):
@@ -108,6 +109,7 @@ class Loop1000BNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["40"]
+    entity_type_qualifier: Literal["2"]
     identification_code_qualifier: Literal["46"]
 
 
@@ -118,6 +120,7 @@ class Loop2000AHlSegment(HlSegment):
 
     hierarchical_parent_id_number: Optional[str]
     hierarchical_level_code: Literal["20"]
+    hierarchical_child_code: Literal["1"]
 
 
 class Loop2000APrvSegment(PrvSegment):
@@ -157,6 +160,7 @@ class Loop2000BSbrSegment(SbrSegment):
         PAYER_RESPONSIBILITY_EIGHT = "E"
         PAYER_RESPONSIBILITY_NINE = "F"
         PAYER_RESPONSIBILITY_TEN = "G"
+        PAYER_RESPONSIBILITY_ELEVEN = "H"
         PRIMARY = "P"
         SECONDARY = "S"
         TERTIARY = "T"
@@ -217,6 +221,7 @@ class Loop2000CHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["23"]
+    hierarchical_child_code: Literal["0"]
 
 
 class Loop2000CPatSegment(PatSegment):
@@ -247,6 +252,7 @@ class Loop2010AaNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["85"]
+    entity_type_qualifier: Literal["2"]
     identification_code_qualifier: Optional[Literal["XX"]]
 
 
@@ -255,17 +261,7 @@ class Loop2010AaRefSegment(RefSegment):
     Billing Provider Identification Codes
     """
 
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        EMPLOYER_IDENTIFICATION_NUMBER = "EI"
-        SOCIAL_SECURITY_NUMBER = "SY"
-        STATE_LICENSE_NUMBER = "0B"
-        PROVIDER_UPIN_NUMBER = "1G"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
+    reference_identification_qualifier: Literal["EI"]
 
 
 class Loop2010AaPerSegment(PerSegment):
@@ -290,6 +286,7 @@ class Loop2010AbNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["87"]
+    entity_type_qualifier: Literal["2"]
     name_last_or_organization_name: Optional[str]
 
 
@@ -308,7 +305,6 @@ class Loop2010AcNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["PE"]
     entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
     identification_code_qualifier: IdentificationCodeQualifier
 
 
@@ -322,10 +318,9 @@ class Loop2010AcRefSegment(RefSegment):
         Code values for REF01
         """
 
-        PAYER_IDENTIFICATION_NUMBER = "2u"
+        PAYER_IDENTIFICATION_NUMBER = "2U"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
-        EMPLOYERS_IDENTIFICATION_NUMBER = "EI"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
@@ -344,7 +339,7 @@ class Loop2010BaNm1Segment(Nm1Segment):
         MEMBER_IDENTIFICATION_NUMBER = "MI"
 
     entity_identifier_code: Literal["IL"]
-    identification_code_qualifier: IdentificationCodeQualifier
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
 
 
 class Loop2010BaRefSegment(RefSegment):
@@ -388,6 +383,7 @@ class Loop2010BbNm1Segment(Nm1Segment):
     entity_identifier_code: Literal["PR"]
     entity_type_qualifier: Literal["2"]
     identification_code_qualifier: IdentificationCodeQualifier
+    identification_code: str = Field(min_length=2, max_length=80)
 
 
 class Loop2010BbRefSegment(RefSegment):
@@ -453,32 +449,19 @@ class Loop2300DtpSegment(DtpSegment):
         Code values for DTP01
         """
 
-        ONSET_OF_CURRENT_SYMPTOM_OR_ILLNESS = "431"
-        INITIAL_TREATMENT = "454"
-        LAST_VISIT_OR_CONSULTATION = "304"
-        ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "453"
-        ACCIDENT = "439"
-        LAST_MENSTRUAL_PERIOD = "484"
-        LAST_XRAY = "455"
-        PRESCRIPTION = "471"
-        DISABILITY = "314"
-        INITIAL_DISABILITY_START = "360"
-        INITIAL_DISABILITY_END = "361"
-        INITIAL_DISABILITY_LAST_DATE_WORKED = "297"
-        INITIAL_DISABILITY_RETURN_TO_WORK = "296"
-        ADMISSION = "435"
         DISCHARGE = "096"
-        ASSUMED_CARE_DATE = "090"
-        RELINQUISHED_CARE_DATE = "091"
-        FIRST_VISIT_CONSULTATION = "444"
-        REPRICER_RECEIVED_DATE = "050"
+        STATEMENT = "434"
+        ADMISSION = "435"
+        RECEIVED = "050"
 
     class DateTimePeriodFormatQualifier(str, Enum):
         """
         Code values for DTP02
         """
 
+        TIME = "TM"
         DATE = "D8"
+        DATE_AND_TIME = "DT"
         DATE_RANGE = "RD8"
 
     date_time_qualifier: DateTimeQualifier
@@ -528,7 +511,7 @@ class Loop2300AmtSegment(AmtSegment):
     Monetary Amount
     """
 
-    amount_qualifier_code: Literal["F5"]
+    amount_qualifier_code: Literal["F3"]
 
 
 class Loop2300RefSegment(RefSegment):
@@ -542,19 +525,17 @@ class Loop2300RefSegment(RefSegment):
         """
 
         SPECIAL_PAYMENT_REFERENCE_NUMBER = "4N"
-        MEDICARE_VERSION_CODE = "F5"
-        MAMMOGRAPHY_CERTIFICATION_NUMBER = "EW"
         REFERRAL_NUMBER = "9F"
         PRIOR_AUTHORIZATION_NUMBER = "G1"
         ORIGINAL_REFERENCE_NUMBER = "F8"
-        CLINICAL_LABORATORY_IMPROVEMENT_AMENDMENT_NUMBER = "X4"
         REPRICED_CLAIM_REFERENCE_NUMBER = "9A"
         ADJUSTED_REPRICED_CLAIM_REFERENCE_NUMBER = "9C"
         QUALIFIED_PRODUCTS_LIST = "LX"
         CLAIM_NUMBER = "D9"
+        LOCATION_NUMBER = "LU"
         MEDICAL_RECORD_IDENTIFICATION_NUMBER = "EA"
         PROJECT_CODE = "P4"
-        FACILITY_ID_NUMBER = "1J"
+        PEER_REVIEW_ORG_APPROVAL_NUMBER = "G4"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
@@ -569,110 +550,24 @@ class Loop2300NteSegment(NteSegment):
         Code values for NTE01
         """
 
-        ADDITIONAL_INFORMATION = "ADD"
-        CERTIFICATION_NARRATIVE = "CER"
+        ALLERGIES = "ALG"
         GOALS_REHAB_POTENTIAL_DISCHARGE_PLANS = "DCP"
         DIAGNOSIS_DESCRIPTION = "DGN"
-        THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
+        DURABLE_MEDICAL_EQUIPMENT_SUPPLIES = "DME"
+        MEDICATIONS = "MED"
+        NUTRITIONAL_REQUIREMENTS = "NTR"
+        ORDERS_FOR_DISCIPLINES_AND_TREATMENTS = "ODT"
+        FUNCTIONAL_LIMITATIONS_REASON_HOMEBOUND = "RHB"
+        REASONS_PATIENT_LEAVES_HOME = "RLH"
+        TIMES_REASONS_PATIENT_NOT_AT_HOME = "RNH"
+        UNUSUAL_HOME_SOCIAL_ENV_OR_BOTH = "SET"
+        SAFETY_MEASURES = "SFM"
+        SUPPLEMENTARY_PLAN_OF_TREATMENT = "SPT"
+        UPDATED_INFORMATION = "UPI"
 
 
-class Loop2300CrcAmbulanceCertification(CrcSegment):
-    """
-    Claim Information - Ambulance Certification
-    """
-
-    class YesNoResponseCode(str, Enum):
-        """
-        Code values for CRC02
-        """
-
-        NO = "N"
-        YES = "Y"
-
-    class ConditionsIndicator(str, Enum):
-        """
-        Code values for CRC03 - CRC07
-        """
-
-        PATIENT_ADMITTED_TO_HOSPITAL = "01"
-        PATIENT_MOVED_BY_STRETCHER = "04"
-        PATIENT_UNCONSCIOUS_IN_SHOCK = "05"
-        PATIENT_EMERGENCY_TRANSPORT = "06"
-        PATIENT_RESTRAINED = "07"
-        PATIENT_HEMORRHAGING = "08"
-        AMBULANCE_MEDICALLY_NECESSARY = "09"
-        PATIENT_CONFINED_BED_CHAIR = "12"
-
-    code_category: Literal["07"]
-    certification_condition_indicator: YesNoResponseCode
-    condition_code_1: ConditionsIndicator
-    condition_code_2: Optional[ConditionsIndicator]
-    condition_code_3: Optional[ConditionsIndicator]
-    condition_code_4: Optional[ConditionsIndicator]
-    condition_code_5: Optional[ConditionsIndicator]
 
 
-class Loop2300CrcPatientConditionVision(CrcSegment):
-    """
-    Claim Information - Patient Vision Condition
-    """
-
-    class CodeCategoryValues(str, Enum):
-        """
-        Code values for CRC01
-        """
-
-        SPECTACLE_LENSES = "E1"
-        CONTACT_LENSES = "E2"
-        SPECTACLE_FRAMES = "E3"
-
-    class YesNoResponseCode(str, Enum):
-        """
-        Code values for CRC02
-        """
-
-        NO = "N"
-        YES = "Y"
-
-    class ConditionsIndicator(str, Enum):
-        """
-        Code values for CRC03 - CRC07
-        """
-
-        GENERAL_STANDARD_20_DEGREE = "L1"
-        REPLACEMENT_LOSS_THEFT = "L2"
-        REPLACEMENT_BREAKAGE_DAMAGE = "L3"
-        REPLACEMENT_PATIENT_PREFERENCE = "L4"
-        REPLACEMENT_MEDICAL_REASON = "L5"
-
-    code_category: CodeCategoryValues
-    certification_condition_indicator: YesNoResponseCode
-    condition_code_1: ConditionsIndicator
-    condition_code_2: Optional[ConditionsIndicator]
-    condition_code_3: Optional[ConditionsIndicator]
-    condition_code_4: Optional[ConditionsIndicator]
-    condition_code_5: Optional[ConditionsIndicator]
-
-
-class Loop2300CrcHomeboundIndicator(CrcSegment):
-    """
-    Claim Information - Homebound indicator
-    """
-
-    class ConditionsIndicator(str, Enum):
-        """
-        Code values for CRC03 - CRC07
-        """
-
-        INDEPENDENT_AT_HOME = "IH"
-
-    code_category: Literal["75"]
-    certification_condition_indicator: Literal["Y"]
-    condition_code_1: ConditionsIndicator
-    condition_code_2: Optional[ConditionsIndicator]
-    condition_code_3: Optional[ConditionsIndicator]
-    condition_code_4: Optional[ConditionsIndicator]
-    condition_code_5: Optional[ConditionsIndicator]
 
 
 class Loop2300CrcEpSdtRefferal(CrcSegment):
@@ -707,47 +602,57 @@ class Loop2300CrcEpSdtRefferal(CrcSegment):
     condition_code_5: Optional[ConditionsIndicator]
 
 
-class Loop2300CrcSegment(CrcSegment):
-    """
-    Claim information conditions indicators
-    """
+class Loop2300HcpSegment(HcpSegment):
 
-    @root_validator
-    def validate_specialized_crc_segment(cls, values):
+    class PricingMethodologyCodes(str, Enum):
         """
-        Parses the CRC segments code category to determine which model is used for validation.
+        Code values for HCP01
         """
-        code_category = values.get("code_category")
 
-        if code_category == "07":
-            Loop2300CrcAmbulanceCertification(**values)
-        elif code_category in ("E1", "E2", "E3"):
-            Loop2300CrcPatientConditionVision(**values)
-        elif code_category == "75":
-            Loop2300CrcHomeboundIndicator(**values)
-        elif code_category == "ZZ":
-            Loop2300CrcEpSdtRefferal(**values)
-        else:
-            raise ValueError(f"Unknown CRC01 code category value {code_category}")
-        return values
+        ZERO_PRICING_NOT_COVERED = "00"
+        PRICED_AS_BILLED_100_PERCENT = "01"
+        PRICED_AT_STANDARD_FEE_SCHEDULE = "02"
+        PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
+        BUNDLED_PRICING = "04"
+        PEER_REVIEW_PRICING = "05"
+        PER_DIEM_PRICING = "06"
+        FLAT_RATE_PRICING = "07"
+        COMBINATION_PRICING = "08"
+        MATERNITY_PRICING = "09"
+        OTHER_PRICING = "10"
+        LOWER_OF_COST = "11"
+        RATIO_OF_COST = "12"
+        COST_REIMBURSED = "13"
+        ADJUSTMENT_PRICING = "14"
+
+    class MeasurementCodes(str, Enum):
+        """
+        Code values for HCP11
+        """
+        DAYS = "DA"
+        UNIT = "UN"
+
+    pricing_methodology: PricingMethodologyCodes
+    unit_basis_measurement_code: Optional[MeasurementCodes]
 
 
 class Loop2310ANm1Segment(Nm1Segment):
     """
-    Claim Referring Provider Name
+    Claim Attending Provider Name
     """
 
-    class EntityIdentifierCode(str, Enum):
-        """
-        Code values for NM101
-        """
-
-        REFERRING_PROVIDER = "DN"
-        PRIMARY_CARE_PROVIDER = "P3"
-
-    entity_identifier_code: EntityIdentifierCode
+    entity_identifier_code: Literal["71"]
     entity_type_qualifier: Literal["1"]
     identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2310APrvSegment(PrvSegment):
+    """
+    Attending Provider Speciality Information
+    """
+    provider_code: Literal["AT"]
+    reference_identification_qualifier: Literal["PXC"]
+    reference_identification: str = Field(min_length=1, max_length=50)
 
 
 class Loop2310ARefSegment(RefSegment):
@@ -763,32 +668,24 @@ class Loop2310ARefSegment(RefSegment):
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2310BNm1Segment(Nm1Segment):
     """
-    Claim Rendering Provider Name
+    Claim Operating Physician Name
     """
 
-    entity_identifier_code: Literal["82"]
+    entity_identifier_code: Literal["72"]
+    entity_type_qualifier: Literal["1"]
     identification_code_qualifier: Literal["XX"]
-
-
-class Loop2310BPrvSegment(PrvSegment):
-    """
-    Claim Rendering Provider Specialty
-    """
-
-    provider_code: Literal["PE"]
-    reference_identification_qualifier: Literal["PXC"]
-    reference_identification: str = Field(min_length=1, max_length=50)
 
 
 class Loop2310BRefSegment(RefSegment):
     """
-    Claim Rendering Provider Reference Identification
+    Claim ROperating Physician Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -815,13 +712,12 @@ class Loop2310CaPerSegment(PerSegment):
 
 class Loop2310CNm1Segment(Nm1Segment):
     """
-    Claim Service Facility Location Name
+    Claim Other Operating Physician Name
     """
 
-    entity_identifier_code: Literal["77"]
-    entity_type_qualifier: Literal["2"]
+    entity_identifier_code: Literal["ZZ"]
+    entity_type_qualifier: Literal["1"]
     identification_code_qualifier: Optional[Literal["XX"]]
-    identification_code: Optional[str]
 
 
 class Loop2310CRefSegment(RefSegment):
@@ -835,34 +731,26 @@ class Loop2310CRefSegment(RefSegment):
         """
 
         STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2310CPerSegment(PerSegment):
-    """
-    Claim Service Facility Contact Segment
-    """
-
-    communication_number_qualifier_1: Literal["TE"]
-    communication_number_qualifier_2: Optional[Literal["EX"]]
-
-
 class Loop2310DNm1Segment(Nm1Segment):
     """
-    Claim Supervising Provider Name
+    Claim Rendering Provider Name
     """
 
-    entity_identifier_code: Literal["DQ"]
+    entity_identifier_code: Literal["82"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Literal["XX"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2310DRefSegment(Nm1Segment):
     """
-    Claim Supervising Provider Reference Identification
+    Claim Rendering Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -880,12 +768,28 @@ class Loop2310DRefSegment(Nm1Segment):
 
 class Loop2310ENm1Segment(Nm1Segment):
     """
-    Claim ambulance pickup location
+    Service Facility Location Name
     """
 
-    entity_identifier_code: Literal["PW"]
+    entity_identifier_code: Literal["77"]
     entity_type_qualifier: Literal["2"]
     name_last_or_organization_name: Optional[str]
+    identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2310ERefSegment(RefSegment):
+    """
+    Service Facility Location Reference Identification
+    """
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2310FNm1Segment(Nm1Segment):
@@ -893,9 +797,23 @@ class Loop2310FNm1Segment(Nm1Segment):
     Claim ambulance pickup location
     """
 
-    entity_identifier_code: Literal["45"]
-    entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
+    entity_identifier_code: Literal["DN"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[Literal["XX"]]
+
+
+class Loop2310FRefSegment(RefSegment):
+    """
+    Referring Provider Reference Identification
+    """
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2320SbrSegment(SbrSegment):
@@ -936,20 +854,54 @@ class Loop2320SbrSegment(SbrSegment):
         LIFE_PARTNER = "53"
         OTHER_RELATIONSHIP = "G8"
 
-    class InsuranceTypeCode(str, Enum):
+    class ClaimFilingIndicatorCode(str, Enum):
         """
-        SBR05 code values
+        SBR09 code values
         """
 
-        MEDICARE_SECONDARY_WORKING = "12"
-        MEDICARE_SECONDARY_END_STAGE_RENAL = "13"
-        MEDICARE_SECONDARY_AUTO_PRIMARY = "14"
-        MEDICARE_SECONDARY_WORKERS_COMPENSATION = "15"
-        MEDICARE_SECONDARY_PUBLIC_HEALTH_SERVICE = "16"
-        MEDICARE_SECONDARY_BLACK_LUNG = "41"
-        MEDICARE_SECONDARY_VETERANS_ADMINISTRATION = "42"
-        MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
-        MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"
+        OTHER_NON_FEDERAL_PROGRAMS = "11"
+        PREFERRED_PROVIDER_ORGANIZATION = "12"
+        POINT_OF_SERVICE = "13"
+        EXCLUSIVE_PROVIDER_ORGANIZATION = "14"
+        INDEMNITY_INSURANCE = "15"
+        HEALTH_MAINTENANCE_ORGANIZATION_MEDICARE_RISK = "16"
+        DENTAL_MAINTENANCE_ORGANIZATION = "17"
+        AUTOMOBILE_MEDICAL = "AM"
+        BLUE_CROSS_BLUE_SHIELD = "BL"
+        CHAMPUS = "CH"
+        COMMERICIAL_INSURANCE_COMPANY = "CI"
+        DISABILITY = "DS"
+        FEDERAL_EMPLOYEES_PROGRAM = "FI"
+        HEALTH_MAINTENANCE_ORGANIZATION = "HM"
+        LIABILITY_MEDICAL = "LM"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        OTHER_FEDERAL_PROGRAM = "OF"
+        TITLE_V = "TV"
+        VETERANS_AFFAIR_PLAN = "VA"
+        WORKERS_COMPENSATION_HEALTH_CLAIM = "WC"
+        MUTUALLY_DEFINED = "ZZ"
+
+    payer_responsibility_code: PayerResponsibilityCode
+    individual_relationship_code: IndividualRelationshipCode
+    claim_filing_indicator_code: ClaimFilingIndicatorCode
+
+
+class Loop2320AmtSegment(AmtSegment):
+    """
+    Other Subscriber COB Payer Paid Amount
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+        PAYOR_AMOUNT_PAID = "D"
+        AMOUNT_OWED = "EAF"
+        NONCOVERED_CHARGES_ACTUAL = "A8"
+
+    amount_qualifier_code: AmountQualifierCode
 
 
 class Loop2330aNm1Segment(Nm1Segment):
@@ -966,6 +918,8 @@ class Loop2330aNm1Segment(Nm1Segment):
         MEMBER_IDENTIFICATION_NUMBER = "MI"
 
     entity_identifier_code: Literal["IL"]
+    identification_code_qualifier: IdentificationCodeQualifier
+    identification_code: str = Field(min_length=2, max_length=80)
 
 
 class Loop2330aRefSegment(RefSegment):
@@ -1014,35 +968,31 @@ class Loop2300BRefSegment(RefSegment):
         """
         Code values for REF01
         """
-
-        PAYOR_IDENTIFICATION = "PI"
+        PAYER_IDENTIFICATION_NUMBER = "2U"
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        REFERRAL_NUMBER = "9F"
+        SIGNAL_CODE = "T4"
+        ORIGINAL_REFERENCE_NUMBER = "F8"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2330cNm1Segment(Nm1Segment):
     """
-    Claim Other Subscriber Other Payer Referring Provider Name
+    Claim Other Subscriber Other Payer Attending Provider Name
     """
 
-    class EntityIdentifierCode(str, Enum):
-        """
-        Code values for NM01
-        """
-
-        REFERRING_PROVIDER = "DN"
-        PRIMARY_CARE_PROVIDER = "P3"
-
-    entity_identifier_code: EntityIdentifierCode
+    entity_identifier_code: Literal["71"]
     entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: Optional[str]
 
 
 class Loop2330cRefSegment(RefSegment):
     """
-    Claim Other Subscriber Referring Provider
+    Claim Other Subscriber Other Payer Attending Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1053,22 +1003,24 @@ class Loop2330cRefSegment(RefSegment):
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2330dNm1Segment(Nm1Segment):
     """
-    Claim Other Subscriber Other Payer Rendering Provider Name
+    Claim Other Subscriber Other Payer Operating Physician
     """
 
-    entity_identifier_code: Literal["82"]
+    entity_identifier_code: Literal["72"]
+    entity_type_qualifier: Literal["1"]
     name_last_or_organization_name: Optional[str]
 
 
 class Loop2330dRefSegment(RefSegment):
     """
-    Claim Other Subscriber Rendering Provider
+    Claim Other Subscriber Other Payer Operating Physician Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1086,42 +1038,17 @@ class Loop2330dRefSegment(RefSegment):
 
 class Loop2330eNm1Segment(Nm1Segment):
     """
-    Claim Other Subscriber Other Payer Service Facility Location
+    Claim Other Subscriber Other Payer Other Operating Physician
     """
 
-    entity_identifier_code: Literal["77"]
-    entity_type_qualifier: Literal["2"]
+    entity_identifier_code: Literal["ZZ"]
+    entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: Optional[str]
 
 
 class Loop2330eRefSegment(RefSegment):
     """
-    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
-    """
-
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        STATE_LICENSE_NUMBER = "0B"
-        PROVIDER_COMMERCIAL_NUMBER = "G2"
-        LOCATION_NUMBER = "LU"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2330fNm1Segment(Nm1Segment):
-    """
-    Claim Other Subscriber Other Payer Service Facility Location
-    """
-
-    entity_identifier_code: Literal["DQ"]
-    entity_type_qualifier: Literal["1"]
-
-
-class Loop2330fRefSegment(RefSegment):
-    """
-    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    Claim Other Subscriber Other Payer Other Operating Physician Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1137,17 +1064,101 @@ class Loop2330fRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2330gNm1Segment(Nm1Segment):
+class Loop2330fNm1Segment(Nm1Segment):
     """
     Claim Other Subscriber Other Payer Service Facility Location
     """
 
-    entity_identifier_code: Literal["85"]
+    entity_identifier_code: Literal["77"]
+    entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
+
+
+class Loop2330fRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330gNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Rendering Provider Name
+    """
+
+    entity_identifier_code: Literal["82"]
+    entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: Optional[str]
 
 
 class Loop2330gRefSegment(RefSegment):
     """
-    Claim Other Subscriber Other Payer Service Facility Location Reference Identification
+    Claim Other Subscriber Other Payer Rendering Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330HNm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Referring Provider Name
+    """
+
+    entity_identifier_code: Literal["DN"]
+    entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: Optional[str]
+
+
+class Loop2330HRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Referring Provider Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
+        PROVIDER_COMMERCIAL_NUMBER = "G2"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2330INm1Segment(Nm1Segment):
+    """
+    Claim Other Subscriber Other Payer Billing Provider Name
+    """
+
+    entity_identifier_code: Literal["85"]
+    entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str]
+
+
+class Loop2330IRefSegment(RefSegment):
+    """
+    Claim Other Subscriber Other Payer Billing Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):

@@ -106,6 +106,17 @@ def test_clp_segment():
     assert clp_segment.x12() == "CLP*7722337*1*211366.97*138018.40**12*119932404007801~"
 
 
+def test_cl1_segment():
+    segment_data = {
+        "admission_type_code": "1",
+        "admission_source_code": "7",
+        "patient_status_code": "30",
+    }
+
+    cl1_segment: Cl1Segment = Cl1Segment(**segment_data)
+    assert cl1_segment.x12() == "CL1*1*7*30~"
+
+
 def test_cn1_segment():
     segment_data = {"contract_type_code": "02", "contract_amount": "550"}
 

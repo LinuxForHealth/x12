@@ -40,6 +40,7 @@ class X12SegmentName(str, Enum):
     CAS = "CAS"
     CLM = "CLM"
     CLP = "CLP"
+    CL1 = "CL1"
     CN1 = "CN1"
     CR1 = "CR1"
     CR2 = "CR2"
