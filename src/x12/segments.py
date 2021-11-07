@@ -1229,7 +1229,7 @@ class HcpSegment(X12Segment):
         EMERGENCY_CARE = "2"
         SERVICES_SPECIALIST_NOT_IN_NETWORK = "3"
         OUT_OF_SERVICE_AREA = "4"
-        STATE_MAnDATES = "5"
+        STATE_MANDATES = "5"
         OTHER = "6"
 
     segment_name: X12SegmentName = X12SegmentName.HCP
@@ -2586,8 +2586,29 @@ class Sv1Segment(X12Segment):
 
 class Sv2Segment(X12Segment):
     """
-
+    Institutional Claim Service Line
+    Example:
+        SV2*0120**1500*DA*5~
     """
+    class MeasurementCodes(str, Enum):
+        """
+        Code values for SV204
+        """
+        DAYS = "DA"
+        UNIT = "UN"
+
+    segment_name: X12SegmentName = X12SegmentName.SV2
+    service_line_revenue_code: str = Field(min_length=1, max_length=48)
+    composite_medical_procedure_identifier: Optional[str]
+    line_item_charge_amount = Decimal
+    measurement_code: MeasurementCodes
+    service_unit_count = Decimal
+    unit_rate: Optional[Decimal]
+    non_covered_charge_amount: Optional[Decimal]
+    condition_response_code: Optional[str]
+    nursing_home_residential_status_code: Optional[str]
+    level_of_care_code: Optional[str]
+
 
 class Sv5Segment(X12Segment):
     """

@@ -112,16 +112,12 @@ from .segments import (
     Loop2330HRefSegment,
     Loop2330INm1Segment,
     Loop2330IRefSegment,
-    Loop2400CrcSegment,
     Loop2400DtpSegment,
-    Loop2400QtySegment,
-    Loop2400Cn1Segment,
     Loop2400RefSegment,
     Loop2400AmtSegment,
     Loop2400NteSegment,
     Loop2410RefSegment,
     Loop2420ANm1Segment,
-    Loop2420APrvSegment,
     Loop2420ARefSegment,
     Loop2420BNm1Segment,
     Loop2420BRefSegment,
@@ -129,13 +125,6 @@ from .segments import (
     Loop2420CRefSegment,
     Loop2420DNm1Segment,
     Loop2420DRefSegment,
-    Loop2420ENm1Segment,
-    Loop2420ERefSegment,
-    Loop2420EPerSegment,
-    Loop2420FNm1Segment,
-    Loop2420FRefSegment,
-    Loop2420GNm1Segment,
-    Loop2420HNm1Segment,
     Loop2430DtpSegment,
     Loop2430AmtSegment,
     Loop2010AaPerSegment,
@@ -150,20 +139,14 @@ from x12.segments import (
     DmgSegment,
     ClmSegment,
     K3Segment,
-    Cr1Segment,
     HiSegment,
     CasSegment,
-    AmtSegment,
     OiSegment,
     MiaSegment,
     MoaSegment,
     LxSegment,
-    Sv1Segment,
-    Sv5Segment,
+    Sv2Segment,
     PwkSegment,
-    Cr3Segment,
-    MeaSegment,
-    Ps1Segment,
     HcpSegment,
     LinSegment,
     CtpSegment,
@@ -257,8 +240,8 @@ class Loop2330I(X12SegmentGroup):
     Claim - Other Subscriber Other Payer Billing Provider
     """
 
-    nm1_segment: Loop2330HNm1Segment
-    ref_segment: List[Loop2330HRefSegment] = Field(min_items=1, max_items=2)
+    nm1_segment: Loop2330INm1Segment
+    ref_segment: List[Loop2330IRefSegment] = Field(min_items=1, max_items=2)
 
 
 class Loop2330H(X12SegmentGroup):
@@ -436,55 +419,14 @@ class Loop2430(X12SegmentGroup):
     """
 
     svd_segment: SvdSegment
-    cas_segment: Optional[List[CasSegment]] = Field()
+    cas_segment: Optional[List[CasSegment]] = Field(min_length=0, max_length=5)
     dtp_segment: Loop2430DtpSegment
     amt_segment: Optional[Loop2430AmtSegment]
 
 
-class Loop2420H(X12SegmentGroup):
-    """
-    Claim Service Line - Ambulance Drop-Off Location
-    """
-
-    nm1_segment: Loop2420HNm1Segment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
-
-
-class Loop2420G(X12SegmentGroup):
-    """
-    Claim Service Line - Ambulance Pick-Up Location
-    """
-
-    nm1_segment: Loop2420GNm1Segment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
-
-
-class Loop2420F(X12SegmentGroup):
-    """
-    Claim Service Line - Referring Provider Name
-    """
-
-    nm1_segment: Loop2420FNm1Segment
-    ref_segment: Optional[List[Loop2420FRefSegment]] = Field(min_items=0, max_items=20)
-
-
-class Loop2420E(X12SegmentGroup):
-    """
-    Claim Service Line - Ordering Provider Name
-    """
-
-    nm1_segment: Loop2420ENm1Segment
-    n3_segment: Optional[N3Segment]
-    n4_segment: Optional[N4Segment]
-    ref_segment: Optional[List[Loop2420ERefSegment]] = Field(min_items=0, max_items=20)
-    per_segment: Optional[Loop2420EPerSegment]
-
-
 class Loop2420D(X12SegmentGroup):
     """
-    Claim Service Line - Supervising Provider Name
+    Claim Service Line - Referring Provider Name
     """
 
     nm1_segment: Loop2420DNm1Segment
@@ -493,31 +435,28 @@ class Loop2420D(X12SegmentGroup):
 
 class Loop2420C(X12SegmentGroup):
     """
-    Claim Service Line - Service Facility Location Name
+    Claim Service Line - Rendering Provider
     """
 
     nm1_segment: Loop2420CNm1Segment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
     ref_segment: Optional[List[Loop2420CRefSegment]] = Field(min_items=0, max_items=3)
 
 
 class Loop2420B(X12SegmentGroup):
     """
-    Claim Service Line - Purchased Service Provider
+    Claim Service Line - Other Operating Physician
     """
 
     nm1_segment: Loop2420BNm1Segment
-    ref_segment: Optional[List[Loop2420BRefSegment]] = Field(min_items=0, max_items=20)
+    ref_segment: Optional[List[Loop2420BRefSegment]] = Field(min_items=0, max_items=4)
 
 
 class Loop2420A(X12SegmentGroup):
     """
-    Claim Service Line - Rendering Provider
+    Claim Service Line - Operating Physician
     """
 
     nm1_segment: Loop2420ANm1Segment
-    prv_segment: Optional[Loop2420APrvSegment]
     ref_segment: Optional[List[Loop2420ARefSegment]] = Field(min_items=0, max_items=20)
 
 
@@ -528,7 +467,7 @@ class Loop2410(X12SegmentGroup):
 
     lin_segment: LinSegment
     ctp_segment: CtpSegment
-    ref_segment: Optional[Loop2410RefSegment]
+    ref_segment: Loop2410RefSegment
 
 
 class Loop2400(X12SegmentGroup):
@@ -537,33 +476,19 @@ class Loop2400(X12SegmentGroup):
     """
 
     lx_segment: LxSegment
-    sv1_segment: Sv1Segment
-    sv5_segment: Optional[Sv5Segment]
+    sv2_segment: Sv2Segment
     pwk_segment: Optional[List[PwkSegment]] = Field(min_items=0, max_items=10)
-    cr1_segment: Optional[Cr1Segment]
-    cr3_segment: Optional[Cr3Segment]
-    crc_segment: Optional[List[Loop2400CrcSegment]] = Field(min_items=0, max_items=5)
-    dtp_segment: List[Loop2400DtpSegment] = Field(min_items=1, max_items=11)
-    qty_segment: Optional[List[Loop2400QtySegment]] = Field(min_items=0, max_items=2)
-    mea_segment: Optional[List[MeaSegment]] = Field(min_items=0, max_items=5)
-    cn1_segment: Optional[Loop2400Cn1Segment]
-    ref_segment: Optional[List[Loop2400RefSegment]] = Field(min_items=0, max_items=11)
+    dtp_segment: Optional[Loop2400DtpSegment]
+    ref_segment: Optional[List[Loop2400RefSegment]] = Field(min_items=0, max_items=3)
     amt_segment: Optional[List[Loop2400AmtSegment]] = Field(min_items=0, max_items=2)
-    k3_segment: Optional[List[K3Segment]] = Field(min_items=0, max_items=10)
-    nte_segment: Optional[List[Loop2400NteSegment]] = Field(min_items=0, max_items=2)
-    ps1_segment: Optional[Ps1Segment]
+    nte_segment: Optional[Loop2400NteSegment]
     hcp_segment: Optional[HcpSegment]
     loop_2410: Optional[Loop2410]
     loop_2420a: Optional[Loop2420A]
     loop_2420b: Optional[Loop2420B]
     loop_2420c: Optional[Loop2420C]
     loop_2420d: Optional[Loop2420D]
-    loop_2420e: Optional[Loop2420E]
-    loop_2420f: Optional[Loop2420F]
-    loop_2420g: Optional[Loop2420G]
-    loop_2420h: Optional[Loop2420H]
     loop_2430: Optional[List[Loop2430]] = Field(min_items=0, max_items=15)
-    loop_2440: Optional[List[Loop2440]] = Field(min_items=0)
 
     _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
         validate_duplicate_date_qualifiers

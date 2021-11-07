@@ -21,7 +21,7 @@ from x12.segments import (
     PatSegment,
     HcpSegment,
     QtySegment,
-    CasSegment,
+    SvdSegment
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -358,15 +358,6 @@ class Loop2010BaRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2010BaPerSegment(PerSegment):
-    """
-    Subscriber Name Contact Information
-    """
-
-    communication_number_qualifier_1: Literal["TE"]
-    communication_number_qualifier_2: Optional[Literal["EX"]]
-
-
 class Loop2010BbNm1Segment(Nm1Segment):
     """
     Subscriber Name Segment
@@ -413,15 +404,6 @@ class Loop2010CaNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["QC"]
     entity_type_qualifier: Literal["1"]
-
-
-class Loop2010CaPerSegment(PerSegment):
-    """
-    Loop2010CA (Patient Name) Per (Contact) segment
-    """
-
-    communication_number_qualifier_1: Literal["TE"]
-    communication_number_qualifier_2: Optional[Literal["EX"]]
 
 
 class Loop2010CaRefSegment(RefSegment):
@@ -566,10 +548,6 @@ class Loop2300NteSegment(NteSegment):
         UPDATED_INFORMATION = "UPI"
 
 
-
-
-
-
 class Loop2300CrcEpSdtRefferal(CrcSegment):
     """
     Claim Information - Homebound indicator
@@ -699,15 +677,6 @@ class Loop2310BRefSegment(RefSegment):
         LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2310CaPerSegment(PerSegment):
-    """
-    Loop2310CA (Patient Name) Per (Contact) segment
-    """
-
-    communication_number_qualifier_1: Literal["TE"]
-    communication_number_qualifier_2: Optional[Literal["EX"]]
 
 
 class Loop2310CNm1Segment(Nm1Segment):
@@ -1172,114 +1141,13 @@ class Loop2330IRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2400CrcSegment(CrcSegment):
-    """
-    Conditions Indicator
-    """
-
-    class YesNoResponseCode(str, Enum):
-        """
-        Code values for CRC
-        """
-
-        YES = "Y"
-        NO = "N"
-
-    class CodeCategory(str, Enum):
-        """
-        Code values for CRC01
-        """
-
-        DURABLE_MEDICAL_EQUIPMENT_CERTIFICATION = "09"
-        HOSPICE = "70"
-
-    class ConditionsIndicator(str, Enum):
-        """
-        Code values for CRC03 - CRC07
-        """
-
-        # Ambulance Conditions
-        PATIENT_ADMITTED_TO_HOSPITAL = "01"
-        PATIENT_MOVED_BY_STRETCHER = "04"
-        PATIENT_UNCONSCIOUS_IN_SHOCK = "05"
-        PATIENT_EMERGENCY_TRANSPORT = "06"
-        PATIENT_RESTRAINED = "07"
-        PATIENT_HEMORRHAGING = "08"
-        AMBULANCE_MEDICALLY_NECESSARY = "09"
-        PATIENT_CONFINED_BED_CHAIR = "12"
-        # Hospice Condition
-        OPEN = "65"
-        # Durable Medical Equipment Condition
-        CERTIFICATE_ON_FILE_SUPPLIER = "38"
-        REPLACEMENT_ITEM = "ZV"
-
-    code_category: CodeCategory
-    certification_condition_indicator: YesNoResponseCode
-    condition_code_1: ConditionsIndicator
-    condition_code_2: Optional[ConditionsIndicator]
-    condition_code_3: Optional[ConditionsIndicator]
-    condition_code_4: Optional[ConditionsIndicator]
-    condition_code_5: Optional[ConditionsIndicator]
-
-
 class Loop2400DtpSegment(DtpSegment):
     """
     Date values for Loop 2400 - Claim service line
     """
 
-    class DateTimeQualifier(str, Enum):
-        """
-        Code values for DTP001
-        """
-
-        SERVICE = "472"
-        PRESCRIPTION = "471"
-        CERTIFICATION_REVISION = "607"
-        BEGIN_THERAPY = "463"
-        LAST_CERTIFICATION = "461"
-        LATEST_VISIT_CONSULTATION = "304"
-        MOST_RECENT_HEMOGLOBIN_HEMATOCRIT = "738"
-        MOST_RECENT_SERUM_CREATINE = "739"
-        SHIPPED = "011"
-        LAST_X_RAY = "455"
-        INITIAL_TREATMENT = "454"
-
-    date_time_qualifier: DateTimeQualifier
-
-
-class Loop2400QtySegment(QtySegment):
-    """
-    Quantity Information for Claim Service Lines
-    """
-
-    class QuantityQualifier(str, Enum):
-        """
-        Code values for QTY01
-        """
-
-        UNITS = "FL"
-        PATIENTS = "PT"
-
-    quantity_qualifier: QuantityQualifier
-
-
-class Loop2400Cn1Segment(Cn1Segment):
-    """
-    Contract Information
-    """
-
-    class ContractTypeCode(str, Enum):
-        """
-        Code values for CN101
-        """
-
-        DIAGNOSIS_RELATED_GROUP = "01"
-        PER_DIEM = "02"
-        VARIABLE_PER_DIEM = "03"
-        FLAT = "04"
-        CAPITATED = "05"
-        PERCENT = "06"
-        OTHER = "09"
+    date_time_qualifier: Literal["472"]
+    date_time_period_format_qualifier: Literal["D8"]
 
 
 class Loop2400RefSegment(RefSegment):
@@ -1292,15 +1160,9 @@ class Loop2400RefSegment(RefSegment):
         Code values for REF01
         """
 
+        PROVIDER_CONTROL_NUMBER = "6R"
         REPRICED_LINE_ITEM_REFERENCE_NUMBER = "9B"
         ADJUSTED_REPRICED_LINE_ITEM_REFERENCE_NUMBER = "9D"
-        PRIOR_AUTHORIZATION_NUMBER = "G1"
-        PROVIDER_CONTROL_NUMBER = "6R"
-        MAMMOGRAPHY_CERTIFICATION_NUMBER = "EW"
-        CLINICAL_LABORATORY_IMPROVEMENT_NUMBER = "X4"
-        FACILITY_CERTIFICATION_NUMBER = "F4"
-        BATCH_NUMBER = "BT"
-        REFERRAL_NUMBER = "9F"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
@@ -1315,8 +1177,8 @@ class Loop2400AmtSegment(AmtSegment):
         Code values for AMT01
         """
 
-        TAX = "T"
-        POSTAGE_CLAIMED = "F4"
+        GOODS_SERVICES_TAX = "GT"
+        MISCELLANEOUS_TAXES = "N8"
 
     amount_qualifier_code: AmountQualifierCode
 
@@ -1326,16 +1188,7 @@ class Loop2400NteSegment(NteSegment):
     Loop 2400/Claim Service Line Notes
     """
 
-    class NoteReferenceCode(str, Enum):
-        """
-        NTE01 code values
-        """
-
-        ADDITIONAL_INFORMATION = "ADD"
-        GOALS_REHAB_DISCHARGE_PLANS = "DCP"
-        THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
-
-    note_reference_code: NoteReferenceCode
+    note_reference_code: Literal["TPO"]
 
 
 class Loop2410RefSegment(RefSegment):
@@ -1343,38 +1196,22 @@ class Loop2410RefSegment(RefSegment):
     Loop 2400/Claim Service Line Drug Identification Reference Identifier
     """
 
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        LINK_SEQUENCE_NUMBER = "VY"
-        PHARMACY_PRESCRIPTION_NUMBER = "XZ"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
+    reference_identification_qualifier: Literal["XZ"]
 
 
 class Loop2420ANm1Segment(Nm1Segment):
     """
-    Loop 2420A Rendering Provider Name
+    Loop 2420A Operating Physician Name
     """
 
-    entity_identifier_code: Literal["82"]
+    entity_identifier_code: Literal["71"]
+    entity_type_qualifier: Literal["1"]
     identification_code_qualifier: Literal["XX"]
-
-
-class Loop2420APrvSegment(PrvSegment):
-    """
-    Loop 2420A Rendering Provider Speciality
-    """
-
-    provider_code: Literal["PE"]
-    reference_identification_qualifier: Literal["PXC"]
 
 
 class Loop2420ARefSegment(RefSegment):
     """
-    Loop 2420A Rendering Provider Reference Identification
+    Loop 2420A Operating Physician Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1392,11 +1229,12 @@ class Loop2420ARefSegment(RefSegment):
 
 class Loop2420BNm1Segment(Nm1Segment):
     """
-    Loop 2420B Purchased Service Provider Name
+    Loop 2420B Other Operating Physician Name
     """
 
-    entity_identifier_code: Literal["QB"]
-    identification_code_qualifier: Literal["XX"]
+    entity_identifier_code: Literal["ZZ"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2420BRefSegment(RefSegment):
@@ -1412,28 +1250,32 @@ class Loop2420BRefSegment(RefSegment):
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
+        LOCATION_NUMBER = "LU"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2420CNm1Segment(Nm1Segment):
     """
-    Loop 2420C Service Facility Location Name
+    Loop 2420C Rendering Provider Name
     """
 
-    entity_identifier_code: Literal["77"]
+    entity_identifier_code: Literal["82"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2420CRefSegment(RefSegment):
     """
-    Loop 2420C Service Facility Location Reference Identification
+    Loop 2420C Rendering Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
-
+        STATE_LICENSE_NUMBER = "0B"
+        PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
         LOCATION_NUMBER = "LU"
 
@@ -1442,42 +1284,17 @@ class Loop2420CRefSegment(RefSegment):
 
 class Loop2420DNm1Segment(Nm1Segment):
     """
-    Loop 2420D Supervising Provider Name
+    Loop 2420D Referring Provider Name
     """
 
-    entity_identifier_code: Literal["DQ"]
+    entity_identifier_code: Literal["DN"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2420DRefSegment(RefSegment):
     """
-    Loop 2420D Supervising Provider Reference Identification
-    """
-
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        STATE_LICENSE_NUMBER = "0B"
-        PROVIDER_UPIN_NUMBER = "1G"
-        PROVIDER_COMMERCIAL_NUMBER = "G2"
-        LOCATION_NUMBER = "LU"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2420ENm1Segment(Nm1Segment):
-    """
-    Loop 2420E Ordering Provider Name
-    """
-
-    entity_identifier_code: Literal["DK"]
-    entity_type_qualifier: Literal["1"]
-
-
-class Loop2420ERefSegment(RefSegment):
-    """
-    Loop 2420E Ordering Provider Reference Identification
+    Loop 2420D Referring Provider Reference Identification
     """
 
     class ReferenceIdentificationQualifier(str, Enum):
@@ -1490,78 +1307,6 @@ class Loop2420ERefSegment(RefSegment):
         PROVIDER_COMMERCIAL_NUMBER = "G2"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2420EPerSegment(PerSegment):
-    """
-    Loop 2420E Ordering Provider Contact Information
-    """
-
-    class CommunicationNumberQualifier(str, Enum):
-        """
-        Code values for PER03, PER05, PER07
-        """
-
-        ELECTRONIC_MAIL = "EM"
-        TELEPHONE_EXTENSION = "EX"
-        FACSIMILE = "FX"
-        TELEPHONE = "TE"
-
-    communication_number_qualifier_1: CommunicationNumberQualifier
-    communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
-    communication_number_qualifier_3: Optional[CommunicationNumberQualifier]
-
-
-class Loop2420FNm1Segment(Nm1Segment):
-    """
-    Loop 2420C Service Facility Location Name
-    """
-
-    class EntityIdentifierCode(str, Enum):
-        """
-        Code values for NM101
-        """
-
-        REFERRING_PROVIDER = "DN"
-        PRIMARY_CARE_PROVIDER = "P3"
-
-    entity_identifier_code: EntityIdentifierCode
-    entity_type_qualifier: Literal["1"]
-
-
-class Loop2420FRefSegment(RefSegment):
-    """
-    Loop 2420C Service Facility Location Reference Identification
-    """
-
-    class ReferenceIdentificationQualifier(str, Enum):
-        """
-        Code values for REF01
-        """
-
-        STATE_LICENSE_NUMBER = "0B"
-        PROVIDER_UPIN_NUMBER = "1G"
-        PROVIDER_COMMERCIAL_NUMBER = "G2"
-
-    reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2420GNm1Segment(Nm1Segment):
-    """
-    Loop 2420G Ambulance Pickup Location
-    """
-
-    entity_identifier_code: Literal["PW"]
-    entity_type_qualifier: Literal["2"]
-
-
-class Loop2420HNm1Segment(Nm1Segment):
-    """
-    Loop 2420H Ambulance Drop-Off Location
-    """
-
-    entity_identifier_code: Literal["45"]
-    entity_type_qualifier: Literal["2"]
 
 
 class Loop2430DtpSegment(DtpSegment):

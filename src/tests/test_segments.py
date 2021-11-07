@@ -647,6 +647,17 @@ def test_sv1_segment():
     assert sv1_segment.x12() == "SV1*HC:99213*40.00*UN*1.00***1~"
 
 
+def test_sv2_segment():
+    segment_data = {
+        "service_line_revenue_code": "0120",
+        "line_item_charge_amount": "1500.00",
+        "measurement_code": "DA",
+        "service_unit_count": "5.00",
+    }
+    sv2_segment: Sv2Segment = Sv2Segment(**segment_data)
+    assert sv2_segment.x12() == "SV2*0120**1500.00*DA*5.00~"
+
+
 def test_sv5_segment():
     segment_data = {
         "product_service_id_qualifier": "HC:A4631",
