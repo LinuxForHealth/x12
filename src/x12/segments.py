@@ -2374,6 +2374,10 @@ class PwkSegment(X12Segment):
         """
 
         AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
+        PREVIOUSLY_SUBMITTED_TO_PAYER = "AB"
+        CERTIFICATION_INCLUDED_IN_THIS_CLAIM = "AD"
+        NARRATIVE_SUPPORT_INCLUDED_IN_THIS_CLAIM = "AF"
+        NOT_SPECIFIED = "NS"
         BY_MAIL = "BM"
         ELECTRONICALLY_ONLY = "EL"
         EMAIL = "EM"
@@ -2604,7 +2608,7 @@ class Sv2Segment(X12Segment):
     composite_medical_procedure_identifier: Optional[str]
     line_item_charge_amount: Decimal
     measurement_code: MeasurementCodes
-    service_unit_count = Decimal
+    service_unit_count: Decimal
     unit_rate: Optional[Decimal]
     non_covered_charge_amount: Optional[Decimal]
     condition_response_code: Optional[str]

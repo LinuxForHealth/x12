@@ -13,7 +13,12 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["institutional-claim.837i", "out-of-network-repriced-claim.837i"],
+    [
+        "institutional-claim.837i",
+        "out-of-network-repriced-claim.837i",
+        "ppo-repriced-claim.837i",
+        "two-claims-single-provider.837i",
+    ],
 )
 def test_837i_model(resource_path, file_name: str):
     x12_file_path = os.path.join(resource_path, file_name)
