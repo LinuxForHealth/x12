@@ -21,7 +21,7 @@ from x12.segments import (
     PatSegment,
     HcpSegment,
     QtySegment,
-    SvdSegment
+    SvdSegment,
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
@@ -581,7 +581,6 @@ class Loop2300CrcEpSdtRefferal(CrcSegment):
 
 
 class Loop2300HcpSegment(HcpSegment):
-
     class PricingMethodologyCodes(str, Enum):
         """
         Code values for HCP01
@@ -607,6 +606,7 @@ class Loop2300HcpSegment(HcpSegment):
         """
         Code values for HCP11
         """
+
         DAYS = "DA"
         UNIT = "UN"
 
@@ -628,6 +628,7 @@ class Loop2310APrvSegment(PrvSegment):
     """
     Attending Provider Speciality Information
     """
+
     provider_code: Literal["AT"]
     reference_identification_qualifier: Literal["PXC"]
     reference_identification: str = Field(min_length=1, max_length=50)
@@ -750,10 +751,12 @@ class Loop2310ERefSegment(RefSegment):
     """
     Service Facility Location Reference Identification
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_COMMERCIAL_NUMBER = "G2"
         LOCATION_NUMBER = "LU"
@@ -775,10 +778,12 @@ class Loop2310FRefSegment(RefSegment):
     """
     Referring Provider Reference Identification
     """
+
     class ReferenceIdentificationQualifier(str, Enum):
         """
         Code values for REF01
         """
+
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_UPIN_NUMBER = "1G"
 
@@ -866,6 +871,7 @@ class Loop2320AmtSegment(AmtSegment):
         """
         Code values for AMT01
         """
+
         PAYOR_AMOUNT_PAID = "D"
         AMOUNT_OWED = "EAF"
         NONCOVERED_CHARGES_ACTUAL = "A8"
@@ -937,6 +943,7 @@ class Loop2300BRefSegment(RefSegment):
         """
         Code values for REF01
         """
+
         PAYER_IDENTIFICATION_NUMBER = "2U"
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         CLAIM_OFFICE_NUMBER = "FY"
@@ -1274,6 +1281,7 @@ class Loop2420CRefSegment(RefSegment):
         """
         Code values for REF01
         """
+
         STATE_LICENSE_NUMBER = "0B"
         PROVIDER_UPIN_NUMBER = "1G"
         PROVIDER_COMMERCIAL_NUMBER = "G2"

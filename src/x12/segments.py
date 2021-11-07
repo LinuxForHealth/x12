@@ -351,7 +351,7 @@ class ClmSegment(X12Segment):
     claim_status_code: Optional[str]
     yes_no_condition_response_code_3: Optional[str]
     claim_submission_reason_code: Optional[str]
-    delay_reason_code: DelayReasonCode
+    delay_reason_code: Optional[DelayReasonCode]
 
 
 class ClpSegment(X12Segment):
@@ -2590,17 +2590,19 @@ class Sv2Segment(X12Segment):
     Example:
         SV2*0120**1500*DA*5~
     """
+
     class MeasurementCodes(str, Enum):
         """
         Code values for SV204
         """
+
         DAYS = "DA"
         UNIT = "UN"
 
     segment_name: X12SegmentName = X12SegmentName.SV2
     service_line_revenue_code: str = Field(min_length=1, max_length=48)
     composite_medical_procedure_identifier: Optional[str]
-    line_item_charge_amount = Decimal
+    line_item_charge_amount: Decimal
     measurement_code: MeasurementCodes
     service_unit_count = Decimal
     unit_rate: Optional[Decimal]

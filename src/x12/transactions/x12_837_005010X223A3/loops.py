@@ -490,10 +490,6 @@ class Loop2400(X12SegmentGroup):
     loop_2420d: Optional[Loop2420D]
     loop_2430: Optional[List[Loop2430]] = Field(min_items=0, max_items=15)
 
-    _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
-        validate_duplicate_date_qualifiers
-    )
-
 
 class Loop2300(X12SegmentGroup):
     """
@@ -534,7 +530,7 @@ class Loop2300(X12SegmentGroup):
         line_total: Decimal = Decimal("0.0")
 
         for line in values.get("loop_2400", []):
-            line_total += line.sv1_segment.line_item_charge_amount
+            line_total += line.sv2_segment.line_item_charge_amount
 
         if claim_amount != line_total:
             raise ValueError(

@@ -169,7 +169,6 @@ def set_billing_provider_name_loop(
 
         if TransactionLoops.BILLING_PROVIDER_NAME not in billing_provider:
             billing_provider[TransactionLoops.BILLING_PROVIDER_NAME] = {
-                "ref_segment": [],
                 "per_segment": [],
             }
         billing_provider_name_loop = billing_provider[
@@ -305,9 +304,7 @@ def set_patient_loop(context: X12ParserContext, segment_data: Dict) -> None:
         context.subscriber_record[TransactionLoops.PATIENT] = []
 
     context.subscriber_record[TransactionLoops.PATIENT].append({})
-    context.patient_record = context.subscriber_record[TransactionLoops.PATIENT][
-        -1
-    ]
+    context.patient_record = context.subscriber_record[TransactionLoops.PATIENT][-1]
     context.set_loop_context(TransactionLoops.PATIENT, context.patient_record)
 
 
@@ -349,7 +346,9 @@ def set_claim_loop(context: X12ParserContext, segment_data: Dict) -> None:
     context.set_loop_context(TransactionLoops.CLAIM_INFORMATION, claim_loop)
 
 
-@match("NM1", conditions={"entity_identifier_code": ["71", "72", "ZZ", "82", "77", "DN"]})
+@match(
+    "NM1", conditions={"entity_identifier_code": ["71", "72", "ZZ", "82", "77", "DN"]}
+)
 def set_claim_entity_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the "entity" loops within the 2300 claims loop, including:
@@ -444,7 +443,9 @@ def set_other_subscriber_name_loop(
 
 @match(
     "NM1",
-    conditions={"entity_identifier_code": ["IL", "PR", "71", "72", "ZZ", "77", "82", "DN", "85"]},
+    conditions={
+        "entity_identifier_code": ["IL", "PR", "71", "72", "ZZ", "77", "82", "DN", "85"]
+    },
 )
 def set_other_subscriber_entities_loop(
     context: X12ParserContext, segment_data: Dict
@@ -490,9 +491,13 @@ def set_other_subscriber_entities_loop(
                 TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
             )
         elif identifier == "DN":
-            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
+            )
         elif identifier == "85":
-            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
+            loop_name = (
+                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
+            )
 
         if not loop_name:
             raise ValueError(
@@ -500,7 +505,12 @@ def set_other_subscriber_entities_loop(
             )
 
         other_subscriber = _get_other_subscriber(context)
-        other_subscriber[loop_name] = {"ref_segment": []}
+
+        if identifier == "IL":
+            other_subscriber[loop_name] = {}
+        else:
+            other_subscriber[loop_name] = {"ref_segment": []}
+
         context.set_loop_context(loop_name, other_subscriber[loop_name])
 
 
@@ -520,7 +530,6 @@ def set_service_line_loop(context: X12ParserContext, segment_data: Dict) -> None
     claim[TransactionLoops.CLAIM_SERVICE_LINE].append(
         {
             "pwk_segment": [],
-            "dtp_segment": [],
             "ref_segment": [],
             "amt_segment": [],
         }
@@ -574,9 +583,7 @@ def set_service_line_entities_loop(
                 TransactionLoops.CLAIM_SERVICE_LINE_OTHER_OPERATING_PHYSICIAN_NAME
             )
         elif identifier == "82":
-            loop_name = (
-                TransactionLoops.CLAIM_SERVICE_LINE_RENDERING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_SERVICE_LINE_RENDERING_PROVIDER_NAME
         elif identifier == "DN":
             loop_name = TransactionLoops.CLAIM_SERVICE_LINE_REFERRING_PROVIDER_NAME
 
