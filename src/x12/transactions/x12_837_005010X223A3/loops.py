@@ -419,7 +419,7 @@ class Loop2430(X12SegmentGroup):
     """
 
     svd_segment: SvdSegment
-    cas_segment: Optional[List[CasSegment]] = Field(min_length=0, max_length=5)
+    cas_segment: Optional[List[CasSegment]] = Field(min_items=0, max_items=5)
     dtp_segment: Loop2430DtpSegment
     amt_segment: Optional[Loop2430AmtSegment]
 

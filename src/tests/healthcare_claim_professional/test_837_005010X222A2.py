@@ -4,7 +4,6 @@ test_837_005010XX222A2.py
 import pytest
 from tests.support import assert_eq_model, resources_directory
 import os
-from x12.io import X12ModelReader
 
 
 @pytest.fixture

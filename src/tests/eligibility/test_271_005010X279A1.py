@@ -1,7 +1,6 @@
 """
 Tests use-cases for the 271 005010X279A1 (Eligibility Benefit Response) transaction
 """
-from x12.io import X12ModelReader
 import pytest
 from tests.support import assert_eq_model, resources_directory
 import os
