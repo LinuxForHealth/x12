@@ -20,12 +20,11 @@ from x12.segments import (
     CrcSegment,
     PatSegment,
     HcpSegment,
-    QtySegment,
-    SvdSegment,
 )
-from typing import Literal, Optional, Dict
+from typing import Literal, Optional, Dict, Union
 from enum import Enum
 from pydantic import Field, root_validator
+import datetime
 
 
 class HeaderStSegment(StSegment):
@@ -448,6 +447,7 @@ class Loop2300DtpSegment(DtpSegment):
 
     date_time_qualifier: DateTimeQualifier
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
+    date_time_period: Union[str, datetime.datetime, datetime.date]
 
     @root_validator
     def validate_disability_dates(cls, values: Dict):

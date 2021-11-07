@@ -151,6 +151,8 @@ class X12Segment(abc.ABC, BaseModel):
                 x12_values.append(v)
             elif isinstance(v, list):
                 x12_values.append(self._process_multivalue_field(k, v))
+            elif isinstance(v, datetime.datetime):
+                x12_values.append(v.strftime("%Y%m%d%H%M"))
             elif isinstance(v, datetime.date):
                 x12_values.append(v.strftime("%Y%m%d"))
             elif isinstance(v, datetime.time):
