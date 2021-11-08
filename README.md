@@ -16,13 +16,13 @@ Implemented formats include:
 * 005010X212 Claim Status
 * 005010X221 Claim Payment
 * 005010X222 Professional Claim
+* 05010X223 Institutional Claim
 * 005010X279 Eligibility
 
 Future formats include:
 * 005010X217 Services Review
 * 005010X218 Premium Payment
 * 005010X220 Enrollment and Maintenance
-* 05010X223 Institutional Claim
 * 005010X224 Dental Claim
 
 This project is currently under construction. Please refer to the [LinuxForHealth X12 Issue Board](https://github.com/LinuxForHealth/x12/issues) to review current issues and progress.
