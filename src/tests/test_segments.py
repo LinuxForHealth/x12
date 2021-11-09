@@ -106,6 +106,17 @@ def test_clp_segment():
     assert clp_segment.x12() == "CLP*7722337*1*211366.97*138018.40**12*119932404007801~"
 
 
+def test_cl1_segment():
+    segment_data = {
+        "admission_type_code": "1",
+        "admission_source_code": "7",
+        "patient_status_code": "30",
+    }
+
+    cl1_segment: Cl1Segment = Cl1Segment(**segment_data)
+    assert cl1_segment.x12() == "CL1*1*7*30~"
+
+
 def test_cn1_segment():
     segment_data = {"contract_type_code": "02", "contract_amount": "550"}
 
@@ -634,6 +645,17 @@ def test_sv1_segment():
     }
     sv1_segment: Sv1Segment = Sv1Segment(**segment_data)
     assert sv1_segment.x12() == "SV1*HC:99213*40.00*UN*1.00***1~"
+
+
+def test_sv2_segment():
+    segment_data = {
+        "service_line_revenue_code": "0120",
+        "line_item_charge_amount": "1500.00",
+        "measurement_code": "DA",
+        "service_unit_count": "5.00",
+    }
+    sv2_segment: Sv2Segment = Sv2Segment(**segment_data)
+    assert sv2_segment.x12() == "SV2*0120**1500.00*DA*5.00~"
 
 
 def test_sv5_segment():

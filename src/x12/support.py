@@ -53,11 +53,21 @@ def parse_interchange_date(date_string: str) -> datetime.date:
     return datetime.datetime.strptime(date_string, "%y%m%d").date()
 
 
-def parse_x12_date(date_string: str) -> Union[datetime.date, None]:
-    """Parses a datetime.date from date fields in X12 transaction segments"""
+def parse_x12_date(date_string: str) -> Union[datetime.date, datetime.datetime, None]:
+    """Parses a datetime.date or datetime.datetime from date fields in X12 transaction segments"""
+    parsed_date = None
+
     if not date_string:
-        return None
-    return datetime.datetime.strptime(date_string, "%Y%m%d").date()
+        return parsed_date
+
+    if len(date_string) == 8:
+        # date
+        parsed_date = datetime.datetime.strptime(date_string, "%Y%m%d").date()
+    elif len(date_string) == 12:
+        # date and time
+        parsed_date = datetime.datetime.strptime(date_string, "%Y%m%d%H%M")
+
+    return parsed_date
 
 
 def count_segments(values: Dict) -> int:

@@ -40,6 +40,7 @@ class X12SegmentName(str, Enum):
     CAS = "CAS"
     CLM = "CLM"
     CLP = "CLP"
+    CL1 = "CL1"
     CN1 = "CN1"
     CR1 = "CR1"
     CR2 = "CR2"
@@ -95,6 +96,7 @@ class X12SegmentName(str, Enum):
     STC = "STC"
     SVC = "SVC"
     SV1 = "SV1"
+    SV2 = "SV2"
     SV5 = "SV5"
     SVD = "SVD"
     TRN = "TRN"
@@ -149,6 +151,8 @@ class X12Segment(abc.ABC, BaseModel):
                 x12_values.append(v)
             elif isinstance(v, list):
                 x12_values.append(self._process_multivalue_field(k, v))
+            elif isinstance(v, datetime.datetime):
+                x12_values.append(v.strftime("%Y%m%d%H%M"))
             elif isinstance(v, datetime.date):
                 x12_values.append(v.strftime("%Y%m%d"))
             elif isinstance(v, datetime.time):
