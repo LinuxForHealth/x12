@@ -2296,92 +2296,9 @@ class PwkSegment(X12Segment):
         PWK*OZ*BM***AC*DMN0012~
     """
 
-    class AttachmentReportTypeCode(str, Enum):
-        """
-        PWK01 code values
-        """
-
-        REPORT_JUSTIFYING_TREATMENT_BEYOND_UTILIZATION_GUIDELINES = "03"
-        DRUGS_ADMINISTERED = "04"
-        TREATMENT_DIAGNOSIS = "05"
-        INITIAL_ASSESSMENT = "06"
-        FUNCTIONAL_GOALS = "07"
-        PLAN_OF_TREATMENT = "08"
-        PROGRESS_REPORT = "09"
-        CONTINUED_TREATMENT = "10"
-        CHEMICAL_ANALYSIS = "11"
-        CERTIFIED_TEST_REPORT = "13"
-        JUSTIFICATION_FOR_ADMISSION = "15"
-        RECOVERY_PLAN = "21"
-        ALLERGIES_SENSITIVITIES_DOCUMENT = "A3"
-        AUTOPSY_REPORT = "A4"
-        AMBULANCE_CERTIFICATION = "AM"
-        ADMISSION_SUMMARY = "AS"
-        PRESCRIPTION = "B2"
-        PHYSICIAN_ORDER = "B3"
-        REFERRAL_FORM = "B4"
-        BENCHMARK_TESTING_RESULTS = "BR"
-        BASELINE = "BS"
-        BLANKET_TESTING_RESULTS = "BT"
-        CHIROPRACTIC_JUSTIFICATION = "CB"
-        CONSENT_FORM = "CK"
-        CERTIFICATION = "CT"
-        DRUG_PROFILE_DOCUMENT = "D2"
-        DENTAL_MODELS = "DA"
-        DURABLE_MEDICAL_EQUIPMENT_PRESCRIPTION = "DB"
-        DIAGNOSTIC_REPORT = "DG"
-        DISCHARGE_MONITORING_REPORT = "DJ"
-        DISCHARGE_SUMMARY = "DS"
-        EXPLANATION_OF_BENEFITS = "EB"
-        HEALTH_CERTIFICATE = "HC"
-        HEALTH_CLINIC_RECORDS = "HR"
-        IMMUNIZATION_RECORD = "I5"
-        STATE_SCHOOL_IMMUNIZATION_RECORDS = "IR"
-        LABORATORY_RESULTS = "LA"
-        MEDICAL_RECORD_ATTACHMENT = "M1"
-        MODELS = "MT"
-        NURSING_NOTES = "NN"
-        OPERATIVE_NOTE = "OB"
-        OXYGEN_CONTENT_AVERAGING_REPORT = "OC"
-        ORDERS_AND_TREATMENTS_DOCUMENT = "OD"
-        OBJECTIVE_PHYSICAL_EXAMINATION = "OE"
-        OXYGEN_THERAPY_CERTIFICATION = "OX"
-        SUPPORT_DATA_FOR_CLAIM = "OZ"
-        PATHOLOGY_REPORT = "P4"
-        PATIENT_MEDICAL_HISTORY_DOCUMENT = "P5"
-        PARENTAL_OR_ENTERAL_CERTIFICATION = "PE"
-        PHYSICAL_THERAPY_NOTES = "PN"
-        PROSTHETICS_OR_ORTHOTIC_CERTIFICATION = "PO"
-        PARAMEDICAL_RESULTS = "PQ"
-        PHYSICIANS_REPORT = "PY"
-        PHYSICAL_THERAPY_CERTIFICATION = "PZ"
-        RADIOLOGY_FILMS = "RB"
-        RADIOLOGY_REPORTS = "RR"
-        REPORT_OF_TESTS_AND_ANALYSIS_REPORT = "RT"
-        RENEWABLE_OXYGEN_CONTENT_AVERAGING_REPORT = "RX"
-        SYMPTOMS_DOCUMENT = "SG"
-        DEATH_NOTIFICATION = "V5"
-        PHOTOGRAPHS = "XP"
-
-    class AttachmentTransmissionCode(str, Enum):
-        """
-        Code values for PWK02
-        """
-
-        AVAILABLE_ON_REQUEST_PROVIDER_SITE = "AA"
-        PREVIOUSLY_SUBMITTED_TO_PAYER = "AB"
-        CERTIFICATION_INCLUDED_IN_THIS_CLAIM = "AD"
-        NARRATIVE_SUPPORT_INCLUDED_IN_THIS_CLAIM = "AF"
-        NOT_SPECIFIED = "NS"
-        BY_MAIL = "BM"
-        ELECTRONICALLY_ONLY = "EL"
-        EMAIL = "EM"
-        FILE_TRANSFER = "FT"
-        BY_FAX = "FX"
-
     segment_name: X12SegmentName = X12SegmentName.PWK
-    report_type_code: AttachmentReportTypeCode
-    report_transmission_code: AttachmentTransmissionCode
+    report_type_code: str = Field(min_length=2, max_length=2)
+    report_transmission_code: str = Field(min_length=1, max_length=2)
     report_copies_needed: Optional[str] = Field(max_length=2)
     entity_identifier_code: Optional[str] = Field(max_length=3)
     identification_code_qualifier: Optional[str] = Field(max_length=2)

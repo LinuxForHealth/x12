@@ -78,6 +78,7 @@ from .segments import (
     Loop2000CPatSegment,
     Loop2010CaNm1Segment,
     Loop2010CaRefSegment,
+    Loop2300PwkSegment,
     Loop2310ANm1Segment,
     Loop2310ARefSegment,
     Loop2310BNm1Segment,
@@ -113,6 +114,7 @@ from .segments import (
     Loop2330INm1Segment,
     Loop2330IRefSegment,
     Loop2400DtpSegment,
+    Loop2400PwkSegment,
     Loop2400RefSegment,
     Loop2400AmtSegment,
     Loop2400NteSegment,
@@ -146,7 +148,6 @@ from x12.segments import (
     MoaSegment,
     LxSegment,
     Sv2Segment,
-    PwkSegment,
     HcpSegment,
     LinSegment,
     CtpSegment,
@@ -477,7 +478,7 @@ class Loop2400(X12SegmentGroup):
 
     lx_segment: LxSegment
     sv2_segment: Sv2Segment
-    pwk_segment: Optional[List[PwkSegment]] = Field(min_items=0, max_items=10)
+    pwk_segment: Optional[List[Loop2400PwkSegment]] = Field(min_items=0, max_items=10)
     dtp_segment: Optional[Loop2400DtpSegment]
     ref_segment: Optional[List[Loop2400RefSegment]] = Field(min_items=0, max_items=3)
     amt_segment: Optional[List[Loop2400AmtSegment]] = Field(min_items=0, max_items=2)
@@ -499,7 +500,7 @@ class Loop2300(X12SegmentGroup):
     clm_segment: ClmSegment
     dtp_segment: List[Loop2300DtpSegment] = Field(min_items=1, max_items=4)
     cl1_segment: Cl1Segment
-    pwk_segment: Optional[List[PwkSegment]] = Field(min_items=0, max_items=10)
+    pwk_segment: Optional[List[Loop2300PwkSegment]] = Field(min_items=0, max_items=10)
     cn1_segment: Optional[Loop2300Cn1Segment]
     amt_segment: Optional[Loop2300AmtSegment]
     ref_segment: Optional[List[Loop2300RefSegment]] = Field(min_items=0, max_items=16)
