@@ -39,9 +39,9 @@ class AaaSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.AAA
     response_code: ResponseCode
-    agency_qualifier_code: Optional[str]
-    reject_reason_code: str
-    follow_up_action_code: str
+    agency_qualifier_code: Optional[str] = Field(max_length=2)
+    reject_reason_code: str = Field(min_length=2, max_length=2)
+    follow_up_action_code: str = Field(min_length=1, max_length=1)
 
 
 class AmtSegment(X12Segment):
@@ -54,7 +54,7 @@ class AmtSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.AMT
     amount_qualifier_code: str = Field(min_length=1, max_length=3)
     monetary_amount: Decimal
-    credit_debit_flag_code: Optional[str]
+    credit_debit_flag_code: Optional[str] = Field(min_length=0, max_length=1)
 
 
 class BhtSegment(X12Segment):
@@ -155,15 +155,15 @@ class BprSegment(X12Segment):
     payment_method_code: PaymentMethodCode
     payment_format_code: Optional[PaymentFormatCode]
     sender_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
-    sender_dfi_id: Optional[str]
+    sender_dfi_id: Optional[str] = Field(max_length=12)
     sender_account_qualifier: Optional[Literal["DA"]]
-    sender_account_number: Optional[str]
-    payer_identifier: Optional[str]
-    sender_supplemental_code: Optional[str]
+    sender_account_number: Optional[str] = Field(max_length=35)
+    payer_identifier: Optional[str] = Field(max_length=10)
+    sender_supplemental_code: Optional[str] = Field(max_length=9)
     receiver_dfi_qualifier: Optional[FinancialInstitutionIdQualifier]
-    receiver_bank_id_number: Optional[str]
+    receiver_bank_id_number: Optional[str] = Field(max_length=12)
     receiver_account_qualifier: Optional[AccountNumberQualifier]
-    receiver_account_number: Optional[str]
+    receiver_account_number: Optional[str] = Field(max_length=35)
     eft_effective_date: Optional[Union[str, datetime.date]]
 
     _validate_x12_date = field_validator("eft_effective_date")(validate_date_field)
@@ -227,27 +227,27 @@ class CasSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.CAS
     adjustment_group_code: ClaimAdjustmentGroupCode
 
-    adjustment_reason_code_1: str
+    adjustment_reason_code_1: str = Field(min_length=1, max_length=5)
     monetary_amount_1: Decimal
     quantity_1: Optional[Decimal]
 
-    adjustment_reason_code_2: Optional[str]
+    adjustment_reason_code_2: Optional[str] = Field(max_length=5)
     monetary_amount_2: Optional[Decimal]
     quantity_2: Optional[Decimal]
 
-    adjustment_reason_code_3: Optional[str]
+    adjustment_reason_code_3: Optional[str] = Field(max_length=12)
     monetary_amount_3: Optional[Decimal]
     quantity_3: Optional[Decimal]
 
-    adjustment_reason_code_4: Optional[str]
+    adjustment_reason_code_4: Optional[str] = Field(max_length=12)
     monetary_amount_4: Optional[Decimal]
     quantity_4: Optional[Decimal]
 
-    adjustment_reason_code_5: Optional[str]
+    adjustment_reason_code_5: Optional[str] = Field(max_length=12)
     monetary_amount_5: Optional[Decimal]
     quantity_5: Optional[Decimal]
 
-    adjustment_reason_code_6: Optional[str]
+    adjustment_reason_code_6: Optional[str] = Field(max_length=12)
     monetary_amount_6: Optional[Decimal]
     quantity_6: Optional[Decimal]
 
@@ -336,22 +336,22 @@ class ClmSegment(X12Segment):
     total_claim_charge_amount: Decimal = Decimal("0.00")
     claim_filing_indicator_code: Optional[str] = Field(min_length=1, max_length=2)
     non_institutional_claim_type_code: Optional[str] = Field(min_length=1, max_length=2)
-    health_care_service_location_information: str
-    provider_or_supplier_signature_indicator: Optional[str]
+    health_care_service_location_information: str = Field(is_component=True)
+    provider_or_supplier_signature_indicator: Optional[str] = Field(max_length=1)
     provider_accept_assignment_code: ProviderAcceptAssignmentCode
     benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
     release_of_information_code: ReleaseOfInformationCode
-    patient_signature_source_code: Optional[str]
-    related_causes_code: Optional[str]
-    special_program_code: Optional[str]
-    yes_no_condition_response_code_1: Optional[str]
-    level_of_service_code: Optional[str]
-    yes_no_condition_response_code_2: Optional[str]
-    provider_agreement_code: Optional[str]
-    claim_status_code: Optional[str]
-    yes_no_condition_response_code_3: Optional[str]
-    claim_submission_reason_code: Optional[str]
-    delay_reason_code: Optional[DelayReasonCode]
+    patient_signature_source_code: Optional[str] = Field(max_length=1)
+    related_causes_code: Optional[str] = Field(is_component=True)
+    special_program_code: Optional[str] = Field(max_length=3)
+    yes_no_condition_response_code_1: Optional[str] = Field(max_length=1)
+    level_of_service_code: Optional[str] = Field(max_length=3)
+    yes_no_condition_response_code_2: Optional[str] = Field(max_length=1)
+    provider_agreement_code: Optional[str] = Field(max_length=1)
+    claim_status_code: Optional[str] = Field(max_length=2)
+    yes_no_condition_response_code_3: Optional[str] = Field(max_length=1)
+    claim_submission_reason_code: Optional[str] = Field(max_length=2)
+    delay_reason_code: Optional[DelayReasonCode] = Field(max_length=2)
 
 
 class ClpSegment(X12Segment):
@@ -410,14 +410,14 @@ class ClpSegment(X12Segment):
     claim_payment_amount: Decimal
     patient_responsibility_amount: Optional[Decimal]
     claim_filing_indicator_code: ClaimFilingIndicatorCode
-    payer_claim_control_number: Optional[str] = Field(min_length=1, max_length=50)
-    facility_type_code: Optional[str] = Field(min_length=1, max_length=2)
-    claim_frequency_type_code: Optional[str] = Field(min_length=1, max_length=1)
-    patient_status_code: Optional[str]
-    drg_code: Optional[str] = Field(min_length=1, max_length=4)
+    payer_claim_control_number: Optional[str] = Field(max_length=50)
+    facility_type_code: Optional[str] = Field(max_length=2)
+    claim_frequency_type_code: Optional[str] = Field(max_length=1)
+    patient_status_code: Optional[str] = Field(max_length=2)
+    drg_code: Optional[str] = Field(max_length=4)
     drg_weight: Optional[condecimal(gt=Decimal("0.0"))]
     discharge_fraction: Optional[condecimal(ge=Decimal("0.0"))]
-    condition_response_code: Optional[str]
+    condition_response_code: Optional[str] = Field(max_length=1)
 
 
 class Cl1Segment(X12Segment):
@@ -429,11 +429,9 @@ class Cl1Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.CL1
     admission_type_code: str = Field(min_length=1, max_length=1)
-    admission_source_code: Optional[str] = Field(min_length=1, max_length=1)
+    admission_source_code: Optional[str] = Field(max_length=1)
     patient_status_code: str = Field(min_length=1, max_length=2)
-    nursing_home_residential_status_code: Optional[str] = Field(
-        min_length=0, max_length=1
-    )
+    nursing_home_residential_status_code: Optional[str] = Field(max_length=1)
 
 
 class Cn1Segment(X12Segment):
@@ -444,12 +442,12 @@ class Cn1Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.CN1
-    contract_type_code: str
+    contract_type_code: str = Field(min_length=2, max_length=2)
     contract_amount: Optional[Decimal]
     contract_percentage: Optional[Decimal]
-    contract_code: Optional[str]
+    contract_code: Optional[str] = Field(max_length=50)
     terms_discount_percentage: Optional[Decimal]
-    contract_version_identifier: Optional[str]
+    contract_version_identifier: Optional[str] = Field(max_length=30)
 
 
 class CrcSegment(X12Segment):
@@ -462,11 +460,11 @@ class CrcSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.CRC
     code_category: str = Field(min_length=2, max_length=2)
     certification_condition_indicator: str = Field(min_length=1, max_length=1)
-    condition_code_1: str
-    condition_code_2: Optional[str]
-    condition_code_3: Optional[str]
-    condition_code_4: Optional[str]
-    condition_code_5: Optional[str]
+    condition_code_1: str = Field(min_length=2, max_length=3)
+    condition_code_2: Optional[str] = Field(max_length=3)
+    condition_code_3: Optional[str] = Field(max_length=3)
+    condition_code_4: Optional[str] = Field(max_length=3)
+    condition_code_5: Optional[str] = Field(max_length=3)
 
 
 class Cr1Segment(X12Segment):
@@ -490,14 +488,14 @@ class Cr1Segment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.CR1
     weight_measurement_code: Optional[Literal["LB"]]
     patient_weight: Optional[Decimal]
-    ambulance_transport_code: Optional[str]
+    ambulance_transport_code: Optional[str] = Field(max_length=1)
     ambulance_transport_reason_code: AmbulanceTransportReasonCode
     mileage_measurement_code: Literal["DH"]
     transport_distance: Decimal
-    address_information_1: Optional[str]
-    address_information_2: Optional[str]
-    round_trip_purpose_description: Optional[str]
-    stretcher_purpose_description: Optional[str]
+    address_information_1: Optional[str] = Field(max_length=55)
+    address_information_2: Optional[str] = Field(max_length=55)
+    round_trip_purpose_description: Optional[str] = Field(max_length=80)
+    stretcher_purpose_description: Optional[str] = Field(max_length=80)
 
 
 class Cr2Segment(X12Segment):
@@ -521,16 +519,16 @@ class Cr2Segment(X12Segment):
         ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "M"
 
     segment_name: X12SegmentName = X12SegmentName.CR2
-    count: Optional[str]
-    quantity: Optional[str]
-    subluxation_level_code_1: Optional[str]
-    subluxation_level_code_2: Optional[str]
-    unit_basis_measurement_code: Optional[str]
+    count: Optional[str] = Field(max_length=9)
+    quantity: Optional[Decimal]
+    subluxation_level_code_1: Optional[str] = Field(max_length=3)
+    subluxation_level_code_2: Optional[str] = Field(max_length=3)
+    unit_basis_measurement_code: Optional[str] = Field(max_length=2)
     quantity_1: Optional[Decimal]
     quantity_2: Optional[Decimal]
     patient_condition_code: PatientConditionCode
-    patient_condition_description_1: Optional[str]
-    patient_condition_description_2: Optional[str]
+    patient_condition_description_1: Optional[str] = Field(max_length=80)
+    patient_condition_description_2: Optional[str] = Field(max_length=80)
     yes_no_condition_response_code: Optional[str]
 
 
@@ -554,8 +552,8 @@ class Cr3Segment(X12Segment):
     certification_type_code: CertificationTypeCode
     unit_basis_measurement_code: Literal["MO"]
     durable_medical_equipment_duration: condecimal(gt=Decimal("0.0"))
-    insulin_dependent_code: Optional[str]
-    description: Optional[str]
+    insulin_dependent_code: Optional[str] = Field(max_length=1)
+    description: Optional[str] = Field(max_length=80)
 
 
 class CtpSegment(X12Segment):
@@ -566,11 +564,11 @@ class CtpSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.CTP
-    class_of_trade_code: Optional[str]
-    price_identifier_code: Optional[str]
+    class_of_trade_code: Optional[str] = Field(max_length=2)
+    price_identifier_code: Optional[str] = Field(max_length=3)
     unit_price: Optional[Decimal]
     quantity: Decimal
-    composite_unit_of_measure: str
+    composite_unit_of_measure: str = Field(is_component=True)
 
 
 class CurSegment(X12Segment):
@@ -1056,7 +1054,8 @@ class EbSegment(X12Segment):
     quantity: Optional[Decimal]
     authorization_certification_indicator: Optional[AuthorizationCertificationIndicator]
     inplan_network_indicator: Optional[InPlanNetworkIndicator]
-    procedure_identifier: Optional[str]
+    procedure_identifier: Optional[List[str]] = Field(is_component=True)
+    diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
 
     @root_validator
     def validate_quantity(cls, values):
@@ -1085,8 +1084,8 @@ class EqSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.EQ
     service_type_code: Optional[List[str]]
     medical_procedure_id: Optional[List[str]] = Field(is_component=True)
-    coverage_level_code: Optional[str] = Field(min_length=3, max_length=3)
-    insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
+    coverage_level_code: Optional[str] = Field(max_length=3)
+    insurance_type_code: Optional[str] = Field(max_length=3)
     diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
 
     @root_validator
@@ -1125,13 +1124,13 @@ class FrmSegment(X12Segment):
         YES = "Y"
 
     segment_name: X12SegmentName = X12SegmentName.FRM
-    question_number_letter: str
+    question_number_letter: str = Field(min_length=1, max_length=20)
     question_response_1: Optional[QuestionResponse]
-    question_response_2: Optional[str]
+    question_response_2: Optional[str] = Field(max_length=50)
     question_response_3: Optional[Union[str, datetime.date]]
     question_response_4: Optional[Decimal]
 
-    _validate_cquestion_response_3 = field_validator("question_response_3")(
+    _validate_question_response_3 = field_validator("question_response_3")(
         parse_x12_date
     )
 
@@ -1236,22 +1235,18 @@ class HcpSegment(X12Segment):
     pricing_methodology: PricingMethodology
     repriced_allowed_amount: Decimal
     repriced_saving_amount: Optional[Decimal]
-    repricing_organization_identifier: Optional[str] = Field(
-        min_length=1, max_length=50
-    )
+    repricing_organization_identifier: Optional[str] = Field(max_length=50)
     per_diem_flat_rate_amount: Optional[Decimal]
-    repriced_apg_code: Optional[str] = Field(min_length=1, max_length=50)
+    repriced_apg_code: Optional[str] = Field(max_length=50)
     repriced_apg_amount: Optional[Decimal]
-    product_service_id_1: Optional[str]
-    product_service_id_1_qualifier: Optional[str]
-    product_service_id_2: Optional[str]
-    unit_basis_measurement_code: Optional[str]
+    product_service_id_1: Optional[str] = Field(max_length=48)
+    product_service_id_1_qualifier: Optional[str] = Field(max_length=2)
+    product_service_id_2: Optional[str] = Field(max_length=48)
+    unit_basis_measurement_code: Optional[str] = Field(max_length=2)
     quantity: Optional[Decimal]
-    reject_reason_code: Optional[RejectReasonCode] = Field(min_length=2, max_length=2)
-    policy_compliance_code: Optional[PolicyComplianceCode] = Field(
-        min_length=1, max_length=2
-    )
-    exception_code: Optional[ExceptionCode] = Field(min_length=1, max_length=2)
+    reject_reason_code: Optional[RejectReasonCode]
+    policy_compliance_code: Optional[PolicyComplianceCode]
+    exception_code: Optional[ExceptionCode]
 
 
 class HiSegment(X12Segment):
@@ -1463,9 +1458,9 @@ class IiiSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.III
     code_list_qualifier_code: Optional[CodeListQualifierCode]
-    industry_code: Optional[str] = Field(min_length=1, max_length=30)
+    industry_code: Optional[str] = Field(max_length=30)
     code_category: Optional[Literal["44"]]
-    injured_body_part_name: Optional[str] = Field(min_length=1, max_length=264)
+    injured_body_part_name: Optional[str] = Field(max_length=264)
 
     @root_validator
     def validate_industry_code(cls, values):
@@ -1514,19 +1509,19 @@ class InsSegment(X12Segment):
     member_indicator: ResponseCode
     individual_relationship_code: str = Field(min_length=2, max_length=2)
     maintenance_type_code: str = Field(min_length=3, max_length=3)
-    maintenance_reason_code: Optional[str] = Field(min_length=2, max_length=3)
+    maintenance_reason_code: Optional[str] = Field(max_length=3)
     benefit_status_code: str = Field(min_length=1, max_length=1)
     medicare_status_code: Optional[List[str]] = Field(is_component=True)
-    cobra_qualifying_event_code: Optional[str] = Field(min_length=1, max_length=2)
-    employment_status_code: Optional[str] = Field(min_length=2, max_length=2)
-    student_status_code: Optional[str] = Field(min_length=1, max_length=1)
+    cobra_qualifying_event_code: Optional[str] = Field(max_length=2)
+    employment_status_code: Optional[str] = Field(max_length=2)
+    student_status_code: Optional[str] = Field(max_length=1)
     handicap_indicator: Optional[ResponseCode]
-    date_time_period_format_qualifier: Optional[str] = Field(min_length=2, max_length=3)
+    date_time_period_format_qualifier: Optional[str] = Field(max_length=3)
     member_death_date: Optional[Union[str, datetime.date]]
-    confidentiality_code: Optional[str] = Field(min_length=1, max_length=1)
-    city_name: Optional[str] = Field(min_length=2, max_length=30)
-    state_province_code: Optional[str] = Field(min_length=2, max_length=2)
-    country_code: Optional[str] = Field(min_length=2, max_length=3)
+    confidentiality_code: Optional[str] = Field(max_length=1)
+    city_name: Optional[str] = Field(max_length=30)
+    state_province_code: Optional[str] = Field(max_length=2)
+    country_code: Optional[str] = Field(max_length=3)
     birth_sequence_number: Optional[int]
 
     _validate_death_date = field_validator("member_death_date")(validate_date_field)
@@ -1603,9 +1598,9 @@ class K3Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.K3
-    fixed_format_information: str
-    record_format_code: Optional[str]
-    composite_unit_of_measurement: Optional[str]
+    fixed_format_information: str = Field(min_length=1, max_length=80)
+    record_format_code: Optional[str] = Field(max_length=2)
+    composite_unit_of_measurement: Optional[str] = Field(is_component=True)
 
 
 class LeSegment(X12Segment):
@@ -1617,7 +1612,7 @@ class LeSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.LE
-    loop_id_code: str
+    loop_id_code: str = Field(min_length=1, max_length=4)
 
 
 class LinSegment(X12Segment):
@@ -1641,9 +1636,11 @@ class LinSegment(X12Segment):
         UCC_12 = "UP"
 
     segment_name: X12SegmentName = X12SegmentName.LIN
-    assigned_identification: Optional[str]
+    assigned_identification: Optional[str] = Field(max_length=20)
     product_service_id_qualifier: ProductServiceIdQualifier
-    national_drug_code_universal_product_number: str
+    national_drug_code_universal_product_number: str = Field(
+        min_length=1, max_length=48
+    )
 
 
 class LqSegment(X12Segment):
@@ -1663,7 +1660,7 @@ class LqSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LQ
     code_list_qualifier_code: CodeListQualifierCode
-    form_identifier: str
+    form_identifier: str = Field(min_length=1, max_length=30)
 
 
 class LsSegment(X12Segment):
@@ -1675,7 +1672,7 @@ class LsSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.LS
-    loop_id_code: str
+    loop_id_code: str = Field(min_length=1, max_length=4)
 
 
 class LxSegment(X12Segment):
@@ -1731,7 +1728,7 @@ class MiaSegment(X12Segment):
     pps_operating_outlier_amount: Optional[Decimal]
     lifetime_psychiatric_days_count: Optional[Decimal]
     claim_drg_amount: Optional[Decimal]
-    claim_payment_remark_code: Optional[str] = Field(min_length=1, max_length=20)
+    claim_payment_remark_code: Optional[str] = Field(max_length=20)
     claim_disproportionate_share_amount: Optional[Decimal]
     claim_msp_passthrough_amount: Optional[Decimal]
     claim_pps_capital_amount: Optional[Decimal]
@@ -1746,10 +1743,10 @@ class MiaSegment(X12Segment):
     claim_pps_capital_outlier_amount: Optional[Decimal]
     claim_indirect_teaching_amount: Optional[Decimal]
     nonpayable_professional_component_amount: Optional[Decimal]
-    claim_payment_remark_code_1: Optional[str] = Field(min_length=1, max_length=50)
-    claim_payment_remark_code_2: Optional[str] = Field(min_length=1, max_length=50)
-    claim_payment_remark_code_3: Optional[str] = Field(min_length=1, max_length=50)
-    claim_payment_remark_code_4: Optional[str] = Field(min_length=1, max_length=50)
+    claim_payment_remark_code_1: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_2: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_3: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_4: Optional[str] = Field(max_length=50)
     pps_capital_exception_amount: Optional[Decimal]
 
 
@@ -1763,11 +1760,11 @@ class MoaSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.MOA
     reimbursement_rate: Optional[Decimal]
     hcpcs_payable_amount: Optional[Decimal]
-    claim_payment_remark_code_1: Optional[str]
-    claim_payment_remark_code_2: Optional[str]
-    claim_payment_remark_code_3: Optional[str]
-    claim_payment_remark_code_4: Optional[str]
-    claim_payment_remark_code_5: Optional[str]
+    claim_payment_remark_code_1: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_2: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_3: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_4: Optional[str] = Field(max_length=50)
+    claim_payment_remark_code_5: Optional[str] = Field(max_length=50)
     end_stage_renal_disease_payment_amount: Optional[Decimal]
     nonpayable_professional_component_billable_amount: Optional[Decimal]
 
@@ -1910,10 +1907,10 @@ class MpiSegment(X12Segment):
     information_status_code: InformationStatusCode
     employment_status_code: EmploymentStatusCode
     government_services_affiliation_code: GovernmentServicesAffiliationCode
-    description: Optional[str]
+    description: Optional[str] = Field(max_length=80)
     military_service_rank_code: Optional[MilitaryServiceRankCode]
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
-    date_time_period: Optional[str]
+    date_time_period: Optional[str] = Field(max_length=35)
 
     @root_validator
     def validate_date_fields(cls, values):
@@ -1940,7 +1937,7 @@ class MsgSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.MSG
-    free_form_text: str
+    free_form_text: str = Field(min_length=1, max_length=264)
 
 
 class N1Segment(X12Segment):
@@ -1964,7 +1961,7 @@ class N3Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.N3
     address_information_1: str = Field(min_length=1, max_length=55)
-    address_information_2: Optional[str] = Field(min_length=1, max_length=55)
+    address_information_2: Optional[str] = Field(max_length=55)
 
 
 class N4Segment(X12Segment):
@@ -1976,12 +1973,12 @@ class N4Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.N4
     city_name: str = Field(min_length=2, max_length=30)
-    state_province_code: Optional[str] = Field(min_length=2, max_length=2)
-    postal_code: Optional[str] = Field(min_length=3, max_length=15)
-    country_code: Optional[str] = Field(min_length=2, max_length=3)
-    location_qualifier: Optional[str] = Field(min_length=1, max_length=2)
-    location_identifier: Optional[str] = Field(min_length=1, max_length=30)
-    country_subdivision_code: Optional[str] = Field(min_length=1, max_length=3)
+    state_province_code: Optional[str] = Field(max_length=2)
+    postal_code: Optional[str] = Field(max_length=15)
+    country_code: Optional[str] = Field(max_length=3)
+    location_qualifier: Optional[str] = Field(max_length=2)
+    location_identifier: Optional[str] = Field(max_length=30)
+    country_subdivision_code: Optional[str] = Field(max_length=3)
 
     @root_validator
     def validate_state_codes(cls, values):
@@ -2021,12 +2018,12 @@ class Nm1Segment(X12Segment):
     entity_identifier_code: str = Field(min_length=2, max_length=3)
     entity_type_qualifier: EntityQualifierCode
     name_last_or_organization_name: str = Field(min_length=1, max_length=60)
-    name_first: Optional[str] = Field(min_length=0, max_length=35)
-    name_middle: Optional[str] = Field(min_length=0, max_length=25)
-    name_prefix: Optional[str] = Field(min_length=0, max_length=10)
-    name_suffix: Optional[str] = Field(min_length=0, max_length=10)
-    identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
-    identification_code: Optional[str] = Field(min_length=2, max_length=80)
+    name_first: Optional[str] = Field(max_length=35)
+    name_middle: Optional[str] = Field(max_length=25)
+    name_prefix: Optional[str] = Field(max_length=10)
+    name_suffix: Optional[str] = Field(max_length=10)
+    identification_code_qualifier: Optional[str] = Field(max_length=2)
+    identification_code: Optional[str] = Field(max_length=80)
     # NM110 - NM112 are not used
 
     @root_validator
@@ -2073,8 +2070,8 @@ class NteSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.NTE
-    note_reference_code: str
-    description: str
+    note_reference_code: str = Field(min_length=3, max_length=3)
+    description: str = Field(min_length=1, max_length=80)
 
 
 class OiSegment(X12Segment):
@@ -2102,11 +2099,11 @@ class OiSegment(X12Segment):
         PROVIDER_SIGNED_STATEMENT = "Y"
 
     segment_name: X12SegmentName = X12SegmentName.OI
-    claim_filing_indicator_code: Optional[str]
-    claim_submission_reason_code: Optional[str]
+    claim_filing_indicator_code: Optional[str] = Field(max_length=2)
+    claim_submission_reason_code: Optional[str] = Field(max_length=2)
     benefits_assignment_certification: BenefitsAssignmentCertificationIndicator
     patient_signature_source_code: Optional[Literal["P"]]
-    provider_agreement_code: Optional[str]
+    provider_agreement_code: Optional[str] = Field(max_length=1)
     release_of_information_code: ReleaseOfInformationCode
 
 
@@ -2125,10 +2122,10 @@ class PatSegment(X12Segment):
         SPECIFIC_DATE = "D8"
 
     segment_name: X12SegmentName = X12SegmentName.PAT
-    individual_relationship_code: Optional[str]
-    patient_location_code: Optional[str]
-    employment_status_code: Optional[str]
-    student_status_code: Optional[str]
+    individual_relationship_code: Optional[str] = Field(max_length=2)
+    patient_location_code: Optional[str] = Field(max_length=1)
+    employment_status_code: Optional[str] = Field(max_length=2)
+    student_status_code: Optional[str] = Field(max_length=1)
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     patient_death_date: Optional[Union[str, datetime.date]]
     unit_basis_measurement_code: Optional[Literal["01"]]
@@ -2190,13 +2187,13 @@ class PerSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.PER
     contact_function_code: ContactFunctionCode
-    name: Optional[str]
-    communication_number_qualifier_1: str
-    communication_number_1: str
-    communication_number_qualifier_2: Optional[str]
-    communication_number_2: Optional[str]
-    communication_number_qualifier_3: Optional[str]
-    communication_number_3: Optional[str]
+    name: Optional[str] = Field(max_length=60)
+    communication_number_qualifier_1: str = Field(max_length=2)
+    communication_number_1: str = Field(max_length=256)
+    communication_number_qualifier_2: Optional[str] = Field(max_length=2)
+    communication_number_2: Optional[str] = Field(max_length=256)
+    communication_number_qualifier_3: Optional[str] = Field(max_length=2)
+    communication_number_3: Optional[str] = Field(max_length=256)
 
     @root_validator
     def validate_communication(cls, values):
@@ -2232,17 +2229,17 @@ class PlbSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.PLB
     provider_identifier: str = Field(min_length=1, max_length=50)
     fiscal_period_date: Union[str, datetime.date]
-    adjustment_reason_code_1: str
+    adjustment_reason_code_1: str = Field(is_component=True)
     provider_adjustment_amount_1: Decimal
-    adjustment_reason_code_2: Optional[str]
+    adjustment_reason_code_2: Optional[str] = Field(is_component=True)
     provider_adjustment_amount_2: Optional[Decimal]
-    adjustment_reason_code_3: Optional[str]
+    adjustment_reason_code_3: Optional[str] = Field(is_component=True)
     provider_adjustment_amount_3: Optional[Decimal]
-    adjustment_reason_code_4: Optional[str]
+    adjustment_reason_code_4: Optional[str] = Field(is_component=True)
     provider_adjustment_amount_4: Optional[Decimal]
-    adjustment_reason_code_5: Optional[str]
+    adjustment_reason_code_5: Optional[str] = Field(is_component=True)
     provider_adjustment_amount_5: Optional[Decimal]
-    adjustment_reason_code_6: Optional[str]
+    adjustment_reason_code_6: Optional[str] = Field(is_component=True)
     provider_adjustment_amount_6: Optional[Decimal]
 
     _validate_x12_date = field_validator("fiscal_period_date")(validate_date_field)
@@ -2257,10 +2254,8 @@ class PrvSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.PRV
     provider_code: str = Field(min_length=1, max_length=3)
-    reference_identification_qualifier: Optional[str] = Field(
-        min_length=2, max_length=3
-    )
-    reference_identification: Optional[str] = Field(min_length=1, max_length=50)
+    reference_identification_qualifier: Optional[str] = Field(max_length=3)
+    reference_identification: Optional[str] = Field(max_length=50)
 
     @root_validator
     def validate_reference_id(cls, values):
@@ -2289,9 +2284,9 @@ class Ps1Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.PS1
-    purchased_service_provider_identifier: str
+    purchased_service_provider_identifier: str = Field(min_length=1, max_length=50)
     purchased_service_charge_amount: Decimal
-    state_province_code: Optional[str]
+    state_province_code: Optional[str] = Field(max_length=2)
 
 
 class PwkSegment(X12Segment):
@@ -2387,13 +2382,13 @@ class PwkSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.PWK
     report_type_code: AttachmentReportTypeCode
     report_transmission_code: AttachmentTransmissionCode
-    report_copies_needed: Optional[str]
-    entity_identifier_code: Optional[str]
-    identification_code_qualifier: Optional[str]
-    identification_code: Optional[str]
-    description: Optional[str]
-    actions_indicated: Optional[str]
-    request_category_code: Optional[str]
+    report_copies_needed: Optional[str] = Field(max_length=2)
+    entity_identifier_code: Optional[str] = Field(max_length=3)
+    identification_code_qualifier: Optional[str] = Field(max_length=2)
+    identification_code: Optional[str] = Field(max_length=80)
+    description: Optional[str] = Field(max_length=80)
+    actions_indicated: Optional[str] = Field(is_component=True)
+    request_category_code: Optional[str] = Field(max_length=2)
 
     @root_validator
     def validate_identification_code(cls, values):
@@ -2421,10 +2416,10 @@ class QtySegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.QTY
-    quantity_qualifier: str
+    quantity_qualifier: str = Field(min_length=2, max_length=2)
     quantity: Decimal
-    composite_unit_of_measure: Optional[str]
-    free_form_message: Optional[str]
+    composite_unit_of_measure: Optional[str] = Field(is_component=True)
+    free_form_message: Optional[str] = Field(max_length=30)
 
 
 class RdmSegment(X12Segment):
@@ -2446,8 +2441,8 @@ class RdmSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.RDM
     report_transmission_code: ReportTransmissionCode
-    name: Optional[str] = Field(min_length=1, max_length=60)
-    communication_number: Optional[str] = Field(min_length=1, max_length=256)
+    name: Optional[str] = Field(max_length=60)
+    communication_number: Optional[str] = Field(max_length=256)
 
     @root_validator(pre=True)
     def validate_remittance_destination(cls, values):
@@ -2472,7 +2467,7 @@ class RefSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.REF
     reference_identification_qualifier: str = Field(min_length=2, max_length=3)
     reference_identification: str = Field(min_length=1, max_length=50)
-    description: Optional[str] = Field(min_length=1, max_length=80)
+    description: Optional[str] = Field(max_length=80)
 
 
 class SbrSegment(X12Segment):
@@ -2483,14 +2478,14 @@ class SbrSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.SBR
-    payer_responsibility_code: str
-    individual_relationship_code: Optional[str]
-    group_policy_number: Optional[str] = Field(min_length=1, max_length=50)
-    group_name: Optional[str] = Field(min_length=1, max_length=60)
-    insurance_type_code: Optional[str] = Field(min_length=1, max_length=3)
-    coordination_of_benefits_code: Optional[str]
-    condition_response_code: Optional[str]
-    employment_status_code: Optional[str]
+    payer_responsibility_code: str = Field(min_length=1, max_length=1)
+    individual_relationship_code: Optional[str] = Field(max_length=2)
+    group_policy_number: Optional[str] = Field(max_length=50)
+    group_name: Optional[str] = Field(max_length=60)
+    insurance_type_code: Optional[str] = Field(max_length=3)
+    coordination_of_benefits_code: Optional[str] = Field(max_length=1)
+    condition_response_code: Optional[str] = Field(max_length=1)
+    employment_status_code: Optional[str] = Field(max_length=2)
     claim_filing_indicator_code: str = Field(min_length=1, max_length=2)
 
 
@@ -2514,18 +2509,18 @@ class StcSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.STC
-    health_care_claim_status_1: str
+    health_care_claim_status_1: str = Field(is_component=True)
     status_effective_date: Union[str, datetime.date]
-    action_code: Optional[str]
+    action_code: Optional[str] = Field(max_length=2)
     total_claim_charge_amount: Optional[Decimal]
     claim_payment_amount: Optional[Decimal]
     adjudication_finalized_date: Optional[Union[str, datetime.date]]
-    payment_method_code: Optional[str]
+    payment_method_code: Optional[str] = Field(max_length=3)
     remittance_date: Optional[Union[str, datetime.date]]
-    remittance_trace_number: Optional[str]
-    health_care_claim_status_2: Optional[str]
-    health_care_claim_status_3: Optional[str]
-    free_form_message_text: Optional[str]
+    remittance_trace_number: Optional[str] = Field(max_length=16)
+    health_care_claim_status_2: Optional[str] = Field(is_component=True)
+    health_care_claim_status_3: Optional[str] = Field(is_component=True)
+    free_form_message_text: Optional[str] = Field(max_length=264)
 
     _validate_status_effective_date = field_validator("status_effective_date")(
         parse_x12_date
@@ -2565,27 +2560,27 @@ class Sv1Segment(X12Segment):
         UNIT = "UN"
 
     segment_name: X12SegmentName = X12SegmentName.SV1
-    product_service_id_qualifier: str
+    product_service_id_qualifier: str = Field(is_component=True)
     line_item_charge_amount: Decimal
     unit_basis_measurement_code: UnitBasisMeasurementCode
     service_unit_count: condecimal(gt=Decimal("0.0"))
-    place_of_service_code: Optional[str]
-    service_type_code: Optional[str]
-    composite_diagnosis_code_pointer: str
-    monetary_amount: Optional[str]
+    place_of_service_code: Optional[str] = Field(max_length=2)
+    service_type_code: Optional[str] = Field(max_length=2)
+    composite_diagnosis_code_pointer: str = Field(is_component=True)
+    monetary_amount: Optional[Decimal]
     emergency_indicator: Optional[Literal["Y"]]
-    multiple_procedure_code: Optional[str]
+    multiple_procedure_code: Optional[str] = Field(max_length=2)
     epsdt_indicator: Optional[Literal["Y"]]
     family_planning_indicator: Optional[Literal["Y"]]
-    review_code: Optional[str]
-    national_local_assigned_review_value: Optional[str]
+    review_code: Optional[str] = Field(max_length=2)
+    national_local_assigned_review_value: Optional[str] = Field(max_length=2)
     copay_status_code: Optional[Literal["0"]]
-    health_care_professional_shortage_area_code: Optional[str]
-    reference_identification: Optional[str]
-    postal_code: Optional[str]
+    health_care_professional_shortage_area_code: Optional[str] = Field(max_length=1)
+    reference_identification: Optional[str] = Field(max_length=50)
+    postal_code: Optional[str] = Field(max_length=15)
     monetary_amount: Optional[Decimal]
-    level_of_care_code: Optional[str]
-    provider_agreement_code: Optional[str]
+    level_of_care_code: Optional[str] = Field(max_length=1)
+    provider_agreement_code: Optional[str] = Field(max_length=1)
 
 
 class Sv2Segment(X12Segment):
@@ -2605,15 +2600,15 @@ class Sv2Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.SV2
     service_line_revenue_code: str = Field(min_length=1, max_length=48)
-    composite_medical_procedure_identifier: Optional[str]
+    composite_medical_procedure_identifier: Optional[str] = Field(is_component=True)
     line_item_charge_amount: Decimal
     measurement_code: MeasurementCodes
     service_unit_count: Decimal
     unit_rate: Optional[Decimal]
     non_covered_charge_amount: Optional[Decimal]
-    condition_response_code: Optional[str]
-    nursing_home_residential_status_code: Optional[str]
-    level_of_care_code: Optional[str]
+    condition_response_code: Optional[str] = Field(max_length=1)
+    nursing_home_residential_status_code: Optional[str] = Field(max_length=1)
+    level_of_care_code: Optional[str] = Field(max_length=1)
 
 
 class Sv5Segment(X12Segment):
@@ -2633,13 +2628,13 @@ class Sv5Segment(X12Segment):
         DAILY = "6"
 
     segment_name: X12SegmentName = X12SegmentName.SV5
-    product_service_id_qualifier: str
+    product_service_id_qualifier: str = Field(is_component=True)
     unit_basis_measurement_code: Literal["DA"]
     length_of_medical_necessity: condecimal(gt=Decimal("0.0"))
     dme_rental_price: Decimal
     dme_purchase_price: Decimal
     rental_unit_price_indicator: RentalUnitPriceIndicator
-    prognosis_code: Optional[str]
+    prognosis_code: Optional[str] = Field(max_length=1)
 
 
 class SvcSegment(X12Segment):
@@ -2650,12 +2645,12 @@ class SvcSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.SVC
-    composite_medical_procedure_identifier_1: str
+    composite_medical_procedure_identifier_1: str = Field(is_component=True)
     line_item_charge_amount: Decimal
     line_item_provider_payment_amount: Decimal
-    revenue_code: Optional[str]
+    revenue_code: Optional[str] = Field(max_length=48)
     units_of_service_paid_count: Optional[Decimal]
-    composite_medical_procedure_identifier_2: Optional[str]
+    composite_medical_procedure_identifier_2: Optional[str] = Field(is_component=True)
     original_units_of_service_count: Optional[Decimal]
 
 
@@ -2667,10 +2662,10 @@ class SvdSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.SVD
-    other_payer_primary_identifier: str
+    other_payer_primary_identifier: str = Field(min_length=2, max_length=80)
     service_line_paid_amount: Decimal
-    composite_medical_procedure_identifier: str
-    product_service_id: Optional[str]
+    composite_medical_procedure_identifier: str = Field(is_component=True)
+    product_service_id: Optional[str] = Field(max_length=48)
     paid_service_count: Decimal
     bundled_unbundled_line_number: Optional[conint(gt=0)]
 
@@ -2686,7 +2681,7 @@ class TrnSegment(X12Segment):
     trace_type_code: str = Field(min_length=1, max_length=2)
     reference_identification_1: str = Field(min_length=1, max_length=50)
     originating_company_identifier: str = Field(min_length=10, max_length=10)
-    reference_identification_2: Optional[str] = Field(min_length=1, max_length=50)
+    reference_identification_2: Optional[str] = Field(max_length=50)
 
 
 class Ts2Segment(X12Segment):
