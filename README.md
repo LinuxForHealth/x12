@@ -12,7 +12,7 @@
 
 LinuxForHealth x12 streams ASC 5010 X12 health care transactions into [Pydantic Models](https://pydantic-docs.helpmanual.io/)  for a pleasant pythonic parsing experience! Integration options include REST endpoints, CLI (command line), or direct access using the Python SDK.
 
-Implemented formats include:
+Supported formats include:
 * 005010X212 Claim Status
 * 005010X221 Claim Payment
 * 005010X222 Professional Claim
