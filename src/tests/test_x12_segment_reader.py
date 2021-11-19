@@ -3,8 +3,8 @@ Tests LinuxForHealth X12SegmentReader
 """
 import pytest
 
-import x12.io
-from x12.io import X12SegmentReader
+import linuxforhealth.x12.io
+from linuxforhealth.x12.io import X12SegmentReader
 
 
 @pytest.mark.parametrize(
@@ -135,7 +135,7 @@ def test_large_x12_message(monkeypatch, large_x12_message, config):
         return config
 
     with monkeypatch.context() as m:
-        m.setattr(x12.io, "get_config", mock_get_config)
+        m.setattr(linuxforhealth.x12.io, "get_config", mock_get_config)
 
         segment_counter = 0
         with X12SegmentReader(large_x12_message) as r:

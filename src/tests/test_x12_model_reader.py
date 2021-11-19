@@ -3,7 +3,7 @@ test_x12_model_reader.py
 
 Supports general model streaming tests validating the number of models returned, expected payload, etc.
 """
-from x12.io import X12ModelReader
+from linuxforhealth.x12.io import X12ModelReader
 
 
 def test_multiple_transactions(large_x12_message):
