@@ -5,9 +5,9 @@ Pytest Global Fixtures
 """
 import pytest
 
-from x12.config import X12Config
-from x12.models import X12Delimiters
-from x12.parsing import X12ParserContext
+from linuxforhealth.x12.config import X12Config
+from linuxforhealth.x12.models import X12Delimiters
+from linuxforhealth.x12.parsing import X12ParserContext
 
 
 @pytest.fixture

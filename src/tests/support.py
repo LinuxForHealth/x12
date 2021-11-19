@@ -3,7 +3,7 @@ support.py
 
 Reusable assertions and utilities for X12 based test cases
 """
-from x12.io import X12ModelReader
+from linuxforhealth.x12.io import X12ModelReader
 import os
 
 # base resource directory for "file fixtures" (sample x12 transactions)

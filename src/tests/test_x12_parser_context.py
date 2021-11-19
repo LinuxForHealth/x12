@@ -1,7 +1,7 @@
 """
 test_x12_parser_context.py
 """
-from x12.parsing import X12ParserContext
+from linuxforhealth.x12.parsing import X12ParserContext
 
 
 def test_init(x12_parser_context: X12ParserContext):

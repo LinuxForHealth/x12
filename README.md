@@ -12,7 +12,7 @@
 
 LinuxForHealth x12 streams ASC 5010 X12 health care transactions into [Pydantic Models](https://pydantic-docs.helpmanual.io/)  for a pleasant pythonic parsing experience! Integration options include REST endpoints, CLI (command line), or direct access using the Python SDK.
 
-Implemented formats include:
+Supported formats include:
 * 005010X212 Claim Status
 * 005010X221 Claim Payment
 * 005010X222 Professional Claim
@@ -56,7 +56,7 @@ one or transaction models from the X12 message.
 
 To stream segments, create a X12SegmentReader instance: 
 ```python
-from x12.io import X12SegmentReader
+from linuxforhealth.x12.io import X12SegmentReader
 
 with X12SegmentReader("/home/edi/270.x12") as r:
     # return the segment name and field list
@@ -67,7 +67,7 @@ with X12SegmentReader("/home/edi/270.x12") as r:
 
 To stream models, create a X12ModelReader instance:
 ```python
-from x12.io import X12ModelReader
+from linuxforhealth.x12.io import X12ModelReader
 
 with X12ModelReader("/home/edi/270.x12") as r:
     for model in r.models():
@@ -85,7 +85,7 @@ The X12 CLI parses a X12 input file and returns either a list of X12 segments, o
 To view help information
 ```shell
 user@mbp x12 % source venv/bin/activate
-(venv) user@mbp x12 % cli --help
+(venv) user@mbp x12 % lfhx12 --help
 usage: LinuxForHealth X12 [-h] [-s | -m] [-x] [-p] file
 
 The LinuxForHealth X12 CLI parses and validates X12 messages.
@@ -104,7 +104,7 @@ optional arguments:
 
 To parse a X12 message into segments with pretty printing enabled
 ```shell
-(venv) user@mbp x12 % cli -s -p demo-file/demo.270
+(venv) user@mbp x12 % lfhx12 -s -p demo-file/demo.270
 [
     {
         "ISA00": "ISA",
@@ -115,7 +115,7 @@ To parse a X12 message into segments with pretty printing enabled
 
 To parse a X12 message into models with pretty printing enabled
 ```shell
-(venv) user@mbp x12 % cli -m -p demo-file/demo.270
+(venv) user@mbp x12 % lfhx12 -m -p demo-file/demo.270
 [
     {
         "header": {

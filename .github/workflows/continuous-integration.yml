@@ -32,5 +32,5 @@ jobs:
     - name: Run X12 CLI
       run: |
         for f in demo-file/demo.*; do
-           cli -m -p $f 1> /dev/null
+           lfhx12 -m -p $f 1> /dev/null
         done

@@ -5,14 +5,14 @@ Tests support functions.
 """
 import pytest
 import datetime
-from x12.support import (
+from linuxforhealth.x12.support import (
     is_x12_data,
     is_x12_file,
     parse_x12_date,
     parse_interchange_date,
     count_segments,
 )
-from x12.io import X12ModelReader
+from linuxforhealth.x12.io import X12ModelReader
 
 
 @pytest.mark.parametrize(
