@@ -10,7 +10,7 @@ from typing import Union, Dict
 
 from pydantic import validator, BaseModel
 
-from . config import IsaDelimiters
+from .config import IsaDelimiters
 
 
 def is_x12_data(input_data: str) -> bool:

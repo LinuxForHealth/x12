@@ -10,8 +10,8 @@ Usage:
 
 import argparse
 import json
-from . encoding import X12JsonEncoder
-from . io import X12SegmentReader, X12ModelReader
+from .encoding import X12JsonEncoder
+from .io import X12SegmentReader, X12ModelReader
 from typing import List
 
 

@@ -14,7 +14,7 @@ Field validators support a varying signature:
 from typing import Dict, Union
 from collections import defaultdict
 from datetime import datetime
-from . support import parse_x12_date, count_segments
+from .support import parse_x12_date, count_segments
 
 
 def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
