@@ -385,7 +385,9 @@ def _load_segment_lookup(implementation_version: str) -> Dict:
     """
     module_name = f"linuxforhealth.x12.v{implementation_version[2:6]}.segments"
     segment_module = import_module(module_name)
-    segment_lookup = [v for k, v in inspect.getmembers(segment_module) if k == "SEGMENT_LOOKUP"][0]
+    segment_lookup = [
+        v for k, v in inspect.getmembers(segment_module) if k == "SEGMENT_LOOKUP"
+    ][0]
     return segment_lookup
 
 
