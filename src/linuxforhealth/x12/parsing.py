@@ -13,12 +13,16 @@ from importlib import import_module
 from typing import Callable, Dict, List, Optional, Set
 
 from .models import X12SegmentGroup, X12Segment, X12Delimiters
+from .support import parse_x12_major_version
 
 logger = logging.getLogger(__name__)
 
 # naming convention for parsing functions:
 # parse_nm1_segment, parse_st_segment, etc
 PARSING_FUNCTION_REGEX = "set\\_(.)*\\_loop"
+
+# the base transaction prefix used in _load functions
+BASE_TRANSACTION_PREFIX = "linuxforhealth.x12.v"
 
 
 def match(segment_name: str, conditions: Dict = None) -> Callable:
@@ -340,8 +344,9 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
     pattern = re.compile(PARSING_FUNCTION_REGEX)
     loop_parsers = defaultdict(list)
 
+    major_version = parse_x12_major_version(implementation_version)
     parsing_module = import_module(
-        f"linuxforhealth.x12.v5010.x12_{transaction_code}_{implementation_version}.parsing"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.parsing"
     )
 
     funcs = [
@@ -361,8 +366,11 @@ def _load_transaction_model(
     transaction_code: str, implementation_version: str
 ) -> X12SegmentGroup:
     """Returns the transaction model for the x12 transaction"""
+
+    major_version = parse_x12_major_version(implementation_version)
+
     transaction_module = import_module(
-        f"linuxforhealth.x12.v5010.x12_{transaction_code}_{implementation_version}.transaction_set"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.transaction_set"
     )
 
     # return transaction set model
@@ -383,7 +391,8 @@ def _load_segment_lookup(implementation_version: str) -> Dict:
 
     :param implementation_version: The X12 implementation version used in ST03
     """
-    module_name = f"linuxforhealth.x12.v{implementation_version[2:6]}.segments"
+    major_version = parse_x12_major_version(implementation_version)
+    module_name = f"{BASE_TRANSACTION_PREFIX}{major_version}.segments"
     segment_module = import_module(module_name)
     segment_lookup = [
         v for k, v in inspect.getmembers(segment_module) if k == "SEGMENT_LOOKUP"
