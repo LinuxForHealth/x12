@@ -341,7 +341,7 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
     loop_parsers = defaultdict(list)
 
     parsing_module = import_module(
-        f"linuxforhealth.x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
+        f"linuxforhealth.x12.v5010.x12_{transaction_code}_{implementation_version}.parsing"
     )
 
     funcs = [
@@ -362,7 +362,7 @@ def _load_transaction_model(
 ) -> X12SegmentGroup:
     """Returns the transaction model for the x12 transaction"""
     transaction_module = import_module(
-        f"linuxforhealth.x12.transactions.x12_{transaction_code}_{implementation_version}.transaction_set"
+        f"linuxforhealth.x12.v5010.x12_{transaction_code}_{implementation_version}.transaction_set"
     )
 
     # return transaction set model

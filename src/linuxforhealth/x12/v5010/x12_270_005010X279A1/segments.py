@@ -1,15 +1,14 @@
 """
 segments.py
 
-Specialized segment models for the Eligibility 271 005010X279A1 transaction.
+Specialized segment models for the Eligibility 270 005010X279A1 transaction.
 """
 from enum import Enum
 from typing import Literal, Optional, List
 
 from pydantic import Field
-from linuxforhealth.x12.transactions.validators import validate_hl_parent_id
+from linuxforhealth.x12.v5010.validators import validate_hl_parent_id
 from linuxforhealth.x12.v5010.segments import (
-    AaaSegment,
     BhtSegment,
     HlSegment,
     Nm1Segment,
@@ -21,22 +20,21 @@ from linuxforhealth.x12.v5010.segments import (
     EqSegment,
     IiiSegment,
     AmtSegment,
-    PerSegment,
 )
 
 
 class HeaderStSegment(StSegment):
     """
-    Customized ST segment for 271 transaction header
+    Customized ST segment for 270 transaction header
     """
 
-    transaction_set_identifier_code: Literal["271"]
+    transaction_set_identifier_code: Literal["270"]
     implementation_convention_reference: Literal["005010X279A1"]
 
 
 class HeaderBhtSegment(BhtSegment):
     """
-    Customized BHT Segment for 271 transaction header
+    Customized BHT Segment for 270 transaction header
     """
 
     class PurposeCode(str, Enum):
@@ -44,8 +42,8 @@ class HeaderBhtSegment(BhtSegment):
         Code values for BHT02
         """
 
-        CONFIRMATION = "06"
-        RESPONSE = "11"
+        CANCELLATION = "01"
+        REQUEST = "13"
 
     hierarchical_structure_code: Literal["0022"]
     transaction_set_purpose_code: PurposeCode
@@ -63,37 +61,6 @@ class Loop2000AHlSegment(HlSegment):
     hierarchical_child_code: Literal["1"]
 
     _parent_id_validator = validate_hl_parent_id
-
-
-class Loop2000AAaaSegment(AaaSegment):
-    """
-    Loop 2000A AAA Segment adjusted for Information Source Usage
-    """
-
-    class RejectReasonCode(str, Enum):
-        """
-        Code values for AAA03
-        """
-
-        AUTHORIZED_QUANTITY_EXCEEDED = "04"
-        AUTHORIZATION_ACCESS_RESTRICTIONS = "41"
-        UNABLE_TO_RESPOND_AT_CURRENT_TIME = "42"
-        INVALID_PARTICIPANT_IDENTIFICATION = "79"
-
-    class FollowUpActionCode(str, Enum):
-        """
-        Code values for AAA04
-        """
-
-        PLEASE_CORRECT_AND_RESUBMIT = "C"
-        RESUBMISSION_NOT_ALLOWED = "N"
-        PLEASE_RESUBMIT_ORIGINAL_TRANSACTION = "P"
-        RESUBMISSION_ALLOWED = "R"
-        DO_NOT_RESUBMIT_INQUIRY_SENT_THIRD_PARTY = "S"
-        DO_NOT_RESUBMIT_WE_WILL_RESPOND = "Y"
-
-    reject_reason_code: RejectReasonCode
-    follow_up_action_code: FollowUpActionCode
 
 
 class Loop2100ANm1Segment(Nm1Segment):
@@ -129,80 +96,13 @@ class Loop2100ANm1Segment(Nm1Segment):
     identification_code_qualifier: IdentificationCodeQualifier
 
 
-class Loop2100APerSegment(PerSegment):
-    """
-    Loop 2100A Per segment adjusted for loop specific code table values.
-    """
-
-    class CommunicationNumberQualifier1(str, Enum):
-        """
-        Code values for PER03
-        """
-
-        ELECTRONIC_DATA_INTERCHANGE_ACCESS_NUMBER = "ED"
-        ELECTRONIC_MAIL = "EM"
-        FACSIMILE = "FX"
-        TELEPHONE = "TE"
-        UNIFORM_RESOURCE_LOCATOR = "UR"
-
-    class CommunicationNumberQualifier2(str, Enum):
-        """
-        Code values for PER05
-        """
-
-        ELECTRONIC_DATA_INTERCHANGE_ACCESS_NUMBER = "ED"
-        ELECTRONIC_MAIL = "EM"
-        FACSIMILE = "FX"
-        TELEPHONE = "TE"
-        UNIFORM_RESOURCE_LOCATOR = "UR"
-        TELEPHONE_EXTENSION = "EX"
-
-    communication_number_qualifier_1: CommunicationNumberQualifier1
-    communication_number_qualifier_2: Optional[CommunicationNumberQualifier2]
-    communication_number_qualifier_3: Optional[CommunicationNumberQualifier2]
-
-
-class Loop2100AAaaSegment(AaaSegment):
-    """
-    Loop 2100A AAA segment is overriden to support information source custom code table values
-    """
-
-    class RejectReasonCode(str, Enum):
-        """
-        Code values for AAA03
-        """
-
-        AUTHORIZED_QUANTITY_EXCEEDED = "04"
-        AUTHORIZATION_ACCESS_RESTRICTIONS = "41"
-        UNABLE_TO_RESPOND_AT_CURRENT_TIME = "42"
-        INVALID_PARTICIPANT_IDENTIFICATION = "79"
-        NO_RESPONSE_RECEIVED_TRANSACTION_TERMINATED = "80"
-        PAYER_NAME_OR_IDENTIFIER_MISSING = "T4"
-
-    class FollowUpActionCode(str, Enum):
-        """
-        Code values for AAA04
-        """
-
-        PLEASE_CORRECT_AND_RESUBMIT = "C"
-        RESUBMISSION_NOT_ALLOWED = "N"
-        PLEASE_RESUBMIT_ORIGINAL_TRANSACTION = "P"
-        RESUBMISSION_ALLOWED = "R"
-        DO_NOT_RESUBMIT_INQUIRY_SENT_THIRD_PARTY = "S"
-        DO_NOT_RESUBMIT_WE_WILL_RESPOND = "Y"
-        PLEASE_WAIT_30_DAYS_RESUBMIT = "W"
-        PLEASE_WAIT_10_DAYS_RESUBMIT = "X"
-
-    reject_reason_code: RejectReasonCode
-    follow_up_action_code: FollowUpActionCode
-
-
 class Loop2000BHlSegment(HlSegment):
     """
     Loop2000B HL segment adjusted for Information Receiver usage
     """
 
     hierarchical_level_code: Literal["21"]
+    hierarchical_child_code: Literal["1"]
 
 
 class Loop2100BNm1Segment(Nm1Segment):
@@ -272,47 +172,6 @@ class Loop2100BRefSegment(RefSegment):
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
-class Loop2100BAaaSegment(AaaSegment):
-    """
-    Information Receiver Request Validation
-    """
-
-    class RejectReasonCode(str, Enum):
-        """
-        Code values for AAA03
-        """
-
-        REQUIRED_APPLICATION_DATA_MISSING = "15"
-        AUTHORIZATION_ACCESS_RESTRICTIONS = "41"
-        INVALID_MISSING_PROVIDER_IDENTIFICATION = "43"
-        INVALID_MISSING_PROVIDER_NAME = "44"
-        INVALID_MISSING_PROVIDER_SPECIALITY = "45"
-        INVALID_MISSING_PROVIDER_PHONE_NUMBER = "46"
-        INVALID_MISSING_PROVIDER_PHONE_STATE = "47"
-        INVALID_MISSING_REFERRING_PROVIDER_ID_NUMBER = "48"
-        PROVIDER_INELIGIBLE_FOR_INQUIRIES = "50"
-        PROVIDER_NOT_ON_FILE = "51"
-        INVALID_PARTICIPANT_IDENTIFICATION = "79"
-        INVALID_OR_MISSING_PROVIDER_ADDRESS = "97"
-        PAYER_NAME_OR_IDENITIFER_MISSING = "T4"
-
-    class FollowUpActionCode(str, Enum):
-        """
-        Code values for AAA03
-        """
-
-        PLEASE_CORRECT_AND_RESUBMIT = "C"
-        RESUBMISSION_NOT_ALLOWED = "N"
-        RESUBMISSION_ALLOWED = "R"
-        DO_NOT_RESUBMIT_INQUIRY_SENT_THIRD_PARTY = "S"
-        PLEASE_WAIT_30_DAYS_RESUBMIT = "W"
-        PLEASE_WAIT_10_DAYS_RESUBMIT = "X"
-        DO_NOT_RESUBMIT_WE_WILL_RESPOND = "Y"
-
-    reject_reason_code: RejectReasonCode
-    follow_up_action_code: FollowUpActionCode
-
-
 class Loop2100BPrvSegment(PrvSegment):
     """
     Additional provider information for Information Receiver.
@@ -343,7 +202,6 @@ class Loop2100BPrvSegment(PrvSegment):
         SUPERVISING = "SU"
 
     provider_code: ProviderCode
-    reference_identification_qualifier: Optional[Literal["PXC"]]
 
 
 class Loop2000CHlSegment(HlSegment):
@@ -361,14 +219,6 @@ class Loop2100CNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["IL"]
     name_last_or_organization_name: Optional[str]
-
-
-class Loop2100DNm1Segment(Nm1Segment):
-    """
-    Loop 2100D NM1 segment for Dependent name.
-    """
-
-    entity_identifier_code: Literal["03"]
 
 
 class Loop2100RefSegment(RefSegment):
@@ -432,32 +282,6 @@ class Loop2100CInsSegment(InsSegment):
     benefit_status_code: Optional[str]
 
 
-class Loop2100DInsSegment(InsSegment):
-    """
-    Used if the dependent falls within a "multiple birth" condition and cannot be resolved using a lookup by name
-    and birth date.
-    """
-
-    class IndividualRelationshipCode(str, Enum):
-        """
-        Code values for INS02
-        """
-
-        SPOUSE = "01"
-        CHILD = "19"
-        EMPLOYEE = "20"
-        UNKNOWN = "21"
-        ORGAN_DONOR = "39"
-        CADAVER_DONOR = "40"
-        LIFE_PARTNER = "53"
-        OTHER_RELATIONSHIP = "G8"
-
-    member_indicator: Literal["N"]
-    individual_relationship_code: IndividualRelationshipCode
-    maintenance_type_code: Optional[str]
-    benefit_status_code: Optional[str]
-
-
 class Loop2100DtpSegment(DtpSegment):
     """
     Loop 2100C STP segment for Subscriber date/date ranges.
@@ -468,82 +292,10 @@ class Loop2100DtpSegment(DtpSegment):
         Code values for DTP01
         """
 
-        DISCHARGE = "096"
         ISSUE = "102"
-        EFFECTIVE_DATE_OF_CHARGE = "152"
         PLAN = "291"
-        ELIGIBILITY = "307"
-        ADDED = "318"
-        COBRA_BEGIN = "340"
-        COBRA_END = "341"
-        PREMIUM_PAID_BEGIN = "342"
-        PREMIUM_PAID_END = "343"
-        PLAN_BEGIN = "346"
-        PLAN_END = "347"
-        ELIGIBILITY_BEGIN = "356"
-        ELIGIBILITY_END = "357"
-        ENROLLMENT = "382"
-        ADMISSION = "435"
-        DATE_OF_DEATH = "442"
-        CERTIFICATION = "458"
-        SERVICE = "472"
-        POLICY_EFFECTIVE = "539"
-        POLICY_EXPIRATION = "540"
-        DATE_OF_LAST_UPDATE = "636"
-        STATUS = "771"
 
     date_time_qualifier: DateTimeQualifier
-
-
-class Loop2110CAaaSegment(AaaSegment):
-    """
-    Loop 2110C AAA Segment supports member specific request validation code tables
-    """
-
-    class RejectReasonCode(str, Enum):
-        """
-        Code values for AAA03
-        """
-
-        REQUIRED_APPLICATION_DATA_MISSING = "15"
-        INPUT_ERRORS = "33"
-        SERVICE_DATES_NOT_WITHIN_PROVIDER_PLAN = "52"
-        INQUIRED_BENEFIT_INCONSISTENT_PROVIDER_TYPE = "53"
-        INAPPROPRIATE_PRODUCT_SERVICE_ID_QUALIFIER = "54"
-        INAPPROPRIATE_PRODUCT_SERVICE_ID = "55"
-        INAPPROPRIATE_DATE = "56"
-        INVALID_MISSING_DATES_OF_SERVICE = "57"
-        DATE_OF_BIRTH_FOLLOWS_DATE_OF_SERVICE = "60"
-        DATE_OF_DEATH_PRECEDES_DATE_OF_SERVICE = "61"
-        DATE_OF_SERVICE_NOT_WITHIN_ALLOWABLE_INQUIRY_PERIOD = "62"
-        DATE_OF_SERVICE_IN_FUTURE = "63"
-        INCONSISTENT_WITH_PATIENTS_AGE = "69"
-        INCONSISTENT_WITH_PATIENTS_GENDER = "70"
-        EXPERIMENTAL_SERVICE_OR_PROCEDURE = "98"
-        AUTHORIZATION_NUMBER_NOT_FOUND = "AA"
-        REQUIRES_PRIMARY_CARE_PHYSICIAN_AUTHORIZATION = "AE"
-        INVALID_MISSING_DIAGNOSIS_CODES = "AF"
-        INVALID_MISSING_PROCEDURE_CODES = "AG"
-        ADDITIONAL_PATIENT_CONDITION_INFORMATION_REQUIRED = "AO"
-        CERTIFICATION_INFORMATION_DOES_NOT_MATCH_PATIENT = "CI"
-        REQUIRES_MEDICAL_REVIEW = "E8"
-        INVALID_AUTHORIZATION_NUMBER_FORMAT = "IA"
-        MISSING_AUTHORIZATION_NUMBER = "MA"
-
-    class FollowUpActionCode(str, Enum):
-        """
-        Code values for AAA04
-        """
-
-        PLEASE_CORRECT_AND_RESUBMIT = "C"
-        RESUBMISSION_NOT_ALLOWED = "N"
-        RESUBMISSION_ALLOWED = "R"
-        PLEASE_WAIT_30_DAYS_RESUBMIT = "W"
-        PLEASE_WAIT_10_DAYS_RESUBMIT = "X"
-        DO_NOT_RESUBMIT_WE_WILL_RESPOND = "Y"
-
-    reject_reason_code: RejectReasonCode
-    follow_up_action_code: FollowUpActionCode
 
 
 class Loop2110EqSegment(EqSegment):
@@ -831,91 +583,10 @@ class Loop2110RefSegment(RefSegment):
         Code values for REF01
         """
 
-        PLAN_NUMBER = "18"
-        GROUP_POLICY_NUMBER = "IL"
-        MEMBER_IDENTIFICATION_NUMBER = "1W"
-        FAMILY_UNIT_NUMBER = "49"
-        GROUP_NUMBER = "6P"
         REFERRAL_NUMBER = "9F"
-        ALTERNATIVE_LIST_ID = "ALS"
-        COVERAGE_LIST_ID = "CLI"
-        HIC_NUMBER = "F6"
-        DRUG_FORMULARY_NUMBER = "FO"
         PRIOR_AUTHORIZATION_NUMBER = "G1"
-        INSURANCE_POLICY_NUMBER = "IG"
-        MEDICAL_ASSISTANCE_CATEGORY = "M7"
-        PLAN_NETWORK_IDENTIFICATION_NUMBER = "N6"
-        MEDICAID_RECIPIENT_IDENTIFICATION_NUMBER = "NQ"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
-
-
-class Loop2120Nm1Segment(Nm1Segment):
-    """
-    Benefit Related Entity Name Segment
-    """
-
-    class EntityIdentifierCode(str, Enum):
-        CONTRACTED_SERVICE_PROVIDER = "13"
-        PPO = "11"
-        PROVIDER = "1P"
-        THIRD_PARTY_ADMINISTRATOR = "2B"
-        EMPLOYER = "36"
-        OTHER_PHYSICIAN = "73"
-        FACILITY = "FA"
-        GATEWAY_PROVIDER = "GP"
-        GROUP = "GW"
-        INDEPENDENT_PHYSICIANS_ASSOCIATION = "I3"
-        INSURED_OR_SUBSCRIBER = "IL"
-        LEGAL_REPRESENTATIVE = "LR"
-        ORIGIN_CARRIER = "OC"
-        PRIMARY_CARE_PROVIDER = "P3"
-        PRIOR_INSURANCE_CARRIER = "P4"
-        PLAN_SPONSOR = "P5"
-        PAYER = "PR"
-        PRIMARY_PAYER = "PRP"
-        SECONDARY_PAYER = "SEP"
-        TERTIARY_PAYER = "TTP"
-        PARTY_PERFORMING_VERIFICATION = "VER"
-        VENDOR = "VN"
-        ORGANIZING_COMPLETING_CONFIG_CHANGE = "VY"
-        UTILIZATION_MANAGEMENT_ORGANIZATION = "X3"
-        MANAGED_CARE_ORGANIZATION = "Y2"
-
-    class IdentificationCodeQualifier(str, Enum):
-        """
-        Code values for NM108
-        """
-
-        EMPLOYER_IDENTIFICATION_NUMBER = "24"
-        SOCIAL_SECURITY_NUMBER = "34"
-        ETIN = "46"
-        FACILITY_IDENTIFICATION = "FA"
-        FEDERAL_TIN = "FI"
-        STANDARD_UNIQUE_HEALTH_IDENTIFIER_IN_US = "II"
-        MEMBER_IDENTIFICATION_NUMBER = "MI"
-        NAIC_IDENTIFICATION = "NI"
-        PAYOR_IDENTIFICATION = "PI"
-        PHARMACY_PROCESSOR_NUMBER = "PP"
-        SERVICE_PROVIDER_NUMBER = "SV"
-        CMS_PLAN_ID = "XV"
-        CMS_NPI = "XX"
-
-    class EntityRelationshipCode(str, Enum):
-        """
-        Code values for NM110
-        """
-
-        PARENT = "01"
-        CHILD = "02"
-        DOMESTIC_PARTNER = "27"
-        SPOUSE = "41"
-        EMPLOYEE = "48"
-        OTHER = "65"
-        UNKNOWN = "72"
-
-    entity_identifier_code: EntityIdentifierCode
-    identification_code_qualifier: IdentificationCodeQualifier
 
 
 class Loop2110DtpSegment(DtpSegment):
@@ -923,33 +594,7 @@ class Loop2110DtpSegment(DtpSegment):
     Overrides dates in Loop2100C to support an eligibility inquiry for a specific date or date range.
     """
 
-    class DateTimeQualifier(str, Enum):
-        """
-        Code values for DTP01
-        """
-
-        DISCHARGE = "096"
-        PERIOD_START = "193"
-        PERIOD_END = "194"
-        COMPLETION = "198"
-        COORDINATION_OF_BENEFITS = "290"
-        PLAN = "291"
-        BENEFIT = "292"
-        PRIMARY_CARE_PROVIDER = "295"
-        LATEST_VISIT_OR_CONSULTATION = "304"
-        ELIGIBILITY = "307"
-        ADDED = "318"
-        PLAN_BEGIN = "346"
-        BENEFIT_BEGIN = "348"
-        BENEFIT_END = "349"
-        ELIGIBILITY_BEGIN = "356"
-        ELIGIBILITY_END = "357"
-        ADMISSION = "435"
-        SERVICE = "472"
-        DATE_OF_LAST_UPDATE = "636"
-        STATUS = "771"
-
-    date_time_qualifier: DateTimeQualifier
+    date_time_qualifier: Literal["291"]
 
 
 class Loop2000DHlSegment(HlSegment):
