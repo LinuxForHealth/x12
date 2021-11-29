@@ -10,7 +10,7 @@ from typing import Dict, Iterator, List, Optional, Tuple
 from .config import IsaDelimiters, TransactionSetVersionIds, get_config
 from .models import X12Delimiters, X12SegmentGroup, X12SegmentName
 from .parsing import X12Parser, create_parser
-from .segments import SEGMENT_LOOKUP
+from linuxforhealth.x12.v5010.segments import SEGMENT_LOOKUP
 from .support import is_x12_data, is_x12_file
 
 logger = logging.getLogger(__name__)

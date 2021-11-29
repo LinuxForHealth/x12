@@ -131,7 +131,7 @@ from .segments import (
     Loop2430AmtSegment,
     Loop2010AaPerSegment,
 )
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.segments import (
     SeSegment,
     Cl1Segment,
     CurSegment,

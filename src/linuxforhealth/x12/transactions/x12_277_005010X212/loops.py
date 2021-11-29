@@ -50,7 +50,7 @@ from .segments import (
     Loop2000EHlSegment,
     Loop2100ENm1Segment,
 )
-from linuxforhealth.x12.segments import SeSegment, StcSegment
+from linuxforhealth.x12.v5010.segments import SeSegment, StcSegment
 from typing import List, Optional
 from pydantic import Field
 

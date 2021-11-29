@@ -13,7 +13,7 @@ from importlib import import_module
 from typing import Callable, Dict, List, Optional, Set
 
 from .models import X12SegmentGroup, X12Segment, X12Delimiters
-from .segments import SEGMENT_LOOKUP
+from linuxforhealth.x12.v5010.segments import SEGMENT_LOOKUP
 
 logger = logging.getLogger(__name__)
 
