@@ -106,6 +106,29 @@ def count_segments(values: Dict) -> int:
     return segment_count
 
 
+def parse_x12_major_version(x12_implementation_version) -> str:
+    """
+    Parses the x12 major version from an implementation version string.
+    If the version is invalid, an empty string is returned.
+
+    Example:
+        x = parse_x12_major_version("005010X279A1")
+        print(x)
+        # prints 5010
+
+        x = parse_x12_major_version("00501")
+        print(x)
+        # prints ""
+
+    :param x12_implementation_version: The X12 implementation version typically conveyed in ST03
+    :returns: The x12 major version or an empty string
+    """
+    if x12_implementation_version is None or len(x12_implementation_version) < 6:
+        return ""
+
+    return x12_implementation_version[2:6]
+
+
 # partial function used to "register" common field validator functions
 # common validator functions have the signature (cls, v, values)
 field_validator = functools.partial(validator, allow_reuse=True)

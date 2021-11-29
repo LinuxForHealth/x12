@@ -5,7 +5,7 @@ Models the loops, or logical segment groupings, for the Health Care Claim Paymen
 The Health Care Claim Payment transaction set organizes loops into a hierarchical and nested model.
 """
 from linuxforhealth.x12.models import X12SegmentGroup
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.segments import (
     SeSegment,
     BprSegment,
     DtmSegment,

@@ -13,13 +13,13 @@ from decimal import Decimal
 
 from pydantic import Field, PositiveInt, condecimal, validator, root_validator, conint
 
-from .models import X12Segment, X12SegmentName
-from .support import (
+from linuxforhealth.x12.models import X12Segment, X12SegmentName
+from linuxforhealth.x12.support import (
     parse_x12_date,
     parse_interchange_date,
     field_validator,
 )
-from .validators import validate_date_field
+from linuxforhealth.x12.validators import validate_date_field
 
 
 class AaaSegment(X12Segment):

@@ -11,6 +11,7 @@ from linuxforhealth.x12.support import (
     parse_x12_date,
     parse_interchange_date,
     count_segments,
+    parse_x12_major_version,
 )
 from linuxforhealth.x12.io import X12ModelReader
 
@@ -79,3 +80,9 @@ def test_count_segments(simple_270_with_new_lines):
         model_data = model.dict()
         segment_count: int = count_segments(model_data)
         assert segment_count == 17
+
+
+def test_parse_x12_major_version():
+    assert parse_x12_major_version("005010X279A1") == "5010"
+    assert parse_x12_major_version("00501") == ""
+    assert parse_x12_major_version(None) == ""

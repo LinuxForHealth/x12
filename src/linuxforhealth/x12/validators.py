@@ -92,7 +92,7 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
     :return: The validated date field value
     :raises: ValueError if the date field value is an invalid format.
     """
-    from linuxforhealth.x12.segments import DtpSegment
+    from linuxforhealth.x12.v5010.segments import DtpSegment
 
     def handle_x12_date(date_string: str):
         """Parses a x12 date string, raising a ValueError if an error occurs"""

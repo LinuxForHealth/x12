@@ -4,7 +4,7 @@ segments.py
 Specialized segment models for the HealthCare Claim Institutional 837 005010X223A3 transaction.
 """
 
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.segments import (
     StSegment,
     BhtSegment,
     Nm1Segment,

@@ -22,7 +22,7 @@ transactional modeling and processing.
 """
 
 from linuxforhealth.x12.models import X12SegmentGroup
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.segments import (
     SeSegment,
     N3Segment,
     N4Segment,

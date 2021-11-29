@@ -7,8 +7,8 @@ from enum import Enum
 from typing import Literal, Optional, List
 
 from pydantic import Field
-from linuxforhealth.x12.transactions.validators import validate_hl_parent_id
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.validators import validate_hl_parent_id
+from linuxforhealth.x12.v5010.segments import (
     AaaSegment,
     BhtSegment,
     HlSegment,

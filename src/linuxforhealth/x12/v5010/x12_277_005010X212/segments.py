@@ -3,7 +3,7 @@ segments.py
 
 Specialized segment models for the Health Care Claim Status Response 277 005010X212 transaction.
 """
-from linuxforhealth.x12.segments import (
+from linuxforhealth.x12.v5010.segments import (
     StSegment,
     BhtSegment,
     HlSegment,

@@ -1,7 +1,7 @@
 """
-transactions.py
+v5010.py
 
-The transactions module serves as the package root for X12 transaction implementations.
+The v5010 module serves as the package root for X12 "5010" transaction implementations.
 Transaction implementations are stored in separate packages with the following structure:
 
     x12_[transaction_code]_[implementation_version]

@@ -13,13 +13,16 @@ from importlib import import_module
 from typing import Callable, Dict, List, Optional, Set
 
 from .models import X12SegmentGroup, X12Segment, X12Delimiters
-from .segments import SEGMENT_LOOKUP
+from .support import parse_x12_major_version
 
 logger = logging.getLogger(__name__)
 
 # naming convention for parsing functions:
 # parse_nm1_segment, parse_st_segment, etc
 PARSING_FUNCTION_REGEX = "set\\_(.)*\\_loop"
+
+# the base transaction prefix used in _load functions
+BASE_TRANSACTION_PREFIX = "linuxforhealth.x12.v"
 
 
 def match(segment_name: str, conditions: Dict = None) -> Callable:
@@ -317,6 +320,7 @@ class X12Parser(ABC):
         self,
         transaction_model: X12SegmentGroup,
         loop_parsers: Dict,
+        segment_models: Dict,
         x12_delimiters: Optional[X12Delimiters] = None,
     ) -> None:
         """
@@ -324,14 +328,14 @@ class X12Parser(ABC):
 
         :param transaction_model: The X12 transaction model.
         :param loop_parsers: The parser functions used to identify loop boundaries in the X12 transaction.
+        :param segment_models: Dictionary mapping segment names to domain models
         :param x12_delimiters: The delimiters used to parse segments and fields.
         """
         self._transaction_model: X12SegmentGroup = transaction_model
         self._loop_parsers: Dict = loop_parsers
+        self._segment_models: Dict = segment_models
         self._delimiters: X12Delimiters = x12_delimiters or X12Delimiters()
-
         self._context: X12ParserContext = X12ParserContext()
-        self._segment_models: Dict = SEGMENT_LOOKUP
 
 
 @lru_cache
@@ -340,8 +344,9 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
     pattern = re.compile(PARSING_FUNCTION_REGEX)
     loop_parsers = defaultdict(list)
 
+    major_version = parse_x12_major_version(implementation_version)
     parsing_module = import_module(
-        f"linuxforhealth.x12.transactions.x12_{transaction_code}_{implementation_version}.parsing"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.parsing"
     )
 
     funcs = [
@@ -361,8 +366,11 @@ def _load_transaction_model(
     transaction_code: str, implementation_version: str
 ) -> X12SegmentGroup:
     """Returns the transaction model for the x12 transaction"""
+
+    major_version = parse_x12_major_version(implementation_version)
+
     transaction_module = import_module(
-        f"linuxforhealth.x12.transactions.x12_{transaction_code}_{implementation_version}.transaction_set"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.transaction_set"
     )
 
     # return transaction set model
@@ -372,6 +380,24 @@ def _load_transaction_model(
             # transaction set models have header and footer attributes
             if props.issuperset({"header", "footer"}):
                 return class_value
+
+
+@lru_cache
+def _load_segment_lookup(implementation_version: str) -> Dict:
+    """
+    Returns a segment lookup dictionary for a specific implementation version.
+    The lookup dictionary is implemented as Key = segment name, Value = segment model.
+    The implementation version is the version identifier used in the ST03 - 005010X279A1, 005010X212, etc.
+
+    :param implementation_version: The X12 implementation version used in ST03
+    """
+    major_version = parse_x12_major_version(implementation_version)
+    module_name = f"{BASE_TRANSACTION_PREFIX}{major_version}.segments"
+    segment_module = import_module(module_name)
+    segment_lookup = [
+        v for k, v in inspect.getmembers(segment_module) if k == "SEGMENT_LOOKUP"
+    ][0]
+    return segment_lookup
 
 
 def create_parser(
@@ -393,4 +419,5 @@ def create_parser(
         transaction_code, implementation_version
     )
     loop_parsers: Dict = _load_loop_parsers(transaction_code, implementation_version)
-    return X12Parser(transaction_model, loop_parsers, x12_delimiters)
+    segment_lookup: Dict = _load_segment_lookup(implementation_version)
+    return X12Parser(transaction_model, loop_parsers, segment_lookup, x12_delimiters)
