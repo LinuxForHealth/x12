@@ -10,7 +10,6 @@ from typing import Dict, Iterator, List, Optional, Tuple
 from .config import IsaDelimiters, TransactionSetVersionIds, get_config
 from .models import X12Delimiters, X12SegmentGroup, X12SegmentName
 from .parsing import X12Parser, create_parser
-from linuxforhealth.x12.v5010.segments import SEGMENT_LOOKUP
 from .support import is_x12_data, is_x12_file
 
 logger = logging.getLogger(__name__)
@@ -146,7 +145,6 @@ class X12ModelReader:
         :param x12_input: The X12 Message or a path to a X12 file
         """
         self._x12_segment_reader: X12SegmentReader = X12SegmentReader(x12_input)
-        self._segment_lookup: Dict = SEGMENT_LOOKUP
 
     def __enter__(self) -> "X12ModelReader":
         """
