@@ -1,7 +1,7 @@
 """
 transaction_set.py
 
-Defines the Professional Claims 837 005010X222A2 transaction set model.
+Defines the Professional Claims 837 004010X098A1 transaction set model.
 """
 
 from linuxforhealth.x12.models import X12SegmentGroup

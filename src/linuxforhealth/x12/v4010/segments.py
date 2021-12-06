@@ -295,6 +295,7 @@ class ClmSegment(X12Segment):
         ASSIGNED = "A"
         ASSIGNMENT_ACCEPTED_CLINICAL_LAB_ONLY = "B"
         NOT_ASSIGNED = "C"
+        PATENT_REFUSES_TO_ASSIGN_BENEFITS = "P"
 
     class BenefitsAssignmentCertificationIndicator(str, Enum):
         """
@@ -302,7 +303,6 @@ class ClmSegment(X12Segment):
         """
 
         NO = "N"
-        NOT_APPLICABLE = "W"
         YES = "Y"
 
     class ReleaseOfInformationCode(str, Enum):
@@ -310,8 +310,36 @@ class ClmSegment(X12Segment):
         Code values for CLM09
         """
 
+        APPROPRIATE_RELEASE_OF_INFORMATION_ON_FILE = "A"
         INFORMED_CONSENT_NO_SIGNATURE = "I"
+        PROVIDER_HAS_LIMITED_ABILITY_TO_RELEASE = "M"
+        PROVIDER_IS_NOT_ALLOWED_TO_RELEASE = "N"
+        ON_FILE_AT_PAYOR = "O"
         SIGNED_STATEMENT = "Y"
+
+    class PatientSignatureSourceCode(str, Enum):
+        """
+        Code values for CLM10
+        """
+
+        SIGNED_SIGNATURE_AUTHORIZATION_BLOCK_12_13 = "B"
+        SIGNED_HCFA_1500 = "C"
+        SIGNED_HCFA_1500_BLOCK_13 = "M"
+        SIGNATURE_GENERATED_BY_PROVIDER = "P"
+        SIGNED_HCFA_1500_BLOCK_12 = "S"
+
+    class SpecialProgramCode(str, Enum):
+        """
+        Code values for CLM12
+        """
+
+        EPSDT_OR_CHAP = "01"
+        PHYSICALLY_HANDICAPPED_CHILDRENS_PROGRAM = "02"
+        SPECIAL_FEDERAL_FUNDING = "03"
+        DISABILITY = "05"
+        INDUCED_ABORTION_DANGER_TO_LIFE = "07"
+        INDUCED_ABORTION_RAPE_OR_INCEST = "08"
+        SECOND_OPINION_OR_SURGERY = "09"
 
     class DelayReasonCode(str, Enum):
         """
@@ -329,7 +357,6 @@ class ClmSegment(X12Segment):
         ORIGINAL_CLAIM_REJECTED_DENIED_UNRELATED_TO_BILLING = "9"
         ADMINISTRATION_DELAY_PRIOR_APPROVAL = "10"
         OTHER = "11"
-        NATURAL_DISASTER = "15"
 
     segment_name: X12SegmentName = X12SegmentName.CLM
     patient_control_number: str = Field(min_length=1, max_length=38)
@@ -341,17 +368,17 @@ class ClmSegment(X12Segment):
     provider_accept_assignment_code: ProviderAcceptAssignmentCode
     benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
     release_of_information_code: ReleaseOfInformationCode
-    patient_signature_source_code: Optional[str] = Field(max_length=1)
+    patient_signature_source_code: Optional[PatientSignatureSourceCode]
     related_causes_code: Optional[str] = Field(is_component=True)
-    special_program_code: Optional[str] = Field(max_length=3)
+    special_program_code: Optional[SpecialProgramCode]
     yes_no_condition_response_code_1: Optional[str] = Field(max_length=1)
     level_of_service_code: Optional[str] = Field(max_length=3)
     yes_no_condition_response_code_2: Optional[str] = Field(max_length=1)
-    provider_agreement_code: Optional[str] = Field(max_length=1)
+    provider_agreement_code: Optional[Literal["P"]]
     claim_status_code: Optional[str] = Field(max_length=2)
     yes_no_condition_response_code_3: Optional[str] = Field(max_length=1)
     claim_submission_reason_code: Optional[str] = Field(max_length=2)
-    delay_reason_code: Optional[DelayReasonCode] = Field(max_length=2)
+    delay_reason_code: Optional[DelayReasonCode]
 
 
 class ClpSegment(X12Segment):
@@ -474,6 +501,16 @@ class Cr1Segment(X12Segment):
         CR1*LB*140**A*DH*12****UNCONSCIOUS~
     """
 
+    class AmbulanceTransportCode(str, Enum):
+        """
+        Code values for CR103
+        """
+
+        INITIAL_TRIP = "I"
+        RETURN_TRIP = "R"
+        TRANSFER_TRIP = "T"
+        ROUND_TRIP = "X"
+
     class AmbulanceTransportReasonCode(str, Enum):
         """
         Code values for CR104
@@ -488,7 +525,7 @@ class Cr1Segment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.CR1
     weight_measurement_code: Optional[Literal["LB"]]
     patient_weight: Optional[Decimal]
-    ambulance_transport_code: Optional[str] = Field(max_length=1)
+    ambulance_transport_code: Optional[AmbulanceTransportCode]
     ambulance_transport_reason_code: AmbulanceTransportReasonCode
     mileage_measurement_code: Literal["DH"]
     transport_distance: Decimal
@@ -518,6 +555,14 @@ class Cr2Segment(X12Segment):
         SYMPTOMATIC = "G"
         ACUTE_MANIFESTATION_OF_CHRONIC_CONDITION = "M"
 
+    class ConditionResponseCode(str, Enum):
+        """
+        Code values for CR212
+        """
+
+        NO = "N"
+        YES = "Y"
+
     segment_name: X12SegmentName = X12SegmentName.CR2
     count: Optional[str] = Field(max_length=9)
     quantity: Optional[Decimal]
@@ -527,9 +572,10 @@ class Cr2Segment(X12Segment):
     quantity_1: Optional[Decimal]
     quantity_2: Optional[Decimal]
     patient_condition_code: PatientConditionCode
+    yes_no_response_code: Optional[str]
     patient_condition_description_1: Optional[str] = Field(max_length=80)
     patient_condition_description_2: Optional[str] = Field(max_length=80)
-    yes_no_condition_response_code: Optional[str]
+    yes_no_condition_response_code: Optional[ConditionResponseCode]
 
 
 class Cr3Segment(X12Segment):
@@ -554,6 +600,65 @@ class Cr3Segment(X12Segment):
     durable_medical_equipment_duration: condecimal(gt=Decimal("0.0"))
     insulin_dependent_code: Optional[str] = Field(max_length=1)
     description: Optional[str] = Field(max_length=80)
+
+
+class Cr5Segment(X12Segment):
+    """
+    Home Oxygen Therapy Information
+    Example:
+        CR5*I*6********56**R*1~
+    """
+
+    class CertificationTypeCode(str, Enum):
+        """
+        Code values for CR501
+        """
+
+        INITIAL = "I"
+        RENEWAL = "R"
+        REVISED = "S"
+
+    class OxygenTestConditionCode(str, Enum):
+        """
+        Code values for CR512
+        """
+
+        EXERCISING = "E"
+        AT_REST_ON_ROOM_AIR = "R"
+        SLEEPING = "S"
+
+    segment_name = X12SegmentName.CR5
+    certification_type_code: CertificationTypeCode
+    treatment_period_count: condecimal(gt=Decimal("0.0"))
+    oxygen_type_code_1: Optional[str] = Field(max_length=2)
+    oxygen_type_code_2: Optional[str] = Field(max_length=2)
+    description: Optional[str] = Field(max_length=80)
+    quantity_1: Optional[condecimal(gt=Decimal("0.0"))]
+    quantity_2: Optional[condecimal(gt=Decimal("0.0"))]
+    quantity_3: Optional[condecimal(gt=Decimal("0.0"))]
+    description_2: Optional[str] = Field(max_length=80)
+    arterial_blood_gas_quantity: Optional[condecimal(gt=Decimal("0.0"))]
+    oxygen_saturation_quantity: Optional[condecimal(gt=Decimal("0.0"))]
+    oxygen_test_condition_code: Optional[OxygenTestConditionCode]
+    oxygen_test_findings_code_1: Optional[Literal["1"]]
+    oxygen_test_findings_code_2: Optional[Literal["2"]]
+    oxygen_test_findings_code_3: Optional[Literal["3"]]
+    quantity_4: Optional[condecimal(gt=Decimal("0.0"))]
+    oxygen_delivery_system_code: Optional[str] = Field(max_length=1)
+    oxygen_equipment_type_code: Optional[str] = Field(max_length=1)
+
+
+class Cr7Segment(X12Segment):
+    """
+    Home Health Treatment Plan Certification
+    Example:
+        CR7*AI*2*8~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.CR7
+    discipline_type_code: str = Field(min_length=2, max_length=2)
+    total_visits_rendered: int
+    total_visits_projected: int
 
 
 class CtpSegment(X12Segment):
@@ -1188,6 +1293,7 @@ class HcpSegment(X12Segment):
         PRICED_AT_CONTRACTUAL_PERCENTAGE = "03"
         BUNDLED_PRICING = "04"
         PEER_REVIEW_PRICING = "05"
+        PER_DIEM_PRICING = "06"
         FLAT_RATE_PRICING = "07"
         COMBINATION_PRICING = "08"
         MATERNITY_PRICING = "09"
@@ -1705,11 +1811,13 @@ class MeaSegment(X12Segment):
         Code values for MEA02
         """
 
+        GAS_TEST_RATE = "GRA"
         HEIGHT = "HT"
         HEMOGLOBIN = "R1"
         HEMATOCRIT = "R2"
         EPOETIN_STARTING_DOSAGE = "R3"
-        CREATINE = "R4"
+        CREATIN = "R4"
+        OXYGEN = "Z0"
 
     segment_name: X12SegmentName = X12SegmentName.MEA
     measurement_reference_id_code: MeasurementReferenceIdCode
@@ -2054,7 +2162,6 @@ class Nm1Segment(X12Segment):
         :param values: The previously validated field names and values
         """
         entity_type = values["entity_type_qualifier"]
-
         if cls.EntityQualifierCode.NON_PERSON.value == entity_type:
             if field_value:
                 raise ValueError(
@@ -2088,22 +2195,36 @@ class OiSegment(X12Segment):
         """
 
         NO = "NO"
-        NOT_APPLICABLE = "N"
         YES = "Y"
+
+    class PatientSignatureSourceCode(str, Enum):
+        """
+        Code values for OI04
+        """
+
+        SIGNED_SIGNATURE_AUTHORIZATION_BLOCK_12_13 = "B"
+        SIGNED_HCFA_1500 = "C"
+        SIGNED_HCFA_1500_BLOCK_13 = "M"
+        SIGNATURE_GENERATED_BY_PROVIDER = "P"
+        SIGNED_HCFA_1500_BLOCK_12 = "S"
 
     class ReleaseOfInformationCode(str, Enum):
         """
         Code values for OI06
         """
 
+        APPROPRIATE_RELEASE_ON_FILE = "A"
         INFORMED_CONSENT = "I"
+        PROVIDER_HAS_LIMITED_ABILITY_TO_RELEASE_DATA = "M"
+        NO_PROVIDER_IS_NOT_ALLOWED_TO_RELEASE_DATA = "N"
+        ON_FILE_AT_PAYOR_OR_AT_PLAN_SPONSOR = "O"
         PROVIDER_SIGNED_STATEMENT = "Y"
 
     segment_name: X12SegmentName = X12SegmentName.OI
     claim_filing_indicator_code: Optional[str] = Field(max_length=2)
     claim_submission_reason_code: Optional[str] = Field(max_length=2)
     benefits_assignment_certification: BenefitsAssignmentCertificationIndicator
-    patient_signature_source_code: Optional[Literal["P"]]
+    patient_signature_source_code: Optional[PatientSignatureSourceCode]
     provider_agreement_code: Optional[str] = Field(max_length=1)
     release_of_information_code: ReleaseOfInformationCode
 
@@ -2179,15 +2300,8 @@ class PerSegment(X12Segment):
         PER*IC*JOHN SMITH*TE*5551114444*EX*123~
     """
 
-    class ContactFunctionCode(str, Enum):
-        """
-        Code value for PER01
-        """
-
-        INFORMATION_CONTACT = "IC"
-
     segment_name: X12SegmentName = X12SegmentName.PER
-    contact_function_code: ContactFunctionCode
+    contact_function_code: Literal["IC"]
     name: Optional[str] = Field(max_length=60)
     communication_number_qualifier_1: str = Field(max_length=2)
     communication_number_1: str = Field(max_length=80)
@@ -2397,14 +2511,14 @@ class SbrSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.SBR
     payer_responsibility_code: str = Field(min_length=1, max_length=1)
-    individual_relationship_code: Optional[str] = Field(max_length=2)
+    individual_relationship_code: str = Field(max_length=2)
     group_policy_number: Optional[str] = Field(max_length=30)
     group_name: Optional[str] = Field(max_length=60)
-    insurance_type_code: Optional[str] = Field(max_length=3)
+    insurance_type_code: str = Field(max_length=3)
     coordination_of_benefits_code: Optional[str] = Field(max_length=1)
     condition_response_code: Optional[str] = Field(max_length=1)
     employment_status_code: Optional[str] = Field(max_length=2)
-    claim_filing_indicator_code: str = Field(min_length=1, max_length=2)
+    claim_filing_indicator_code: Optional[str] = Field(min_length=1, max_length=2)
 
 
 class SeSegment(X12Segment):
@@ -2474,6 +2588,7 @@ class Sv1Segment(X12Segment):
         Code values for SV103
         """
 
+        INTERNATIONAL_UNIT = "F2"
         MINUTES = "MJ"
         UNIT = "UN"
 
