@@ -3,7 +3,7 @@ test_4010_segments.py
 
 Tests the Pydantic X12 segment models specific to the 4010 specification
 """
-from linuxforhealth.x12.v4010.segments import Cr7Segment, Cr5Segment
+from linuxforhealth.x12.v4010.segments import Cr7Segment, Cr5Segment, Cr6Segment
 
 
 def test_cr5_segment():
@@ -26,3 +26,23 @@ def test_cr7_segment():
     }
     cr7_segment: Cr7Segment = Cr7Segment(**segment_data)
     assert cr7_segment.x12() == "CR7*PT*4*12~"
+
+
+def test_cr6_segment():
+    segment_data = {
+        "prognosis_indicator": "4",
+        "soc_date": "19941191",
+        "date_time_period_format_qualifier": "RD8",
+        "certification_period": "19941101-19941231",
+        "diagnosis_date": "19941015",
+        "skilled_nursing_facility_indicator": "N",
+        "medicare_coverage_indicator": "Y",
+        "certification_type_indicator": "I",
+        "last_visit_date": "19941101",
+        "patient_location_code": "A",
+    }
+    cr6_segment: Cr6Segment = Cr6Segment(**segment_data)
+    assert (
+        cr6_segment.x12()
+        == "CR6*4*19941191*RD8*19941101-19941231*19941015*N*Y*I*****19941101****A~"
+    )

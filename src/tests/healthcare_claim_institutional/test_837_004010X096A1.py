@@ -18,7 +18,6 @@ def resource_path() -> str:
         "homeowners.837",
         "institutional-ppo-repriced.837",
         "institutional.837",
-        "two-claims-same-provider.837",
         "workers-compensation.837",
     ],
 )

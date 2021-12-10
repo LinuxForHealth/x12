@@ -293,9 +293,7 @@ class ClmSegment(X12Segment):
         """
 
         ASSIGNED = "A"
-        ASSIGNMENT_ACCEPTED_CLINICAL_LAB_ONLY = "B"
         NOT_ASSIGNED = "C"
-        PATENT_REFUSES_TO_ASSIGN_BENEFITS = "P"
 
     class BenefitsAssignmentCertificationIndicator(str, Enum):
         """
@@ -365,7 +363,7 @@ class ClmSegment(X12Segment):
     non_institutional_claim_type_code: Optional[str] = Field(min_length=1, max_length=2)
     health_care_service_location_information: str = Field(is_component=True)
     provider_or_supplier_signature_indicator: Optional[str] = Field(max_length=1)
-    provider_accept_assignment_code: ProviderAcceptAssignmentCode
+    provider_accept_assignment_code: Optional[ProviderAcceptAssignmentCode]
     benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
     release_of_information_code: ReleaseOfInformationCode
     patient_signature_source_code: Optional[PatientSignatureSourceCode]
@@ -455,9 +453,9 @@ class Cl1Segment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.CL1
-    admission_type_code: str = Field(min_length=1, max_length=1)
+    admission_type_code: Optional[str] = Field(max_length=1)
     admission_source_code: Optional[str] = Field(max_length=1)
-    patient_status_code: str = Field(min_length=1, max_length=2)
+    patient_status_code: Optional[str] = Field(max_length=2)
     nursing_home_residential_status_code: Optional[str] = Field(max_length=1)
 
 
@@ -646,6 +644,105 @@ class Cr5Segment(X12Segment):
     quantity_4: Optional[condecimal(gt=Decimal("0.0"))]
     oxygen_delivery_system_code: Optional[str] = Field(max_length=1)
     oxygen_equipment_type_code: Optional[str] = Field(max_length=1)
+
+
+class Cr6Segment(X12Segment):
+    """
+    Home Health Care Certification
+    Example:
+        CR6*4*941191*RD8*19941101-19941231*941015*N*Y*I*****941101****A~
+    """
+
+    class PrognosisIndicator(str, Enum):
+        """
+        Code values for CR601
+        """
+
+        POOR = "1"
+        GUARDED = "2"
+        FAIR = "3"
+        GOOD = "4"
+        VERY_GOOD = "5"
+        EXCELLENT = "6"
+        LESS_THEN_6_MONTHS = "7"
+        TERMINAL = "8"
+
+    class SkilledNursingFacilityIndicator(str, Enum):
+        """
+        Code values for CR606
+        """
+
+        NO = "N"
+        UNKNOWN = "U"
+        YES = "Y"
+
+    class MedicareCoverageIndicator(str, Enum):
+        """
+        Code values for CR606
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    class CertificationTypeIndicator(str, Enum):
+        """
+        Code values for CR608
+        """
+
+        INITIAL = "I"
+        RENEWAL = "R"
+        REVISED = "S"
+
+    class ProductServiceIdQualifier(str, Enum):
+        """
+        Code values for CR610
+        """
+
+        HCPCS_CPT_CODES = "HC"
+        ICD_9_CM = "ID"
+
+    class PatientLocationCode(str, Enum):
+        """
+        Code values for CR617
+        """
+
+        ACUTE_CARE_FACILITY = "A"
+        BOARDING_HOME = "B"
+        HOSPICE = "C"
+        INTERMEDIATE_CARE_FACILITY = "D"
+        LONG_TERM_CARE_FACILITY = "E"
+        NOT_SPECIFIED = "F"
+        NURSING_HOME = "G"
+        SUB_ACUTE_CARE_FACILITY = "H"
+        OTHER_LOCATION = "L"
+        REHABILITATION_FACILITY = "M"
+        OUTPATIENT_FACILITY = "O"
+        RESIDENTIAL_TREATMENT_FACILITY = "R"
+        SKILLED_NURSING_HOME = "S"
+        REST_HOME = "T"
+
+    segment_name: X12SegmentName = X12SegmentName.CR6
+    prognosis_indicator: PrognosisIndicator
+    soc_date: Union[str, datetime.date]
+    date_time_period_format_qualifier: Literal["RD8"]
+    certification_period: Optional[str]
+    diagnosis_date: Union[str, datetime.date]
+    skilled_nursing_facility_indicator: SkilledNursingFacilityIndicator
+    medicare_coverage_indicator: MedicareCoverageIndicator
+    certification_type_indicator: CertificationTypeIndicator
+    surgery_date: Optional[Union[str, datetime.date]]
+    product_service_id_qualifier: Optional[ProductServiceIdQualifier]
+    surgical_procedure_code: Optional[str] = Field(max_length=15)
+    verbal_soc_date: Optional[Union[str, datetime.date]]
+    last_visit_date: Optional[Union[str, datetime.date]]
+    physician_contract_date: Optional[Union[str, datetime.date]]
+    hospital_admission_qualifier: Optional[Literal["RD8"]]
+    last_admission_period: Optional[str]
+    patient_location_code: PatientLocationCode
+    diagnosis_date: Optional[Union[str, datetime.date]]
+    secondary_diagnosis_date: Optional[Union[str, datetime.date]]
+    third_secondary_diagnosis_date: Optional[Union[str, datetime.date]]
+    fourth_secondary_diagnosis_date: Optional[Union[str, datetime.date]]
 
 
 class Cr7Segment(X12Segment):
@@ -2629,6 +2726,7 @@ class Sv2Segment(X12Segment):
         """
 
         DAYS = "DA"
+        INTERNATIONAL_UNIT = "F2"
         UNIT = "UN"
 
     segment_name: X12SegmentName = X12SegmentName.SV2
