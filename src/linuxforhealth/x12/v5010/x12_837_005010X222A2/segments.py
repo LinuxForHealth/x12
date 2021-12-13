@@ -441,6 +441,8 @@ class Loop2010CaRefSegment(RefSegment):
         MEMBER_IDENTIFICATION_NUMBER = "1W"
         SOCIAL_SECURITY_NUMBER = "SY"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2300DtpSegment(DtpSegment):
     """
@@ -585,6 +587,9 @@ class Loop2300PwkSegment(PwkSegment):
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
 
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
+
 
 class Loop2300Cn1Segment(Cn1Segment):
     """
@@ -658,6 +663,8 @@ class Loop2300NteSegment(NteSegment):
         GOALS_REHAB_POTENTIAL_DISCHARGE_PLANS = "DCP"
         DIAGNOSIS_DESCRIPTION = "DGN"
         THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
+
+    note_reference_code: NoteReferenceCode
 
 
 class Loop2300CrcAmbulanceCertification(CrcSegment):
@@ -1035,6 +1042,10 @@ class Loop2320SbrSegment(SbrSegment):
         MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
         MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"
 
+    payer_responsibility_code: PayerResponsibilityCode
+    individual_relationship_code: Optional[IndividualRelationshipCode]
+    claim_filing_indicator_code: InsuranceTypeCode
+
 
 class Loop2330aNm1Segment(Nm1Segment):
     """
@@ -1329,6 +1340,9 @@ class Loop2400PwkSegment(PwkSegment):
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
 
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
+
 
 class Loop2400CrcSegment(CrcSegment):
     """
@@ -1438,6 +1452,8 @@ class Loop2400Cn1Segment(Cn1Segment):
         CAPITATED = "05"
         PERCENT = "06"
         OTHER = "09"
+
+    contract_code: ContractTypeCode
 
 
 class Loop2400RefSegment(RefSegment):

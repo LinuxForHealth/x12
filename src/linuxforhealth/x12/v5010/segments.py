@@ -2024,7 +2024,8 @@ class Nm1Segment(X12Segment):
     name_suffix: Optional[str] = Field(max_length=10)
     identification_code_qualifier: Optional[str] = Field(max_length=2)
     identification_code: Optional[str] = Field(max_length=80)
-    # NM110 - NM112 are not used
+    entity_relationship_code: Optional[str] = Field(max_length=2)
+    # NM111 - NM112 are not used
 
     @root_validator
     def validate_identification_codes(cls, values):

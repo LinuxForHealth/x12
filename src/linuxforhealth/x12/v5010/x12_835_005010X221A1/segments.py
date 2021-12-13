@@ -372,6 +372,8 @@ class Loop2110AmtSegment(AmtSegment):
         FEDERAL_PAYMENT_MANDATE_CATEGORY_4 = "ZN"
         FEDERAL_PAYMENT_MANDATE_CATEGORY_5 = "ZO"
 
+    amount_qualifier_code: AmountQualifierCode
+
 
 class Loop2110QtySegment(QtySegment):
     """

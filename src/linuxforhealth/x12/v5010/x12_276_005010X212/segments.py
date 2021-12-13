@@ -179,6 +179,8 @@ class Loop2200DRefSegment(RefSegment):
         PHARMACY_PRESCRIPTION_NUMBER = "XZ"
         CLAIM_NUMBER = "D9"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2200DAmtSegment(AmtSegment):
     """
