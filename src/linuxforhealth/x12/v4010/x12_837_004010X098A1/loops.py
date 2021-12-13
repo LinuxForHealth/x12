@@ -1,7 +1,7 @@
 """
 loops.py
 
-Models the loops, or logical segment groupings, for the HealthCare Claims Professional 837 005010X222A2 transaction set.
+Models the loops, or logical segment groupings, for the HealthCare Claims Professional 837 004010X098A1 transaction set.
 The HealthCare Claims Professional set organizes loops into a hierarchical and nested model.
 
 -- Header

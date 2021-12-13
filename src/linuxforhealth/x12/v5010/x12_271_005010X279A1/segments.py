@@ -419,6 +419,8 @@ class Loop2100CPrvSegment(Loop2100BPrvSegment):
         SOCIAL_SECURITY_NUMBER = "SY"
         FEDERAL_TAXPAYER_IDENTIFICATION_NUMBER = "TJ"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2100CInsSegment(InsSegment):
     """
@@ -916,6 +918,7 @@ class Loop2120Nm1Segment(Nm1Segment):
 
     entity_identifier_code: EntityIdentifierCode
     identification_code_qualifier: IdentificationCodeQualifier
+    entity_relationship_code: Optional[EntityRelationshipCode]
 
 
 class Loop2110DtpSegment(DtpSegment):
@@ -958,35 +961,3 @@ class Loop2000DHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["23"]
-
-
-class Loop2100DNm1Segment(Nm1Segment):
-    """
-    Loop 2100D NM1 segment for Dependent name.
-    """
-
-    entity_identifier_code: Literal["03"]
-    name_first: str
-    identification_code_qualifier: Optional[str]
-    identification_code: Optional[str]
-
-
-class Loop2100DInsSegment(InsSegment):
-    """
-    Used if the dependent falls within a "multiple birth" condition and cannot be resolved using a lookup by name
-    and birth date.
-    """
-
-    class IndividualRelationshipCode(str, Enum):
-        """
-        Code values for INS02
-        """
-
-        SPOUSE = "01"
-        CHILD = "19"
-        OTHER_CHILD = "34"
-
-    member_indicator: Literal["N"]
-    individual_relationship_code: IndividualRelationshipCode
-    maintenance_type_code: Optional[str]
-    benefit_status_code: Optional[str]

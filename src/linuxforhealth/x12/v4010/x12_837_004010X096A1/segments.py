@@ -1,7 +1,7 @@
 """
 segments.py
 
-Specialized segment models for the HealthCare Claim Professional 837 005010X222A2 transaction.
+Specialized segment models for the HealthCare Claim Professional 837 004010X096A1 transaction.
 """
 
 from linuxforhealth.x12.v4010.segments import (
@@ -1373,6 +1373,8 @@ class Loop2330BRefSegment(RefSegment):
         REFERRAL_NUMBER = "9F"
         PRIOR_AUTHORIZATION_NUMBER = "G1"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2300BRefSegment(RefSegment):
     """
@@ -1612,6 +1614,7 @@ class Loop2400PwkSegment(PwkSegment):
         BY_FAX = "FX"
 
     report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
 
 
 class Loop2400CrcSegment(CrcSegment):

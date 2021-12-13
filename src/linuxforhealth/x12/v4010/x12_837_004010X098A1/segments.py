@@ -1,7 +1,7 @@
 """
 segments.py
 
-Specialized segment models for the HealthCare Claim Professional 837 005010X222A2 transaction.
+Specialized segment models for the HealthCare Claim Professional 837 004010X098A1 transaction.
 """
 
 from linuxforhealth.x12.v4010.segments import (
@@ -19,7 +19,6 @@ from linuxforhealth.x12.v4010.segments import (
     NteSegment,
     CrcSegment,
     PatSegment,
-    QtySegment,
     PwkSegment,
     Cr7Segment,
     HsdSegment,
@@ -219,6 +218,7 @@ class Loop2000BSbrSegment(SbrSegment):
     payer_responsibility_code: PayerResponsibilityCode
     individual_relationship_code: Optional[Literal["18"]]
     insurance_type_code: Optional[InsuranceTypeCode]
+    claim_filing_indicator_code: Optional[ClaimFilingIndicatorCode]
 
 
 class Loop2000CHlSegment(HlSegment):
@@ -720,6 +720,8 @@ class Loop2300NteSegment(NteSegment):
         DIAGNOSIS_DESCRIPTION = "DGN"
         PAYMENT = "PMT"
         THIRD_PARTY_ORGANIZATION_NOTES = "TPO"
+
+    note_reference_code: NoteReferenceCode
 
 
 class Loop2300CrcAmbulanceCertification(CrcSegment):
@@ -1233,6 +1235,8 @@ class Loop2310ERefSegment(RefSegment):
         PROVIDER_PLAN_NETWORK_IDENTIFICATION = "NS"
         SOCIAL_SECURITY_NUMBER = "SY"
         STATE_INDUSTRIAL_ACCOUNT_PROVIDER_NUMBER = "X5"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
 
 
 class Loop2320SbrSegment(SbrSegment):

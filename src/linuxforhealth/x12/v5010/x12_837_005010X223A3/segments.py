@@ -420,6 +420,8 @@ class Loop2010CaRefSegment(RefSegment):
         MEMBER_IDENTIFICATION_NUMBER = "1W"
         SOCIAL_SECURITY_NUMBER = "SY"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2300DtpSegment(DtpSegment):
     """
@@ -552,6 +554,9 @@ class Loop2300PwkSegment(PwkSegment):
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
 
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
+
 
 class Loop2300Cn1Segment(Cn1Segment):
     """
@@ -632,6 +637,8 @@ class Loop2300NteSegment(NteSegment):
         SAFETY_MEASURES = "SFM"
         SUPPLEMENTARY_PLAN_OF_TREATMENT = "SPT"
         UPDATED_INFORMATION = "UPI"
+
+    note_reference_code: NoteReferenceCode
 
 
 class Loop2300CrcEpSdtRefferal(CrcSegment):
@@ -1326,6 +1333,9 @@ class Loop2400PwkSegment(PwkSegment):
         EMAIL = "EM"
         FILE_TRANSFER = "FT"
         BY_FAX = "FX"
+
+    report_type_code: AttachmentReportTypeCode
+    report_transmission_code: AttachmentTransmissionCode
 
 
 class Loop2400RefSegment(RefSegment):

@@ -269,6 +269,8 @@ class Loop2100CPrvSegment(Loop2100BPrvSegment):
         SOCIAL_SECURITY_NUMBER = "SY"
         FEDERAL_TAXPAYER_IDENTIFICATION_NUMBER = "TJ"
 
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
 
 class Loop2100CInsSegment(InsSegment):
     """
