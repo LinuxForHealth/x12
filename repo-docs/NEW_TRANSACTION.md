@@ -5,7 +5,7 @@ the implementation within the `x12_270_005010X279A1` transaction set before addi
 
 ## Add Transaction Package
 
-Add a new transaction package to `x12.transactions` for the transaction set. The new transaction package name must
+Add a new transaction package to the appropriate top level version package such as `x12.v5010`. The new transaction package name must
 adhere to the following convention to support transaction discovery - `x12_[transaction set code]_[implementation version]`.
 
 Add the following modules to the new transaction package:
@@ -18,10 +18,10 @@ Add the following modules to the new transaction package:
 
 ## Add Segments
 
-Review the transaction specification and determine if all segments within the transaction set are supported within the
-`x12.segments` module. 
+Review the transaction specification and determine if all segments within the transaction set exist within the top level
+version module, `x12.v5010.segments`
 
-If a segment is missing from the `x12.segments` module, add a new entry to `x12.models.X12SegmentName`
+If a segment is missing from the `x12.v5010.segments` module, add a new entry to `x12.models.X12SegmentName`
 
 ```python
 from enum import Enum
@@ -68,7 +68,7 @@ class GeSegment(X12Segment):
 
 ```
 
-Next, add specialized segment models to `x12.transactoins.[new transaction package].segments.py`as necessary.
+Next, add specialized segment models to `x12.v5010.[new transaction package].segments.py`as necessary.
 Each specialized model must extend its base segment model counterpart.
 
 In the example below `Loop2000AHlSegment` extends `HlSegment` with overrides appropriate for the Eligibility (270)
@@ -82,7 +82,7 @@ The `Loop2000AHlSegment` provides the following:
 * The class overrides `hierarchical_parent_id_number` to set it as `Optional` since it is not required in the 2000A loop.
 
 ```python
-from x12.segments import HlSegment
+from x12.v5010.segments import HlSegment
 from enum import Enum
 from typing import Literal, Optional
 
