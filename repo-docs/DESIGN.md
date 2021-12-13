@@ -120,15 +120,12 @@ ISA*03*9876543210*01*9876543210*30*000000005      *30*12345          *131031*114
 The LinuxForHealth x12 data models extend [pydantic](https://pydantic-docs.helpmanual.io/usage/models) 's BaseModel
 implementation. 
 
-The LinuxForHealth x12 data model aligns with the ASC X12 specification and includes:
+The LinuxForHealth x12 data model version aligns with X12 versioning. The [5010](./src/x12/v5010) version is current,
+with [4010](./src/x12/v4010) provided for historical use. Each version utilizes an identical module structure. Using the
+v5010 version as an example, models used include:
 
-* [Base models](./x12/models.py) in `x12.models` to support X12 segments and groupings (loops and transactions).
-* [Segment models](./x12/segments.py) include all X12 segments used by ASC X12 Health Care transactions.
-
-The segment models define the fields used within a segment, but not the allowable values for a field, or if a field is
-optional. These specifications are enforced at the "loop level" within a transaction. The LinuxForHealth x12 
-transaction models reside within the `x12.transactions` package. Transaction implementations follow a standard naming
-convention of `x12_[transaction code]_[implementation_version]`.
+* [Base models](./src/x12/v5010/models.py) define the transaction set and its loop structures.
+* [Segment models](./x12/v5010/segments.py) the base segments used within the transaction loops.
 
 The contents of a transaction package include:
 
@@ -145,53 +142,40 @@ X12Segment is the base model class for X12 segments. It includes a `x12` method 
 x12 string.
 
 ```python
-import abc
-from pydantic import BaseModel
-
-class X12Segment(abc.ABC, BaseModel):
-    """
-    X12BaseSegment serves as the abstract base class for all X12 segment models.
-    """
-
-    delimiters: X12Delimiters = X12Delimiters()
-    segment_name: X12SegmentName
-
-    class Config:
-        """
-        Default configuration for X12 Models
-        """
-
-        use_enum_values = True
-
     def x12(self) -> str:
         """
         :return: the X12 representation of the model instance
         """
+
         x12_values = []
         for k, v in self.dict(exclude={"delimiters"}).items():
-            # evaluate fields
-    
+            if isinstance(v, str):
+                x12_values.append(v)
+            elif isinstance(v, list):
+                x12_values.append(self._process_multivalue_field(k, v))
+            elif isinstance(v, datetime.datetime):
+                x12_values.append(v.strftime("%Y%m%d%H%M"))
+            elif isinstance(v, datetime.date):
+                x12_values.append(v.strftime("%Y%m%d"))
+            elif isinstance(v, datetime.time):
+                x12_values.append(v.strftime("%H%M"))
+            elif isinstance(v, Decimal):
+                x12_values.append("{:.2f}".format(v))
+            elif v is None:
+                x12_values.append("")
+            else:
+                x12_values.append(str(v))
+
         x12_str = self.delimiters.element_separator.join(x12_values).rstrip(
-        self.delimiters.element_separator
+            self.delimiters.element_separator
         )
         return x12_str + self.delimiters.segment_terminator
-
-
 ```
 
 The X12SegmentGroup model is the base model used to model a X12 loop or transaction set. The X12SegmentGroup also includes
 a `x12` method which generates valid x12 from its contained segments.
 
 ```python
-import abc
-from pydantic import BaseModel
-from typing import List
-
-class X12SegmentGroup(abc.ABC, BaseModel):
-    """
-    Abstract base class for a model, typically a loop or transaction, which groups x12 segments.
-    """
-
     def x12(self, use_new_lines=True) -> str:
         """
         :return: Generates a X12 representation of the loop using its segments.
@@ -200,7 +184,22 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
         for f in fields:
-            # process fields
+            field_instance = getattr(self, f.name)
+
+            if field_instance is None:
+                continue
+            elif isinstance(field_instance, list):
+                for item in field_instance:
+                    if isinstance(item, X12Segment):
+                        x12_segments.append(item.x12())
+                    else:
+                        x12_segments.append(item.x12(use_new_lines=use_new_lines))
+            else:
+                if isinstance(field_instance, X12Segment):
+                    x12_segments.append(field_instance.x12())
+                else:
+                    x12_segments.append(field_instance.x12(use_new_lines=use_new_lines))
+
         join_char: str = "\n" if use_new_lines else ""
         return join_char.join(x12_segments)
 ```
@@ -222,9 +221,6 @@ types.
 String field validations may enforce min and max field lengths and pattern conformance (regular expressions).
 
 ```python
-from x12.models import X12SegmentName, X12Segment
-from pydantic import Field
-
 class HlSegment(X12Segment):
     """
     Defines a hierarchical organization used to relate one grouping of segments to another
@@ -242,9 +238,6 @@ class HlSegment(X12Segment):
 Numeric field validations may enforce value ranges or utilize Pydantic constrained types such as `PositiveInt`.
 
 ```python
-from x12.models import X12SegmentName, X12Segment
-from pydantic import Field, PositiveInt
-
 class IeaSegment(X12Segment):
     """
     Defines the interchange footer and is an EDI control segment.
@@ -258,13 +251,10 @@ class IeaSegment(X12Segment):
 ```
 
 Code-table fields are expressed as string based enumerations within a X12Segment model. Code tables which are not specific
-to a given transaction set or loop are defined within the `x12.segments` module. Transaction-specific code tables are
-defined within the `x12.transactions.<transaction package>.segments` module as "overrides".
+to a given transaction set or loop are defined within the `x12.<version>.segments` module. Transaction-specific code tables are
+defined within the `x12.<version>.x12_<transaction code>_<version identifier>` module as "overrides".
 
 ```python
-from enum import Enum
-from x12.segments import RefSegment
-
 class Loop2100RefSegment(RefSegment):
     """
     Conveys additional Subscriber or Dependent identification data.
@@ -304,11 +294,6 @@ functions. The `@root_validator` provides access to all fields within the model,
 The following example, the `Nm1Segment`, utilizes both validator types.
 
 ```python
-from x12.models import X12Segment, X12SegmentName
-from enum import Enum
-from pydantic import Field, validator, root_validator
-from typing import Optional, Tuple
-
 class Nm1Segment(X12Segment):
     """
     Entity Name and Identification Number
@@ -378,17 +363,6 @@ The `x12.validators` module contains common validation functions which are not s
 validations are "wired" to the model using explicit syntax rather than decorator functions.
 
 ```python
-from x12.models import X12SegmentGroup
-from x12.transactions.x12_270_005010X279A1.loops import (Loop2100DNm1Segment,
-                                                         Loop2100RefSegment,
-                                                         Loop2100DInsSegment,
-                                                         Loop2100DtpSegment,
-                                                         Loop2110D)
-from x12.segments import N3Segment, N4Segment, PrvSegment, DmgSegment,HiSegment
-from x12.validators import validate_duplicate_ref_codes
-from typing import Optional, List
-from pydantic import Field, root_validator
-
 class Loop2100D(X12SegmentGroup):
     """
     Loop 2100D - Dependent Name
