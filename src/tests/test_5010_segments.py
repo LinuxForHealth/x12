@@ -24,6 +24,19 @@ def test_amt_segment():
     assert amt_segment.x12() == "AMT*R*37.50~"
 
 
+def test_bgn_segment():
+    segment_data = {
+        "transaction_set_purpose_code": "00",
+        "transaction_set_reference_number": "12456",
+        "transaction_set_creation_date": "20131020",
+        "transaction_set_creation_time": "1200",
+        "action_code": "2"
+    }
+
+    bgn_segment: BgnSegment = BgnSegment(**segment_data)
+    assert bgn_segment.x12() == "BGN*00*12456*20131020*1200****2~"
+
+
 def test_bht_segment():
     segment_data = {
         "hierarchical_structure_code": "0022",

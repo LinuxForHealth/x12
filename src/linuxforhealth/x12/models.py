@@ -35,6 +35,7 @@ class X12SegmentName(str, Enum):
 
     AAA = "AAA"
     AMT = "AMT"
+    BGN = "BGN"
     BHT = "BHT"
     BPR = "BPR"
     CAS = "CAS"

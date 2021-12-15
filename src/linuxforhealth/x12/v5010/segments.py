@@ -57,6 +57,96 @@ class AmtSegment(X12Segment):
     credit_debit_flag_code: Optional[str] = Field(min_length=0, max_length=1)
 
 
+class BgnSegment(X12Segment):
+    """
+    Beginning Segment
+    Example:
+        BGN*00*12456*20131020*1200****2~
+    """
+
+    class TransactionSetPurposeCode(str, Enum):
+        """
+        Code values for BGN01
+        """
+        ORIGINAL = "00"
+        RESUBMISSION = "15"
+        INFORMATION_COPY = "22"
+
+    class TimeZoneCode(str, Enum):
+        """
+        Code values for BGN05
+        """
+        ISO_PS01 = "01"
+        ISO_PS02 = "02"
+        ISO_PS03 = "03"
+        ISO_PS04 = "04"
+        ISO_PS05 = "05"
+        ISO_PS06 = "06"
+        ISO_PS07 = "07"
+        ISO_PS08 = "08"
+        ISO_PS09 = "09"
+        ISO_PS10 = "10"
+        ISO_PS11 = "11"
+        ISO_PS12 = "12"
+        ISO_PS13 = "13"
+        ISO_PS14 = "14"
+        ISO_PS15 = "15"
+        ISO_PS16 = "16"
+        ISO_PS17 = "17"
+        ISO_PS18 = "18"
+        ISO_PS19 = "19"
+        ISO_PS20 = "20"
+        ISO_PS21 = "21"
+        ISO_PS22 = "22"
+        ISO_PS23 = "23"
+        ISO_PS24 = "24"
+        ALASKA_DAYLIGHT_TIME = "AD"
+        ALASKA_STANDARD_TIME = "AS"
+        ALASKA_TIME = "AT"
+        CENTRAL_DAYLIGHT_TIME = "CD"
+        CENTRAL_STANDARD_TIME = "CS"
+        CENTRAL_TIME = "CT"
+        EASTERN_DAYLIGHT_TIME = "ED"
+        EASTERN_STANDARD_TIME = "ES"
+        EASTERN_TIME = "ET"
+        GREENWICH_MEAN_TIME = "GM"
+        HAWAII_ALEUTIAN_DAYLIGHT_TIME = "HD"
+        HAWAII_ALEUTIAN_STANDARD_TIME = "HS"
+        HAWAII_ALEUTIAN_TIME = "HT"
+        LOCAL_TIME = "LT"
+        MOUNTAIN_DAYLIGHT_TIME = "MD"
+        MOUNTAIN_STANDARD_TIME = "MS"
+        MOUNTAIN_TIME = "MT"
+        NEWFOUNDLAND_DAYLIGHT_TIME = "ND"
+        NEWFOUNDLAND_STANDARD_TIME = "NS"
+        NEWFOUNDLAND_TIME = "NT"
+        PACIFIC_DAYLIGHT_TIME = "PD"
+        PACIFIC_STANDARD_TIME = "PS"
+        PACIFIC_TIME = "PT"
+        ATLANTIC_DAYLIGHT_TIME = "TD"
+        ATLANTIC_STANDARD_TIME = "TT"
+        UNIVERSAL_TIME_COORDINATE = "UT"
+
+    class ActionCode(str, Enum):
+        """
+        Code values for BGN08
+        """
+        CHANGE = "2"
+        VERIFY = "4"
+        REPLACE = "RX"
+
+    segment_name: X12SegmentName = X12SegmentName.BGN
+    transaction_set_purpose_code: TransactionSetPurposeCode
+    transaction_set_reference_number: str = Field(min_length=1, max_length=50)
+    transaction_set_creation_date: Union[str, datetime.date]
+    transaction_set_creation_time: Union[str, datetime.time]
+    time_zone_code: Optional[TimeZoneCode]
+    original_transaction_set_reference_number: Optional[str] = Field(min_length=1, max_length=50)
+    transaction_type_code: Optional[str] = Field(min_length=2, max_length=2)
+    action_code: ActionCode
+    security_level_code: Optional[str] = Field(min_length=2, max_length=2)
+
+
 class BhtSegment(X12Segment):
     """
     Defines the business application purpose and supporting reference data for the transaction.
