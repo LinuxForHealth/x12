@@ -20,7 +20,16 @@ class TransactionLoops(str, Enum):
     """
 
     HEADER = "header"
+    SPONSOR_NAME = "loop_1000a"
+    PAYER = "loop_1000b"
+    TPA_BROKER_NAME = "loop_1000c"
+    TPA_BROKER_ACCOUNT_INFORMATION = "loop_1100c"
     FOOTER = "footer"
+
+
+def _get_tpa_broker(context):
+    """Returns the current TPA broker"""
+    return context.transaction_data[TransactionLoops.TPA_BROKER_NAME][-1]
 
 
 @match("ST")
@@ -34,12 +43,77 @@ def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
 
     context.transaction_data[TransactionLoops.HEADER] = {
         "dtp_segment": [],
-        "qty_segment": []
+        "qty_segment": [],
     }
 
     context.set_loop_context(
         TransactionLoops.HEADER, context.transaction_data[TransactionLoops.HEADER]
     )
+
+
+@match("N1", conditions={"entity_identifier_code": "P5"})
+def set_sponsor_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the sponsor/employer group loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+
+    context.transaction_data[TransactionLoops.SPONSOR_NAME] = {}
+    context.set_loop_context(
+        TransactionLoops.SPONSOR_NAME,
+        context.transaction_data[TransactionLoops.SPONSOR_NAME],
+    )
+
+
+@match("N1", conditions={"entity_identifier_code": "IN"})
+def set_payer_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the payer group loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+
+    context.transaction_data[TransactionLoops.PAYER] = {}
+    context.set_loop_context(
+        TransactionLoops.PAYER, context.transaction_data[TransactionLoops.PAYER]
+    )
+
+
+@match("N1", conditions={"entity_identifier_code": ["BO", "TV"]})
+def set_tpa_broker_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the TPA/Broker Name loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+
+    if TransactionLoops.TPA_BROKER_NAME not in context.transaction_data:
+        context.transaction_data[TransactionLoops.TPA_BROKER_NAME] = []
+
+    context.transaction_data[TransactionLoops.TPA_BROKER_NAME].append({})
+    tpa_broker_name = context.transaction_data[TransactionLoops.TPA_BROKER_NAME][-1]
+    context.set_loop_context(
+        TransactionLoops.TPA_BROKER_NAME,
+        tpa_broker_name,
+    )
+
+
+@match("ACT")
+def set_tpa_broker_account(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the TPA/Broker Account loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    tpa_broker = _get_tpa_broker(context)
+    tpa_broker[TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION] = {}
+    tpa_broker_account = tpa_broker[TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION]
+    context.set_loop_context(TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION, tpa_broker_account)
 
 
 @match("SE")

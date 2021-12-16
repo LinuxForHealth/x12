@@ -15,12 +15,12 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["X307-enroll-individuals-in-qualified-health-plan-through-health-insurance-exchange.edi"],
+    [
+        "enroll-employee-multiple-products.834"
+    ],
 )
 def test_834_model(resource_path, file_name: str):
 
     x12_file_path = os.path.join(resource_path, file_name)
     assert os.path.exists(x12_file_path)
     assert_eq_model(x12_file_path)
-
-

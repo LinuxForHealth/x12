@@ -32,15 +32,20 @@ transactional modeling and processing.
 
 from linuxforhealth.x12.models import X12SegmentGroup
 from linuxforhealth.x12.v5010.segments import (
-    SeSegment,
+    SeSegment, ActSegment
 )
 from .segments import (
-    HeaderStSegment, HeaderRefSegment, HeaderDtpSegment, HeaderQtySegment
+    HeaderStSegment,
+    HeaderRefSegment,
+    HeaderDtpSegment,
+    HeaderQtySegment,
+    Loop1000AN1Segment,
+    Loop1000BN1Segment,
+    Loop1000CN1Segment,
 )
 from typing import List, Optional
-from pydantic import Field, root_validator
+from pydantic import Field
 from linuxforhealth.x12.v5010.segments import BgnSegment
-from linuxforhealth.x12.validators import validate_duplicate_ref_codes
 
 
 class Header(X12SegmentGroup):
@@ -50,9 +55,42 @@ class Header(X12SegmentGroup):
 
     st_segment: HeaderStSegment
     bgn_segment: BgnSegment
-    ref_segment: HeaderRefSegment
+    ref_segment: Optional[HeaderRefSegment]
     dtp_segment: Optional[List[HeaderDtpSegment]] = Field(max_items=6)
     qty_segment: Optional[List[HeaderQtySegment]] = Field(max_items=3)
+
+
+class Loop1000A(X12SegmentGroup):
+    """
+    Sponsor Name
+    """
+
+    n1_segment: Loop1000AN1Segment
+
+
+class Loop1000B(X12SegmentGroup):
+    """
+    Payer
+    """
+
+    n1_segment: Loop1000BN1Segment
+
+
+class Loop1100C(X12SegmentGroup):
+    """
+    TPA/Broker Account Information
+    """
+
+    act_segment: ActSegment
+
+
+class Loop1000C(X12SegmentGroup):
+    """
+    TPA/Broker Name
+    """
+
+    n1_segment: Loop1000CN1Segment
+    loop_1100c: Optional[Loop1100C]
 
 
 class Footer(X12SegmentGroup):

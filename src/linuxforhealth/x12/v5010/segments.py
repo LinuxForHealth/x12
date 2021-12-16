@@ -44,6 +44,24 @@ class AaaSegment(X12Segment):
     follow_up_action_code: str = Field(min_length=1, max_length=1)
 
 
+class ActSegment(X12Segment):
+    """
+    Account Identification
+    Example:
+        ACT*1234*****23498765~
+    """
+    segment_name: X12SegmentName = X12SegmentName.ACT
+    tpa_account_number: str = Field(min_length=1, max_length=35)
+    name: Optional[str] = Field(max_length=60)
+    identification_code_qualifier: Optional[str] = Field(max_length=2)
+    identification_code: Optional[str] = Field(max_length=80)
+    account_number_qualifier: Optional[str] = Field(max_length=3)
+    tpa_account_number_2: Optional[str] = Field(min_length=1, max_length=35)
+    description: Optional[str] = Field(max_length=80)
+    payment_method_type_code: Optional[str] = Field(max_length=2)
+    benefit_status_code: Optional[str] = Field(max_length=1)
+
+
 class AmtSegment(X12Segment):
     """
     Monetary Amount Information.
@@ -68,6 +86,7 @@ class BgnSegment(X12Segment):
         """
         Code values for BGN01
         """
+
         ORIGINAL = "00"
         RESUBMISSION = "15"
         INFORMATION_COPY = "22"
@@ -76,6 +95,7 @@ class BgnSegment(X12Segment):
         """
         Code values for BGN05
         """
+
         ISO_PS01 = "01"
         ISO_PS02 = "02"
         ISO_PS03 = "03"
@@ -131,6 +151,7 @@ class BgnSegment(X12Segment):
         """
         Code values for BGN08
         """
+
         CHANGE = "2"
         VERIFY = "4"
         REPLACE = "RX"
@@ -141,7 +162,9 @@ class BgnSegment(X12Segment):
     transaction_set_creation_date: Union[str, datetime.date]
     transaction_set_creation_time: Union[str, datetime.time]
     time_zone_code: Optional[TimeZoneCode]
-    original_transaction_set_reference_number: Optional[str] = Field(min_length=1, max_length=50)
+    original_transaction_set_reference_number: Optional[str] = Field(
+        min_length=1, max_length=50
+    )
     transaction_type_code: Optional[str] = Field(min_length=2, max_length=2)
     action_code: ActionCode
     security_level_code: Optional[str] = Field(min_length=2, max_length=2)

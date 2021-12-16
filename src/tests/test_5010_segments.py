@@ -18,6 +18,15 @@ def test_aaa_segment():
     assert aaa_segment.x12() == "AAA*Y**42*Y~"
 
 
+def test_act_segment():
+    segment_data = {
+        "tpa_account_number": "1234",
+        "tpa_account_number_2": "23498765",
+    }
+    act_segment: ActSegment = ActSegment(**segment_data)
+    assert act_segment.x12() == "ACT*1234*****23498765~"
+
+
 def test_amt_segment():
     segment_data = {"amount_qualifier_code": "R", "monetary_amount": Decimal("37.5")}
     amt_segment: AmtSegment = AmtSegment(**segment_data)
@@ -30,7 +39,7 @@ def test_bgn_segment():
         "transaction_set_reference_number": "12456",
         "transaction_set_creation_date": "20131020",
         "transaction_set_creation_time": "1200",
-        "action_code": "2"
+        "action_code": "2",
     }
 
     bgn_segment: BgnSegment = BgnSegment(**segment_data)
