@@ -24,6 +24,7 @@ class TransactionLoops(str, Enum):
     PAYER = "loop_1000b"
     TPA_BROKER_NAME = "loop_1000c"
     TPA_BROKER_ACCOUNT_INFORMATION = "loop_1100c"
+    MEMBER_LEVEL_DETAIL = "loop_2000"
     FOOTER = "footer"
 
 
@@ -103,7 +104,7 @@ def set_tpa_broker_name_loop(context: X12ParserContext, segment_data: Dict) -> N
 
 
 @match("ACT")
-def set_tpa_broker_account(context: X12ParserContext, segment_data: Dict) -> None:
+def set_tpa_broker_account_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
     Sets the TPA/Broker Account loop
 
@@ -113,7 +114,30 @@ def set_tpa_broker_account(context: X12ParserContext, segment_data: Dict) -> Non
     tpa_broker = _get_tpa_broker(context)
     tpa_broker[TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION] = {}
     tpa_broker_account = tpa_broker[TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION]
-    context.set_loop_context(TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION, tpa_broker_account)
+    context.set_loop_context(
+        TransactionLoops.TPA_BROKER_ACCOUNT_INFORMATION, tpa_broker_account
+    )
+
+
+@match("INS")
+def set_member_detail_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the Member Detail loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    if TransactionLoops.MEMBER_LEVEL_DETAIL not in context.transaction_data:
+        context.transaction_data[TransactionLoops.MEMBER_LEVEL_DETAIL] = []
+
+    context.transaction_data[TransactionLoops.MEMBER_LEVEL_DETAIL].append(
+        {"ref_segment": [], "dtp_segment": []}
+    )
+
+    member_level_detail = context.transaction_data[
+        TransactionLoops.MEMBER_LEVEL_DETAIL
+    ][-1]
+    context.set_loop_context(TransactionLoops.MEMBER_LEVEL_DETAIL, member_level_detail)
 
 
 @match("SE")

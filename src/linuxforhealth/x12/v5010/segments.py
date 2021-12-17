@@ -50,6 +50,7 @@ class ActSegment(X12Segment):
     Example:
         ACT*1234*****23498765~
     """
+
     segment_name: X12SegmentName = X12SegmentName.ACT
     tpa_account_number: str = Field(min_length=1, max_length=35)
     name: Optional[str] = Field(max_length=60)

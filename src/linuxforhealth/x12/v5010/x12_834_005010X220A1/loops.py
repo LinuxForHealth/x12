@@ -31,9 +31,7 @@ transactional modeling and processing.
 """
 
 from linuxforhealth.x12.models import X12SegmentGroup
-from linuxforhealth.x12.v5010.segments import (
-    SeSegment, ActSegment
-)
+from linuxforhealth.x12.v5010.segments import SeSegment, ActSegment
 from .segments import (
     HeaderStSegment,
     HeaderRefSegment,
@@ -42,6 +40,9 @@ from .segments import (
     Loop1000AN1Segment,
     Loop1000BN1Segment,
     Loop1000CN1Segment,
+    Loop2000InsSegment,
+    Loop2000RefSegment,
+    Loop2000DtpSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -91,6 +92,16 @@ class Loop1000C(X12SegmentGroup):
 
     n1_segment: Loop1000CN1Segment
     loop_1100c: Optional[Loop1100C]
+
+
+class Loop2000(X12SegmentGroup):
+    """
+    Member Level Detail
+    """
+
+    ins_segment: Loop2000InsSegment
+    ref_segment: List[Loop2000RefSegment]
+    dtp_segment: Optional[List[Loop2000DtpSegment]]
 
 
 class Footer(X12SegmentGroup):
