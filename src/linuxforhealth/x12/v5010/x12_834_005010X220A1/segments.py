@@ -14,6 +14,10 @@ from linuxforhealth.x12.v5010.segments import (
     QtySegment,
     N1Segment,
     InsSegment,
+    Nm1Segment,
+    PerSegment,
+    DmgSegment,
+    AmtSegment,
 )
 
 
@@ -374,3 +378,114 @@ class Loop2000DtpSegment(DtpSegment):
         MEDICAID_END = "474"
 
     date_time_qualifier: DateTimeQualifier
+
+
+class Loop2100ANm1Segment(Nm1Segment):
+    """
+    Member Name
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        CORRECTED_INUSRED = "74"
+        INSURED_OR_SUBSCRIBER = "IL"
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        MUTUALLY_DEFINED = "ZZ"
+
+    entity_identifier_code: EntityIdentifierCode
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+
+
+class Loop2100APerSegment(PerSegment):
+    """
+    Member communication numbers
+    """
+
+    class CommunicationNumberQualifier(str, Enum):
+        """
+        Code values for PER03
+        """
+
+        ALTERNATE_TELEPHONE = "AP"
+        BEEPER_NUMBER = "BN"
+        CELLULAR_PHONE = "CP"
+        ELECTRONIC_MAIL = "EM"
+        TELEPHONE_EXTENSION = "EX"
+        FACSIMILE = "FX"
+        HOME_PHONE_NUMBER = "HP"
+        TELEPHONE = "TE"
+        WORK_PHONE_NUMBER = "WP"
+
+    contact_function_code: Literal["IP"]
+    name: Optional[str] = Field(min_length=1, max_length=60)
+    communication_number_qualifier_1: CommunicationNumberQualifier
+    communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
+    communication_number_qualifier_3: Optional[CommunicationNumberQualifier]
+
+
+class Loop2100ADmgSegment(DmgSegment):
+    """
+    Member demographics
+    """
+
+    class MaritalStatusCode(str, Enum):
+        """
+        Code values for DMG04
+        """
+
+        REGISTERED_DOMESTIC_PARTNER = "B"
+        DIVORCED = "D"
+        SINGLE = "I"
+        MARRIED = "M"
+        UNREPORTED = "R"
+        SEPARATED = "S"
+        UNMARRIED = "U"
+        WIDOWED = "W"
+        LEGALLY_SEPARATED = "X"
+
+    class CitizenshipStatusCode(str, Enum):
+        """
+        Code values for DMG06
+        """
+
+        US_CITIZEN = "1"
+        NON_RESIDENT_ALIEN = "2"
+        RESIDENT_ALIEN = "3"
+        ILLEGAL_ALIEN = "4"
+        ALIEN = "5"
+        US_CITIZEN_NON_RESIDENT = "6"
+        US_CITIZEN_RESIDENT = "7"
+
+    marital_status_code: Optional[MaritalStatusCode]
+    citizenship_status_code: Optional[CitizenshipStatusCode]
+    code_list_qualifier_code: Optional[Literal["REC"]]
+
+
+class Loop2100AAmtSegment(AmtSegment):
+    """
+    Member Policy Amounts
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+
+        COINSURANCE_ACTUAL = "B9"
+        COPAYMENT_AMOUNT = "C1"
+        DEDUCTIBLE_AMOUNT = "D2"
+        EXPECTED_EXPENDITURE_AMOUNT = "EBA"
+        OTHER_UNLISTED_AMOUNT = "FK"
+        PREMIMUM_AMOUNT = "P3"
+        SPEND_DOWN = "R"
+
+    amount_qualifier_code: AmountQualifierCode

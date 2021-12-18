@@ -267,6 +267,16 @@ def test_eb_segment():
     )
 
 
+def test_ec_segment():
+    segment_data = {
+        "employment_class_code_1": "04",
+        "employment_class_code_2": "06",
+        "employment_class_code_3": "07",
+    }
+    ec_segment: EcSegment = EcSegment(**segment_data)
+    assert ec_segment.x12() == "EC*04*06*07~"
+
+
 def test_eq_segment():
     segment_data = {
         "service_type_code": ["98", "34", "44", "81", "A0", "A3"],
@@ -343,6 +353,17 @@ def test_hl_segment():
     assert hl_segment.x12() == "HL*3*2*22*0~"
 
 
+def test_hlh_segment():
+    segment_data = {
+        "health_related_code": "X",
+        "member_height": "74.00",
+        "member_weight": "210.00",
+    }
+
+    hlh_segment: HlhSegment = HlhSegment(**segment_data)
+    assert hlh_segment.x12() == "HLH*X*74.00*210.00~"
+
+
 def test_hsd_segment():
     segment_data = {
         "quantity_qualifier": "VS",
@@ -354,6 +375,12 @@ def test_hsd_segment():
     }
     hsd_segment: HsdSegment = HsdSegment(**segment_data)
     assert hsd_segment.x12() == "HSD*VS*12.00*WK*3.00*34*1.00~"
+
+
+def test_icm_segment():
+    segment_data = {"frequency_code": "1", "wage_amount": "800", "weekly_hours": "40"}
+    icm_segment: IcmSegment = IcmSegment(**segment_data)
+    assert icm_segment.x12() == "ICM*1*800.00*40.00~"
 
 
 def test_iea_segment():
@@ -443,6 +470,16 @@ def test_ls_segment():
     segment_data = {"loop_id_code": "2120"}
     ls_segment: LsSegment = LsSegment(**segment_data)
     assert ls_segment.x12() == "LS*2120~"
+
+
+def test_lui_segment():
+    segment_data = {
+        "identification_code_qualifier": "LD",
+        "identification_code": "123",
+        "language_use_indicator": "8",
+    }
+    lui_segment: LuiSegment = LuiSegment(**segment_data)
+    assert lui_segment.x12() == "LUI*LD*123**8~"
 
 
 def test_lx_segment():

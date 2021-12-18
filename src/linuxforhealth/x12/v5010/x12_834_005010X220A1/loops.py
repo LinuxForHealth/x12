@@ -31,7 +31,16 @@ transactional modeling and processing.
 """
 
 from linuxforhealth.x12.models import X12SegmentGroup
-from linuxforhealth.x12.v5010.segments import SeSegment, ActSegment
+from linuxforhealth.x12.v5010.segments import (
+    SeSegment,
+    ActSegment,
+    N3Segment,
+    N4Segment,
+    EcSegment,
+    IcmSegment,
+    HlhSegment,
+    LuiSegment,
+)
 from .segments import (
     HeaderStSegment,
     HeaderRefSegment,
@@ -43,6 +52,10 @@ from .segments import (
     Loop2000InsSegment,
     Loop2000RefSegment,
     Loop2000DtpSegment,
+    Loop2100ANm1Segment,
+    Loop2100APerSegment,
+    Loop2100ADmgSegment,
+    Loop2100AAmtSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -94,6 +107,23 @@ class Loop1000C(X12SegmentGroup):
     loop_1100c: Optional[Loop1100C]
 
 
+class Loop2100A(X12SegmentGroup):
+    """
+    Member Name
+    """
+
+    nm1_segment: Loop2100ANm1Segment
+    per_segment: Optional[Loop2100APerSegment]
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    dmg_segment: Optional[Loop2100ADmgSegment]
+    ec_segment: Optional[List[EcSegment]]
+    icm_segment: Optional[IcmSegment]
+    amt_segment: Optional[List[Loop2100AAmtSegment]]
+    hlh_segment: Optional[HlhSegment]
+    lui_segment: Optional[List[LuiSegment]]
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -102,6 +132,7 @@ class Loop2000(X12SegmentGroup):
     ins_segment: Loop2000InsSegment
     ref_segment: List[Loop2000RefSegment]
     dtp_segment: Optional[List[Loop2000DtpSegment]]
+    loop_2100a: Loop2100A
 
 
 class Footer(X12SegmentGroup):

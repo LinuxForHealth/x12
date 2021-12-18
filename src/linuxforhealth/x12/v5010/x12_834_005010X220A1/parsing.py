@@ -25,12 +25,18 @@ class TransactionLoops(str, Enum):
     TPA_BROKER_NAME = "loop_1000c"
     TPA_BROKER_ACCOUNT_INFORMATION = "loop_1100c"
     MEMBER_LEVEL_DETAIL = "loop_2000"
+    MEMBER_NAME = "loop_2100a"
     FOOTER = "footer"
 
 
 def _get_tpa_broker(context):
     """Returns the current TPA broker"""
     return context.transaction_data[TransactionLoops.TPA_BROKER_NAME][-1]
+
+
+def _get_member(context):
+    """Returns the current member"""
+    return context.transaction_data[TransactionLoops.MEMBER_LEVEL_DETAIL][-1]
 
 
 @match("ST")
@@ -138,6 +144,25 @@ def set_member_detail_loop(context: X12ParserContext, segment_data: Dict) -> Non
         TransactionLoops.MEMBER_LEVEL_DETAIL
     ][-1]
     context.set_loop_context(TransactionLoops.MEMBER_LEVEL_DETAIL, member_level_detail)
+
+
+@match("NM1", conditions={"entity_identifier_code": ["74", "IL"]})
+def set_member_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the member name loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member_loop = _get_member(context)
+    member_loop[TransactionLoops.MEMBER_NAME] = {
+        "ec_segment": [],
+        "amt_segment": [],
+        "lui_segment": [],
+    }
+
+    member_name = member_loop[TransactionLoops.MEMBER_NAME]
+    context.set_loop_context(TransactionLoops.MEMBER_NAME, member_name)
 
 
 @match("SE")

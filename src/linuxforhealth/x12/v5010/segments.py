@@ -723,6 +723,14 @@ class DmgSegment(X12Segment):
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     date_time_period: Optional[Union[str, datetime.date]]
     gender_code: Optional[GenderCode]
+    marital_status_code: Optional[str] = Field(max_length=1)
+    race_or_ethnicity: Optional[str]
+    citizenship_stats_code: Optional[str] = Field(max_length=2)
+    country_code: Optional[str] = Field(max_length=3)
+    basis_of_verification_code: Optional[str] = Field(max_length=2)
+    quantity: Optional[Decimal]
+    code_list_qualifier_code: Optional[Literal["REC"]]
+    race_or_ethnicity_code: Optional[str] = Field(max_length=30)
 
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
@@ -1188,6 +1196,44 @@ class EbSegment(X12Segment):
         return values
 
 
+class EcSegment(X12Segment):
+    """
+    Employment Class
+    Example:
+        EC*04*06*07~
+    """
+
+    class EmploymentClassCode(str, Enum):
+        """
+        Code values for EC01, EC02, and EC03
+        """
+
+        UNION = "01"
+        NON_UNION = "02"
+        EXECUTIVE = "03"
+        NON_EXECUTIVE = "04"
+        MANAGEMENT = "05"
+        NON_MANAGEMENT = "06"
+        HOURLY = "07"
+        SALARIED = "08"
+        ADMINISTRATIVE = "09"
+        NON_ADMINISTRATIVE = "10"
+        EXEMPT = "11"
+        NON_EXEMPT = "12"
+        HIGHLY_COMPENSATED = "17"
+        KEY_EMPLOYEE = "18"
+        BARGAINING = "19"
+        NON_BARGAINING = "20"
+        OWNER = "21"
+        PRESIDENT = "22"
+        VICE_PRESIDENT = "23"
+
+    segment_name: X12SegmentName = X12SegmentName.EC
+    employment_class_code_1: EmploymentClassCode
+    employment_class_code_2: Optional[EmploymentClassCode]
+    employment_class_code_3: Optional[EmploymentClassCode]
+
+
 class EqSegment(X12Segment):
     """
     Eligibility Inquiry Segment
@@ -1395,6 +1441,30 @@ class HlSegment(X12Segment):
     hierarchical_child_code: str = Field(min_length=1, max_length=1, regex="^0|1$")
 
 
+class HlhSegment(X12Segment):
+    """
+    Member Health Information
+    Example:
+        HLH*X*74*210~
+    """
+
+    class HealthRelatedCode(str, Enum):
+        """
+        Code values for HLH01
+        """
+
+        NONE = "N"
+        SUBSTANCE_ABUSE = "S"
+        TOBACCO_USE = "T"
+        UNKNOWN = "U"
+        TOBACCO_USE_AND_SUBSTANCE_ABUSE = "X"
+
+    segment_name: X12SegmentName = X12SegmentName.HLH
+    health_related_code: HealthRelatedCode
+    member_height: Optional[Decimal]
+    member_weight: Optional[Decimal]
+
+
 class HsdSegment(X12Segment):
     """
     Health Care Services Delivery
@@ -1540,6 +1610,42 @@ class HsdSegment(X12Segment):
         if values.get("period_count") and not values.get("time_period_qualifier"):
             raise ValueError("Period requires a qualifier and value")
         return values
+
+
+class IcmSegment(X12Segment):
+    """
+    Member Income
+    Example:
+        ICM*1*425.25*40.00~
+    """
+
+    class FrequencyCode(str, Enum):
+        """
+        Code values for ICM01
+        """
+
+        WEEKLY = "1"
+        BIWEEKLY = "2"
+        SEMIMONTHLY = "3"
+        MONTHLY = "4"
+        DAILY = "6"
+        ANNUAL = "7"
+        TWO_CALENDAR_MONTHS = "8"
+        LUMP_SUM_SEPARATION_ALLOWANCE = "9"
+        YEAR_TO_DATE = "B"
+        SINGLE = "C"
+        HOURLY = "H"
+        QUARTERLY = "Q"
+        SEMI_ANNUAL = "S"
+        UNKNOWN = "U"
+
+    segment_name: X12SegmentName = X12SegmentName.ICM
+    frequency_code: FrequencyCode
+    wage_amount: Decimal
+    weekly_hours: Optional[Decimal]
+    location_identifier: Optional[str] = Field(max_length=30)
+    salary_grade_code: Optional[str] = Field(max_length=5)
+    currency_code: Optional[str]
 
 
 class IeaSegment(X12Segment):
@@ -1787,6 +1893,38 @@ class LsSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LS
     loop_id_code: str = Field(min_length=1, max_length=4)
+
+
+class LuiSegment(X12Segment):
+    """
+    Member language
+    Example:
+        LUI*LD*123**8~
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for LUI01
+        """
+
+        NISO_Z39_53_LANGUAGE_CODES = "LD"
+        ISO_639_LANGUAGE_CODES = "LE"
+
+    class UseOfLanguageIndicator(str, Enum):
+        """
+        Code values for LUI04
+        """
+
+        LANGUAGE_READING = "5"
+        LANGUAGE_WRITING = "6"
+        LANGUAGE_SPEAKING = "7"
+        NATIVE_LANGUAGE = "8"
+
+    segment_name: X12SegmentName = X12SegmentName.LUI
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    identification_code: Optional[str] = Field(max_length=80)
+    description: Optional[str] = Field(max_length=80)
+    language_use_indicator: Optional[UseOfLanguageIndicator]
 
 
 class LxSegment(X12Segment):
