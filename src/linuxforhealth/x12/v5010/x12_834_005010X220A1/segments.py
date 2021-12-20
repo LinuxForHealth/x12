@@ -653,3 +653,17 @@ class Loop2100HNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["45"]
     entity_type_qualifier: Literal["1"]
+
+
+class Loop2200DtpSegment(DtpSegment):
+    """
+    Member disability dates
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTP01
+        """
+
+        INITIAL_DISABILITY_PERIOD_START = "360"
+        INITIAL_DISABILITY_PERIOD_END = "361"

@@ -40,6 +40,7 @@ from linuxforhealth.x12.v5010.segments import (
     IcmSegment,
     HlhSegment,
     LuiSegment,
+    DsbSegment,
 )
 from .segments import (
     HeaderStSegment,
@@ -64,6 +65,7 @@ from .segments import (
     Loop2100FNm1Segment,
     Loop2100GNm1Segment,
     Loop2100HNm1Segment,
+    Loop2200DtpSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -209,6 +211,15 @@ class Loop2100H(X12SegmentGroup):
     n4_segment: N4Segment
 
 
+class Loop2200(X12SegmentGroup):
+    """
+    Member Disability Information
+    """
+
+    dsb_segment: List[DsbSegment]
+    dtp_segment: Optional[List[Loop2200DtpSegment]] = Field(max_items=2)
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -225,6 +236,7 @@ class Loop2000(X12SegmentGroup):
     loop_2100f: Optional[Loop2100F]
     loop_2100g: Optional[Loop2100G]
     loop_2100h: Optional[Loop2100H]
+    loop_2200: Optional[List[Loop2200]]
 
 
 class Footer(X12SegmentGroup):

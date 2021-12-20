@@ -753,6 +753,42 @@ class DmgSegment(X12Segment):
         return values
 
 
+class DsbSegment(X12Segment):
+    """
+    Disability Information
+    Example:
+        DSB*2******DX*585~
+    """
+
+    class DisabilityTypeCode(str, Enum):
+        """
+        Code values for DSB01
+        """
+
+        SHORT_TERM_DISABILITY = "1"
+        LONG_TERM_DISABILITY = "2"
+        PERMANENT_TOTAL_DISABILITY = "3"
+        NO_DISABILITY = "4"
+
+    class ProductServiceIdQualifier(str, Enum):
+        """
+        Code values for DSB07
+        """
+
+        ICD_9_DIAGNOSIS = "DX"
+        MUTUALLY_DEFINED = "ZZ"
+
+    segment_name: X12SegmentName = X12SegmentName.DSB
+    disability_type_code: DisabilityTypeCode
+    quantity: Optional[Decimal]
+    occupation_code: Optional[str] = Field(min_length=4, max_length=6)
+    work_intensity_code: Optional[str] = Field(min_length=1, max_length=1)
+    product_option_code: Optional[str] = Field(min_length=1, max_length=2)
+    monetary_amount: Optional[Decimal]
+    product_service_id_qualifier: Optional[ProductServiceIdQualifier]
+    diagnosis_code: Optional[str] = Field(min_length=1, max_length=15)
+
+
 class DtmSegment(X12Segment):
     """
     Production Date

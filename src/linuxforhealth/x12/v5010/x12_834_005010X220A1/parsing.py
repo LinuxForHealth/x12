@@ -50,6 +50,7 @@ class TransactionLoops(str, Enum):
     MEMBER_CUSTODIAL_PARENT = "loop_2100f"
     MEMBER_RESPONSIBLE_PERSON = "loop_2100g"
     MEMBER_DROPOFF_LOCATION = "loop_2100h"
+    MEMBER_DISABILITY_INFORMATION = "loop_2200"
     FOOTER = "footer"
 
 
@@ -280,6 +281,28 @@ def set_member_drop_off_location_loop(
     member_dropoff_location = member_loop[TransactionLoops.MEMBER_DROPOFF_LOCATION]
     context.set_loop_context(
         TransactionLoops.MEMBER_DROPOFF_LOCATION, member_dropoff_location
+    )
+
+
+@match("DSB")
+def set_member_disability_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the member disability loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member_loop = _get_member(context)
+    member_loop[TransactionLoops.MEMBER_DISABILITY_INFORMATION] = {
+        "dsb_segment": [],
+        "dtp_segment": [],
+    }
+
+    member_disability_information = member_loop[
+        TransactionLoops.MEMBER_DISABILITY_INFORMATION
+    ]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_DISABILITY_INFORMATION, member_disability_information
     )
 
 

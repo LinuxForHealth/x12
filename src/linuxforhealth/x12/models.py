@@ -54,6 +54,7 @@ class X12SegmentName(str, Enum):
     CTP = "CTP"
     CUR = "CUR"
     DMG = "DMG"
+    DSB = "DSB"
     DTM = "DTM"
     DTP = "DTP"
     EB = "EB"

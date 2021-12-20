@@ -210,6 +210,16 @@ def test_dmg_segment():
     assert dmg_segment.x12() == "DMG*D8*19430917*M~"
 
 
+def test_dsb_segment():
+    segment_data = {
+        "disability_type_code": "2",
+        "product_service_id_qualifier": "DX",
+        "diagnosis_code": "585",
+    }
+    dsb_segment: DsbSegment = DsbSegment(**segment_data)
+    assert dsb_segment.x12() == "DSB*2******DX*585~"
+
+
 def test_dtm_segment():
     segment_data = {"date_time_qualifier": "405", "production_date": "20020317"}
     dtm_segment: DtmSegment = DtmSegment(**segment_data)
