@@ -11,7 +11,24 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 from enum import Enum
 
 from linuxforhealth.x12.parsing import match, X12ParserContext
-from typing import Optional, Dict
+from typing import Dict
+
+# ids for Loop2100G
+responsible_person_loop_ids = [
+    "6Y",
+    "9K",
+    "E1",
+    "EI",
+    "EXS",
+    "GB",
+    "GD",
+    "J6",
+    "LR",
+    "QD",
+    "S1",
+    "TZ",
+    "X4",
+]
 
 
 class TransactionLoops(str, Enum):
@@ -208,6 +225,43 @@ def set_member_mailing_address_loop(
     context.set_loop_context(
         TransactionLoops.MEMBER_MAILING_ADDRESS, member_mailing_address
     )
+
+
+def _is_responsible_person(entity_identifier: str):
+    """Returns true if the entity identifier is used for loop 2100G"""
+    return entity_identifier in responsible_person_loop_ids
+
+
+@match(
+    "NM1",
+    conditions={"entity_identifier_code": responsible_person_loop_ids},
+)
+def set_member_2100d_to_2100g_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the following member entity loops:
+    * Loop 2100D - Member Employer
+    * Loop 2100E - Member School
+    * Loop 2100F - Member Custodial Parent
+    * Loop 2100G - Member Responsible Person
+    """
+    member_loop = _get_member(context)
+
+    entity_identifier = segment_data.get("entity_identifier_code")
+    if entity_identifier == TransactionLoops.MEMBER_EMPLOYER:
+        loop_name = TransactionLoops.MEMBER_EMPLOYER
+    elif entity_identifier == TransactionLoops.MEMBER_SCHOOL:
+        loop_name = TransactionLoops.MEMBER_SCHOOL
+    elif entity_identifier == TransactionLoops.MEMBER_CUSTODIAL_PARENT:
+        loop_name = TransactionLoops.MEMBER_CUSTODIAL_PARENT
+    elif _is_responsible_person(entity_identifier):
+        loop_name = TransactionLoops.MEMBER_RESPONSIBLE_PERSON
+    else:
+        raise ValueError(f"Unable to parse entity identifier {entity_identifier}")
+
+    member_loop[loop_name] = {}
+    context.set_loop_context(loop_name, member_loop[loop_name])
 
 
 @match("SE")

@@ -556,3 +556,91 @@ class Loop2100CNm1Segment(Nm1Segment):
     entity_type_qualifier: Literal["1"]
     identification_code_qualifier: Optional[str]
     identification_code: Optional[str]
+
+
+class Loop2100DNm1Segment(Nm1Segment):
+    """
+    Member employer
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        MUTUALLY_DEFINED = "ZZ"
+
+    entity_identifier_code: Literal["36"]
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+
+
+class Loop2100ENm1Segment(Nm1Segment):
+    """
+    Member School
+    """
+
+    entity_identifier_code: Literal["M8"]
+    name_last_or_organization_name: str = Field(min_length=1, max_length=80)
+    identification_code_qualifier: Optional[str]
+    identification_code: Optional[str]
+
+
+class Loop2100FNm1Segment(Nm1Segment):
+    """
+    Member Custodial Parent
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        MUTUALLY_DEFINED = "ZZ"
+
+    entity_identifier_code: Literal["S3"]
+    entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: str = Field(min_length=1, max_length=60)
+    name_first: Optional[str] = Field(min_length=1, max_length=35)
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)
+
+
+class Loop2100GNm1Segment(Nm1Segment):
+    """
+    Member Responsible Person
+    """
+
+    class EntityIdentifier(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        CASE_MANAGER = "6Y"
+        KEY_PERSON = "9K"
+        PERSON_LEGALLY_RESPONSIBLE_FOR_CHILD = "E1"
+        EXECUTOR_OF_ESTATE = "EI"
+        EX_SPOUSE = "EXS"
+        OTHER_INSURED = "GB"
+        GUARDIAN = "GD"
+        POWER_OF_ATTORNEY = "J6"
+        LEGAL_REPRESENTATIVE = "LR"
+        RESPONSIBLE_PARTY = "QD"
+        PARENT = "S1"
+        SIGNIFICANT_OTHER = "TZ"
+        SPOUSE = "X4"
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        MUTUALLY_DEFINED = "ZZ"
+
+    entity_identifier_code: EntityIdentifier
+    entity_type_qualifier: Literal["1"]
+    name_last_or_organization_name: str = Field(min_length=1, max_length=60)
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    identification_code: Optional[str] = Field(min_length=2, max_length=80)

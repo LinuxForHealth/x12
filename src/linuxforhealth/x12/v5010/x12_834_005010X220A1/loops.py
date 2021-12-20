@@ -59,6 +59,10 @@ from .segments import (
     Loop2100BNm1Segment,
     Loop2100BDmgSegment,
     Loop2100CNm1Segment,
+    Loop2100DNm1Segment,
+    Loop2100ENm1Segment,
+    Loop2100FNm1Segment,
+    Loop2100GNm1Segment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -146,6 +150,54 @@ class Loop2100C(X12SegmentGroup):
     n4_segment: N4Segment
 
 
+class Loop2100D(X12SegmentGroup):
+    """
+    Member Employer
+    """
+
+    nm1_segment: Loop2100DNm1Segment
+    # reusing PER segment as communication qualifiers are the same
+    per_segment: Loop2100APerSegment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
+class Loop2100E(X12SegmentGroup):
+    """
+    Member School
+    """
+
+    nm1_segment: Loop2100ENm1Segment
+    # reusing PER segment as communication qualifiers are the same
+    per_segment: Loop2100APerSegment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
+class Loop2100F(X12SegmentGroup):
+    """
+    Member Custodial Parent
+    """
+
+    nm1_segment: Loop2100FNm1Segment
+    # reusing PER segment as communication qualifiers are the same
+    per_segment: Loop2100APerSegment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
+class Loop2100G(X12SegmentGroup):
+    """
+    Member Responsible Parent
+    """
+
+    nm1_segment: Loop2100GNm1Segment
+    # reusing PER segment as communication qualifiers are the same
+    per_segment: Loop2100APerSegment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -156,11 +208,11 @@ class Loop2000(X12SegmentGroup):
     dtp_segment: Optional[List[Loop2000DtpSegment]]
     loop_2100a: Loop2100A
     loop_2100b: Optional[Loop2100B]
-    # loop_2100c: Optional[Loop2100C]
-    # loop_2100d: Optional[List[Loop2100D]] = Field(max_length=3)
-    # loop_2100e: Optional[Loop2100E]
-    # loop_2100f: Optional[Loop2100F]
-    # loop_2100g: Optional[Loop2100G]
+    loop_2100c: Optional[Loop2100C]
+    loop_2100d: Optional[List[Loop2100D]] = Field(max_items=3)
+    loop_2100e: Optional[Loop2100E]
+    loop_2100f: Optional[Loop2100F]
+    loop_2100g: Optional[Loop2100G]
 
 
 class Footer(X12SegmentGroup):
