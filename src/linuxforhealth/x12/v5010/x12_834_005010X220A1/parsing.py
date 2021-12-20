@@ -264,6 +264,25 @@ def set_member_2100d_to_2100g_loop(
     context.set_loop_context(loop_name, member_loop[loop_name])
 
 
+@match("NM1", conditions={"entity_identifier_code": "45"})
+def set_member_drop_off_location_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the member drop off location (shipments) loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member_loop = _get_member(context)
+    member_loop[TransactionLoops.MEMBER_DROPOFF_LOCATION] = {}
+
+    member_dropoff_location = member_loop[TransactionLoops.MEMBER_DROPOFF_LOCATION]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_DROPOFF_LOCATION, member_dropoff_location
+    )
+
+
 @match("SE")
 def set_se_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """

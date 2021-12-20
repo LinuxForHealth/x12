@@ -644,3 +644,12 @@ class Loop2100GNm1Segment(Nm1Segment):
     name_last_or_organization_name: str = Field(min_length=1, max_length=60)
     identification_code_qualifier: Optional[IdentificationCodeQualifier]
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
+
+
+class Loop2100HNm1Segment(Nm1Segment):
+    """
+    Drop off location name
+    """
+
+    entity_identifier_code: Literal["45"]
+    entity_type_qualifier: Literal["1"]

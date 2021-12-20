@@ -63,6 +63,7 @@ from .segments import (
     Loop2100ENm1Segment,
     Loop2100FNm1Segment,
     Loop2100GNm1Segment,
+    Loop2100HNm1Segment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -198,6 +199,16 @@ class Loop2100G(X12SegmentGroup):
     n4_segment: N4Segment
 
 
+class Loop2100H(X12SegmentGroup):
+    """
+    Member drop off location
+    """
+
+    nm1_segment: Loop2100HNm1Segment
+    n3_segment: N3Segment
+    n4_segment: N4Segment
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -213,6 +224,7 @@ class Loop2000(X12SegmentGroup):
     loop_2100e: Optional[Loop2100E]
     loop_2100f: Optional[Loop2100F]
     loop_2100g: Optional[Loop2100G]
+    loop_2100h: Optional[Loop2100H]
 
 
 class Footer(X12SegmentGroup):
