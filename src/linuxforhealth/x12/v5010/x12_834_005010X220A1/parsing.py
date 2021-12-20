@@ -26,6 +26,13 @@ class TransactionLoops(str, Enum):
     TPA_BROKER_ACCOUNT_INFORMATION = "loop_1100c"
     MEMBER_LEVEL_DETAIL = "loop_2000"
     MEMBER_NAME = "loop_2100a"
+    INCORRECT_MEMBER_NAME = "loop_2100b"
+    MEMBER_MAILING_ADDRESS = "loop_2100c"
+    MEMBER_EMPLOYER = "loop_2100d"
+    MEMBER_SCHOOL = "loop_2100e"
+    MEMBER_CUSTODIAL_PARENT = "loop_2100f"
+    MEMBER_RESPONSIBLE_PERSON = "loop_2100g"
+    MEMBER_DROPOFF_LOCATION = "loop_2100h"
     FOOTER = "footer"
 
 
@@ -163,6 +170,44 @@ def set_member_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
 
     member_name = member_loop[TransactionLoops.MEMBER_NAME]
     context.set_loop_context(TransactionLoops.MEMBER_NAME, member_name)
+
+
+@match("NM1", conditions={"entity_identifier_code": "70"})
+def set_incorrect_member_name_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the member name loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member_loop = _get_member(context)
+    member_loop[TransactionLoops.INCORRECT_MEMBER_NAME] = {}
+
+    incorrect_member_name = member_loop[TransactionLoops.INCORRECT_MEMBER_NAME]
+    context.set_loop_context(
+        TransactionLoops.INCORRECT_MEMBER_NAME, incorrect_member_name
+    )
+
+
+@match("NM1", conditions={"entity_identifier_code": "31"})
+def set_member_mailing_address_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the member mailing address loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member_loop = _get_member(context)
+    member_loop[TransactionLoops.MEMBER_MAILING_ADDRESS] = {}
+
+    member_mailing_address = member_loop[TransactionLoops.MEMBER_MAILING_ADDRESS]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_MAILING_ADDRESS, member_mailing_address
+    )
 
 
 @match("SE")

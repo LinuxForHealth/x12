@@ -489,3 +489,70 @@ class Loop2100AAmtSegment(AmtSegment):
         SPEND_DOWN = "R"
 
     amount_qualifier_code: AmountQualifierCode
+
+
+class Loop2100BNm1Segment(Nm1Segment):
+    """
+    Incorrect member name segment
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        MUTUALLY_DEFINED = "ZZ"
+
+    entity_identifier_code: Literal["70"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: IdentificationCodeQualifier
+
+
+class Loop2100BDmgSegment(DmgSegment):
+    """
+    Incorrect Member demographics
+    """
+
+    class MaritalStatusCode(str, Enum):
+        """
+        Code values for DMG04
+        """
+
+        REGISTERED_DOMESTIC_PARTNER = "B"
+        DIVORCED = "D"
+        SINGLE = "I"
+        MARRIED = "M"
+        UNREPORTED = "R"
+        SEPARATED = "S"
+        UNMARRIED = "U"
+        WIDOWED = "W"
+        LEGALLY_SEPARATED = "X"
+
+    class CitizenshipStatusCode(str, Enum):
+        """
+        Code values for DMG06
+        """
+
+        US_CITIZEN = "1"
+        NON_RESIDENT_ALIEN = "2"
+        RESIDENT_ALIEN = "3"
+        ILLEGAL_ALIEN = "4"
+        ALIEN = "5"
+        US_CITIZEN_NON_RESIDENT = "6"
+        US_CITIZEN_RESIDENT = "7"
+
+    marital_status_code: Optional[MaritalStatusCode]
+    citizenship_status_code: Optional[CitizenshipStatusCode]
+    code_list_qualifier_code: Optional[Literal["REC"]]
+
+
+class Loop2100CNm1Segment(Nm1Segment):
+    """
+    Member mailing address
+    """
+
+    entity_identifier_code: Literal["31"]
+    entity_type_qualifier: Literal["1"]
+    identification_code_qualifier: Optional[str]
+    identification_code: Optional[str]
