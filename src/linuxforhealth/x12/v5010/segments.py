@@ -1445,6 +1445,101 @@ class HcpSegment(X12Segment):
     exception_code: Optional[ExceptionCode]
 
 
+class HdSegment(X12Segment):
+    """
+    Health coverage
+    Example:
+        HD*021**HLT*PLAN A BCD*FAM~
+    """
+
+    class MaintenanceTypeCode(str, Enum):
+        """
+        Code values for HD01
+        """
+
+        CHANGE = "001"
+        DELETE = "002"
+        ADDITION = "021"
+        CANCELLATION_OR_TERMINATION = "024"
+        REINSTATEMENT = "025"
+        CORRECTION = "026"
+        AUDIT_OR_COMPARE = "030"
+        EMPLOYEE_INFORMATION_NOT_APPLICABLE = "032"
+
+    class InsuranceLineCode(str, Enum):
+        """
+        Code values for HD03
+        """
+
+        PREVENTATIVE_CARE_WELLNESS = "AG"
+        TWENTY_FOUR_HOUR_CARE_RISK = "AH"
+        MEDICARE_RISK = "AJ"
+        MENTAL_HEALTH = "AK"
+        DENTAL_CAPITATION = "DCP"
+        DENTAL = "DEN"
+        EXCLUSIVE_PROVIDER_ORGANIZATION = "EPO"
+        FACILITY = "FAC"
+        HEARING = "HE"
+        HEALTH = "HLT"
+        HEALTH_MAINTEANCE_ORGANIZATION = "HMO"
+        LONG_TERM_CARE = "LTC"
+        LONG_TERM_DISABILITY = "LTD"
+        MAJOR_MEDICAL = "MM"
+        MAIL_ORDER_DRUG = "MOD"
+        PRESCRIPTION_DRUG = "PDG"
+        POINT_OF_SERVICE = "POS"
+        PREFERRED_PROVIDER_ORGANIZATION = "PPO"
+        PRACTITIONERS = "PRA"
+        SHORT_TERM_DISABILITY = "STD"
+        UTILIZATION_REVIEW = "UR"
+        VISION = "VIS"
+
+    class CoverageLineCode(str, Enum):
+        """
+        Code values for HD05
+        """
+
+        CHILDREN_ONLY = "CHD"
+        DEPENDENTS_ONLY = "DEP"
+        EMPLOYEE_ONE_DEPENDENT = "E1D"
+        EMPLOYEE_TWO_DEPENDENT = "E2D"
+        EMPLOYEE_THREE_DEPENDENT = "E3D"
+        EMPLOYEE_ONE_OR_MORE_DEPENDENTS = "E5D"
+        EMPLOYEE_TWO_OR_MORE_DEPENDENTS = "E6D"
+        EMPLOYEE_THREE_OR_MORE_DEPENDENTS = "E7D"
+        EMPLOYEE_FOUR_OR_MORE_DEPENDENTS = "E8D"
+        EMPLOYEE_FIVE_OR_MORE_DEPENDENTS = "E9D"
+        EMPLOYEE_AND_CHILDREN = "ECH"
+        EMPLOYEE_ONLY = "EMP"
+        EMPLOYEE_AND_SPOUSE = "ESP"
+        FAMILY = "FAM"
+        INDIVIDUAL = "IND"
+        SPOUSE_AND_CHILDREN = "SPC"
+        SPOUSE_ONLY = "SPO"
+        TWO_PARTY = "TWO"
+
+    class LateEnrollmentIndicator(str, Enum):
+        """
+        Code values for HD09
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.HD
+    maintenance_type_code: MaintenanceTypeCode
+    maintenance_reason_code: Optional[str] = Field(min_length=2, max_length=3)
+    insurance_line_code: InsuranceLineCode
+    plan_coverage_description: Optional[str] = Field(min_length=1, max_length=50)
+    coverage_line_code: Optional[CoverageLineCode]
+    count_1: Optional[int]
+    count_2: Optional[int]
+    underwriting_decision_code: Optional[str] = Field(min_length=1, max_length=1)
+    late_enrollment_indicator: Optional[LateEnrollmentIndicator]
+    drug_house_code: Optional[str] = Field(min_length=2, max_length=3)
+    yes_no_condition_response_code: Optional[str] = Field(min_length=1, max_length=1)
+
+
 class HiSegment(X12Segment):
     """
     Health Care Information/Diagnostic Codes
@@ -1682,6 +1777,38 @@ class IcmSegment(X12Segment):
     location_identifier: Optional[str] = Field(max_length=30)
     salary_grade_code: Optional[str] = Field(max_length=5)
     currency_code: Optional[str]
+
+
+class IdcSegment(X12Segment):
+    """
+    Identification Card
+    Example:
+        IDC*12345*H~
+    """
+
+    class IdentificationCardTypeCode(str, Enum):
+        """
+        Code values for IDC02
+        """
+
+        DENTAL_INSURANCE = "D"
+        HEALTH_INSURANCE = "H"
+        PRESCRIPTION_DRUG_SERVICE_DRUG_INSURANCE = "P"
+
+    class ActionCode(str, Enum):
+        """
+        Code values for IDC04
+        """
+
+        ADD = "1"
+        CHANGE = "2"
+        REPLACE = "RX"
+
+    segment_name: X12SegmentName = X12SegmentName.IDC
+    plan_coverage_description: str = Field(min_length=1, max_length=50)
+    identification_card_type_code: IdentificationCardTypeCode
+    identification_card_count: Optional[int] = conint(gt=0)
+    action_code: Optional[ActionCode]
 
 
 class IeaSegment(X12Segment):

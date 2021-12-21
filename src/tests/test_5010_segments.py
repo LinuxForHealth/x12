@@ -341,6 +341,17 @@ def test_hcp_segment():
     assert hcp_segment.x12() == "HCP*03*100.00*10.00*RPO12345~"
 
 
+def test_hd_segment():
+    segment_data = {
+        "maintenance_type_code": "021",
+        "insurance_line_code": "HLT",
+        "plan_coverage_description": "PLAN A BCD",
+        "coverage_line_code": "FAM",
+    }
+    hd_segment: HdSegment = HdSegment(**segment_data)
+    assert hd_segment.x12() == "HD*021**HLT*PLAN A BCD*FAM~"
+
+
 def test_hi_segment():
     segment_data = {
         "health_care_code_1": ["BK", "8901"],
@@ -391,6 +402,15 @@ def test_icm_segment():
     segment_data = {"frequency_code": "1", "wage_amount": "800", "weekly_hours": "40"}
     icm_segment: IcmSegment = IcmSegment(**segment_data)
     assert icm_segment.x12() == "ICM*1*800.00*40.00~"
+
+
+def test_idc_segment():
+    segment_data = {
+        "plan_coverage_description": "12345",
+        "identification_card_type_code": "H",
+    }
+    idc_segment: IdcSegment = IdcSegment(**segment_data)
+    assert idc_segment.x12() == "IDC*12345*H~"
 
 
 def test_iea_segment():

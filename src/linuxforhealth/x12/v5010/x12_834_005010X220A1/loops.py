@@ -41,6 +41,8 @@ from linuxforhealth.x12.v5010.segments import (
     HlhSegment,
     LuiSegment,
     DsbSegment,
+    HdSegment,
+    IdcSegment,
 )
 from .segments import (
     HeaderStSegment,
@@ -54,7 +56,7 @@ from .segments import (
     Loop2000RefSegment,
     Loop2000DtpSegment,
     Loop2100ANm1Segment,
-    Loop2100APerSegment,
+    BenefitEnrollmentPerSegment,
     Loop2100ADmgSegment,
     Loop2100AAmtSegment,
     Loop2100BNm1Segment,
@@ -66,6 +68,9 @@ from .segments import (
     Loop2100GNm1Segment,
     Loop2100HNm1Segment,
     Loop2200DtpSegment,
+    Loop2300DtpSegment,
+    Loop2300AmtSegment,
+    Loop2300RefSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -123,7 +128,7 @@ class Loop2100A(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100ANm1Segment
-    per_segment: Optional[Loop2100APerSegment]
+    per_segment: Optional[BenefitEnrollmentPerSegment]
     n3_segment: Optional[N3Segment]
     n4_segment: Optional[N4Segment]
     dmg_segment: Optional[Loop2100ADmgSegment]
@@ -160,7 +165,7 @@ class Loop2100D(X12SegmentGroup):
 
     nm1_segment: Loop2100DNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: Loop2100APerSegment
+    per_segment: BenefitEnrollmentPerSegment
     n3_segment: N3Segment
     n4_segment: N4Segment
 
@@ -172,7 +177,7 @@ class Loop2100E(X12SegmentGroup):
 
     nm1_segment: Loop2100ENm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: Loop2100APerSegment
+    per_segment: BenefitEnrollmentPerSegment
     n3_segment: N3Segment
     n4_segment: N4Segment
 
@@ -184,7 +189,7 @@ class Loop2100F(X12SegmentGroup):
 
     nm1_segment: Loop2100FNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: Loop2100APerSegment
+    per_segment: BenefitEnrollmentPerSegment
     n3_segment: N3Segment
     n4_segment: N4Segment
 
@@ -196,7 +201,7 @@ class Loop2100G(X12SegmentGroup):
 
     nm1_segment: Loop2100GNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: Loop2100APerSegment
+    per_segment: BenefitEnrollmentPerSegment
     n3_segment: N3Segment
     n4_segment: N4Segment
 
@@ -220,6 +225,18 @@ class Loop2200(X12SegmentGroup):
     dtp_segment: Optional[List[Loop2200DtpSegment]] = Field(max_items=2)
 
 
+class Loop2300(X12SegmentGroup):
+    """
+    Health Coverage
+    """
+
+    hd_segment: HdSegment
+    dtp_segment: List[Loop2300DtpSegment]
+    amt_segment: Optional[List[Loop2300AmtSegment]]
+    ref_segment: Optional[List[Loop2300RefSegment]]
+    idc_segment: Optional[List[IdcSegment]]
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -237,6 +254,7 @@ class Loop2000(X12SegmentGroup):
     loop_2100g: Optional[Loop2100G]
     loop_2100h: Optional[Loop2100H]
     loop_2200: Optional[List[Loop2200]]
+    loop_2300: List[Loop2300]
 
 
 class Footer(X12SegmentGroup):

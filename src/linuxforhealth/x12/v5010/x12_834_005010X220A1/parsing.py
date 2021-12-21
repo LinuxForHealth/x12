@@ -51,6 +51,7 @@ class TransactionLoops(str, Enum):
     MEMBER_RESPONSIBLE_PERSON = "loop_2100g"
     MEMBER_DROPOFF_LOCATION = "loop_2100h"
     MEMBER_DISABILITY_INFORMATION = "loop_2200"
+    MEMBER_HEALTH_COVERAGE = "loop_2300"
     FOOTER = "footer"
 
 
@@ -304,6 +305,26 @@ def set_member_disability_loop(context: X12ParserContext, segment_data: Dict) ->
     context.set_loop_context(
         TransactionLoops.MEMBER_DISABILITY_INFORMATION, member_disability_information
     )
+
+
+@match("HD")
+def set_hd_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the Member health coverage loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member = _get_member(context)
+    if TransactionLoops.MEMBER_HEALTH_COVERAGE not in member:
+        member[TransactionLoops.MEMBER_HEALTH_COVERAGE] = []
+
+    member[TransactionLoops.MEMBER_HEALTH_COVERAGE].append(
+        {"dtp_segment": [], "amt_segment": [], "ref_segment": [], "idc_segment": []}
+    )
+
+    health_coverage = member[TransactionLoops.MEMBER_HEALTH_COVERAGE][-1]
+    context.set_loop_context(TransactionLoops.MEMBER_HEALTH_COVERAGE, health_coverage)
 
 
 @match("SE")

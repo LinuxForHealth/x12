@@ -405,7 +405,7 @@ class Loop2100ANm1Segment(Nm1Segment):
     identification_code_qualifier: Optional[IdentificationCodeQualifier]
 
 
-class Loop2100APerSegment(PerSegment):
+class BenefitEnrollmentPerSegment(PerSegment):
     """
     Member communication numbers
     """
@@ -667,3 +667,84 @@ class Loop2200DtpSegment(DtpSegment):
 
         INITIAL_DISABILITY_PERIOD_START = "360"
         INITIAL_DISABILITY_PERIOD_END = "361"
+
+
+class Loop2300DtpSegment(DtpSegment):
+    """
+    Member coverage dates
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTP01
+        """
+
+        ENROLLMENT_EFFECTIVE_DATE = "300"
+        MAINTENANCE_EFFECTIVE = "303"
+        PREMIUM_PAID_TO_DATE_END = "343"
+        BENEFIT_BEGIN = "348"
+        BENEFIT_END = "349"
+        LAST_PREMIUM_PAID_DATE = "543"
+        PREVIOUS_PERIOD = "695"
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code values for DTP02
+        """
+
+        SPECIFIC_DATE = "D8"
+        DATE_RANGE = "RD8"
+
+    date_time_qualifier: DateTimeQualifier
+    date_time_period_format_qualifier: DateTimePeriodFormatQualifier
+    date_time_period: str
+
+
+class Loop2300AmtSegment(AmtSegment):
+    """
+    Member coverage amounts
+    """
+
+    class AmountQualifierCode(str, Enum):
+        """
+        Code values for AMT01
+        """
+
+        COINSURANCE_ACTUAL = "B9"
+        COPAYMENT_AMOUNT = "C1"
+        DEDUCTIBLE_AMOUNT = "D2"
+        EXPECTED_EXPENDITURE_AMOUNT = "EBA"
+        OTHER_UNLISTED_AMOUNT = "FK"
+        PREMIMUM_AMOUNT = "P3"
+        SPEND_DOWN = "R"
+
+    amount_qualifier_code: AmountQualifierCode
+
+
+class Loop2300RefSegment(RefSegment):
+    """
+    Member coverage reference identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        CLIENT_REPORTING_CATEGORY = "17"
+        GROUP_OR_POLICY_NUMBER = "1L"
+        PAYMENT_CATEGORY = "9V"
+        CLASS_OF_CONTRACT_CODE = "CE"
+        SERVICE_CONTRACT_NUMBER = "E8"
+        MEDICAL_ASSISTANCE_CATEGORY = "M7"
+        PROGRAM_IDENTIFICATION_NUMBER = "PID"
+        RATE_CODE_NUMBER = "RB"
+        INTERNAL_CODE_NUMBER = "X9"
+        ISSUER_NUMBER = "XM"
+        SPECIAL_PROGRAM_CODE = "XX1"
+        SERVICE_AREA_CODE = "XX2"
+        COUNTY_CODE = "ZX"
+        MUTUALLY_DEFINED = "ZZ"
+        UNIT_NUMBER = "QQ"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
