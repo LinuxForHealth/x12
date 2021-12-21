@@ -76,6 +76,12 @@ def _get_coverage(context):
     return member[TransactionLoops.MEMBER_HEALTH_COVERAGE][-1]
 
 
+def _get_cob(context):
+    """Returns the current cob"""
+    coverage = _get_coverage(context)
+    return coverage[TransactionLoops.MEMBER_COVERAGE_COB][-1]
+
+
 @match("ST")
 def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
@@ -389,6 +395,33 @@ def set_cob_loop(context: X12ParserContext, segment_data: Dict) -> None:
 
     cob = coverage[TransactionLoops.MEMBER_COVERAGE_COB][-1]
     context.set_loop_context(TransactionLoops.MEMBER_COVERAGE_COB, cob)
+
+
+@match("NM1", conditions={"entity_identifier_code": ["36", "GW", "IN"]})
+def set_cob_related_entity_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the COB related entity loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    if context.loop_name not in (
+        TransactionLoops.MEMBER_COVERAGE_COB,
+        TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY,
+    ):
+        return
+
+    cob = _get_cob(context)
+
+    if TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY not in cob:
+        cob[TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY] = []
+
+    cob[TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY].append({})
+    related_entity = cob[TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY][-1]
+
+    context.set_loop_context(
+        TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY, related_entity
+    )
 
 
 @match("SE")

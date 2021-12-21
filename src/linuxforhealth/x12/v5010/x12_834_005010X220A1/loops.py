@@ -77,6 +77,8 @@ from .segments import (
     Loop2310PlaSegment,
     Loop2320RefSegment,
     Loop2320DtpSegment,
+    Loop2330Nm1Segment,
+    Loop2330PerSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -244,6 +246,17 @@ class Loop2310(X12SegmentGroup):
     pla_segment: Optional[Loop2310PlaSegment]
 
 
+class Loop2330(X12SegmentGroup):
+    """
+    Member Health Coverage COB Related Entity
+    """
+
+    nm1_segment: Loop2330Nm1Segment
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
+    per_segment: Optional[Loop2330PerSegment]
+
+
 class Loop2320(X12SegmentGroup):
     """
     Member Health Coverage COB
@@ -252,6 +265,7 @@ class Loop2320(X12SegmentGroup):
     cob_segment: CobSegment
     ref_segment: Optional[List[Loop2320RefSegment]]
     dtp_segment: Optional[List[Loop2320DtpSegment]]
+    loop_2330: Optional[List[Loop2330]]
 
 
 class Loop2300(X12SegmentGroup):

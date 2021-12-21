@@ -856,3 +856,41 @@ class Loop2320DtpSegment(DtpSegment):
 
     date_time_qualifier: DateTimeQualifier
     date_time_period_format_qualifier: Literal["D8"]
+
+
+class Loop2330Nm1Segment(Nm1Segment):
+    """
+    Member Coverage COB Related Entity
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        EMPLOYER = "36"
+        GROUP = "GW"
+        INSURER = "IN"
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        FEDERAL_TAXPAYER_IDENTIFICATION = "FI"
+        NAIC_IDENTIFICATION = "NI"
+        CMS_PLAN_ID = "XV"
+
+    entity_identifier_code: EntityIdentifierCode
+    entity_type_qualifier: Literal["2"]
+    name_last_or_organization_name: Optional[str] = Field(min_length=1, max_length=60)
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+
+
+class Loop2330PerSegment(PerSegment):
+    """
+    Member Coverage COB Administrative Communications
+    """
+
+    contact_function_code: Literal["CN"]
+    communication_number_qualifier_1: Literal["TE"]
