@@ -2413,7 +2413,7 @@ class N1Segment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.N1
     entity_identifier_code: str = Field(min_length=2, max_length=3)
     name: str = Field(min_length=1, max_length=60)
-    identification_code_qualifier: str = Field(min_length=1, max_length=2)
+    identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
 

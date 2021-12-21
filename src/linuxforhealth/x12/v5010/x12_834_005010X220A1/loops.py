@@ -79,6 +79,11 @@ from .segments import (
     Loop2320DtpSegment,
     Loop2330Nm1Segment,
     Loop2330PerSegment,
+    Loop2000LsSegment,
+    Loop2000LeSegment,
+    Loop2750N1Segment,
+    Loop2750RefSegment,
+    Loop2750DtpSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -282,6 +287,25 @@ class Loop2300(X12SegmentGroup):
     loop_2320: Optional[List[Loop2320]]
 
 
+class Loop2750(X12SegmentGroup):
+    """
+    Member Reporting Category Detail
+    """
+
+    n1_segment: Loop2750N1Segment
+    ref_segment: Optional[Loop2750RefSegment]
+    dtp_segment: Optional[Loop2750DtpSegment]
+
+
+class Loop2700(X12SegmentGroup):
+    """
+    Member Reporting Categories
+    """
+
+    lx_segment: LxSegment
+    loop_2750: Loop2750
+
+
 class Loop2000(X12SegmentGroup):
     """
     Member Level Detail
@@ -300,6 +324,9 @@ class Loop2000(X12SegmentGroup):
     loop_2100h: Optional[Loop2100H]
     loop_2200: Optional[List[Loop2200]]
     loop_2300: List[Loop2300]
+    ls_segment: Optional[Loop2000LsSegment]
+    loop_2700: Optional[List[Loop2700]]
+    le_segment: Optional[Loop2000LeSegment]
 
 
 class Footer(X12SegmentGroup):

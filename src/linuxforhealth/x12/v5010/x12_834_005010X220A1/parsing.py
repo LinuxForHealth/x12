@@ -82,6 +82,12 @@ def _get_cob(context):
     return coverage[TransactionLoops.MEMBER_COVERAGE_COB][-1]
 
 
+def _get_reporting_category(context):
+    """Returns the current member reporting category"""
+    member = _get_member(context)
+    return member[TransactionLoops.MEMBER_REPORTING_CATEGORIES][-1]
+
+
 @match("ST")
 def set_header_loop(context: X12ParserContext, segment_data: Dict) -> None:
     """
@@ -422,6 +428,79 @@ def set_cob_related_entity_loop(context: X12ParserContext, segment_data: Dict) -
     context.set_loop_context(
         TransactionLoops.MEMBER_COVERAGE_COB_RELATED_ENTITY, related_entity
     )
+
+
+@match("LS")
+def set_reporting_categories_in_member_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the context to the member loop for the LS segment (additional reporting categories).
+    THe LS segment is used to indicate that the 2700 loop follows.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member = _get_member(context)
+    context.set_loop_context(TransactionLoops.MEMBER_LEVEL_DETAIL, member)
+
+
+@match("LX")
+def set_member_reporting_categories_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the Member Reporting Categories Loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+
+    if context.loop_name not in (
+        TransactionLoops.MEMBER_LEVEL_DETAIL,
+        TransactionLoops.MEMBER_REPORTING_CATEGORIES,
+    ):
+        return
+
+    member = _get_member(context)
+    if TransactionLoops.MEMBER_REPORTING_CATEGORIES not in member:
+        member[TransactionLoops.MEMBER_REPORTING_CATEGORIES] = []
+
+    member[TransactionLoops.MEMBER_REPORTING_CATEGORIES].append({})
+
+    reporting_categories = member[TransactionLoops.MEMBER_REPORTING_CATEGORIES][-1]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_REPORTING_CATEGORIES, reporting_categories
+    )
+
+
+@match("N1", conditions={"entity_identifier_code": "75"})
+def set_reporting_category_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the reporting category loop (detail information)
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    reporting_category = _get_reporting_category(context)
+    reporting_category[TransactionLoops.MEMBER_REPORTING_CATEGORY] = {}
+    report_detail = reporting_category[TransactionLoops.MEMBER_REPORTING_CATEGORY]
+    context.set_loop_context(TransactionLoops.MEMBER_REPORTING_CATEGORY, report_detail)
+
+
+@match("LE")
+def set_reporting_categories_end_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the context to the member loop for the LE segment (additional reporting categories termination).
+    The LE segment follows the completion of the 2700 loop.
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    member = _get_member(context)
+    context.set_loop_context(TransactionLoops.MEMBER_LEVEL_DETAIL, member)
 
 
 @match("SE")

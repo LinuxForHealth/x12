@@ -19,6 +19,8 @@ from linuxforhealth.x12.v5010.segments import (
     DmgSegment,
     AmtSegment,
     PlaSegment,
+    LsSegment,
+    LeSegment,
 )
 
 
@@ -894,3 +896,75 @@ class Loop2330PerSegment(PerSegment):
 
     contact_function_code: Literal["CN"]
     communication_number_qualifier_1: Literal["TE"]
+
+
+class Loop2000LsSegment(LsSegment):
+    """
+    Additional reporting categories loop used to signal the start of the 2700 loop.
+    """
+
+    loop_id_code: Literal["2700"]
+
+
+class Loop2750N1Segment(N1Segment):
+    """
+    Member Reporting Category
+    """
+
+    entity_identifier_code: Literal["75"]
+
+
+class Loop2750RefSegment(RefSegment):
+    """
+    Member Reporting Category Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        CONTRACTING_DISTRICT_NUMBER = "00"
+        CLIENT_REPORTING_CATEGORY = "17"
+        PLAN_NUMBER = "18"
+        DIVISION_NUMBER = "19"
+        UNION_NUMBER = "26"
+        BRANCH_IDENTIFIER = "3L"
+        APPLICATION_NUMBER = "6M"
+        PAYMENT_CATEGORY = "9V"
+        ACCOUNT_CATEGORY = "9X"
+        GEOGRAPHIC_NUMBER = "GE"
+        LOCATION_NUMBER = "LU"
+        PROGRAM_IDENTIFICATION_NUMBER = "PID"
+        SPECIAL_PROGRAM_CODE = "XX1"
+        SERVICE_AREA_CODE = "XX2"
+        GEOGRAPHIC_KEY = "YY"
+        MUTUALLY_DEFINED = "ZZ"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2750DtpSegment(DtpSegment):
+    """
+    Member Reporting Category Dates
+    """
+
+    class DateTimePeriodFormatQualifier(str, Enum):
+        """
+        Code values for DTP02
+        """
+
+        SPECIFIC_DATE = "D8"
+        DATE_RANGE = "RD8"
+
+    date_time_qualifier: Literal["007"]
+    date_time_period: str
+
+
+class Loop2000LeSegment(LeSegment):
+    """
+    Additional reporting categories loop termination, used to signal the end of the 2700 loop.
+
+    """
+
+    loop_id_code: Literal["2700"]
