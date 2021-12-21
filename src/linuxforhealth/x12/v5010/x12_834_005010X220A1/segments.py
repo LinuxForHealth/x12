@@ -509,7 +509,7 @@ class Loop2100BNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["70"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: IdentificationCodeQualifier
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
 
 
 class Loop2100BDmgSegment(DmgSegment):

@@ -178,9 +178,9 @@ class Loop2100D(X12SegmentGroup):
 
     nm1_segment: Loop2100DNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: BenefitEnrollmentPerSegment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    per_segment: Optional[BenefitEnrollmentPerSegment]
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
 
 
 class Loop2100E(X12SegmentGroup):
@@ -190,9 +190,9 @@ class Loop2100E(X12SegmentGroup):
 
     nm1_segment: Loop2100ENm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: BenefitEnrollmentPerSegment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    per_segment: Optional[BenefitEnrollmentPerSegment]
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
 
 
 class Loop2100F(X12SegmentGroup):
@@ -202,9 +202,9 @@ class Loop2100F(X12SegmentGroup):
 
     nm1_segment: Loop2100FNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: BenefitEnrollmentPerSegment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    per_segment: Optional[BenefitEnrollmentPerSegment]
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
 
 
 class Loop2100G(X12SegmentGroup):
@@ -214,9 +214,9 @@ class Loop2100G(X12SegmentGroup):
 
     nm1_segment: Loop2100GNm1Segment
     # reusing PER segment as communication qualifiers are the same
-    per_segment: BenefitEnrollmentPerSegment
-    n3_segment: N3Segment
-    n4_segment: N4Segment
+    per_segment: Optional[BenefitEnrollmentPerSegment]
+    n3_segment: Optional[N3Segment]
+    n4_segment: Optional[N4Segment]
 
 
 class Loop2100H(X12SegmentGroup):
@@ -323,7 +323,7 @@ class Loop2000(X12SegmentGroup):
     loop_2100g: Optional[Loop2100G]
     loop_2100h: Optional[Loop2100H]
     loop_2200: Optional[List[Loop2200]]
-    loop_2300: List[Loop2300]
+    loop_2300: Optional[List[Loop2300]]
     ls_segment: Optional[Loop2000LsSegment]
     loop_2700: Optional[List[Loop2700]]
     le_segment: Optional[Loop2000LeSegment]

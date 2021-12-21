@@ -15,7 +15,18 @@ def resource_path() -> str:
 
 @pytest.mark.parametrize(
     "file_name",
-    ["enroll-employee-multiple-products.834"],
+    [
+        "enroll-employee-multiple-products.834",
+        "add-dependent.834",
+        "enroll-employee-multiple-products.834",
+        "add-subscriber-coverage.834",
+        "change-subscriber-information.834",
+        "cancel-dependent.834",
+        "terminate-subscriber-eligibility.834",
+        "reinstate-employee.834",
+        "reinstate-employee-coverage-level.834",
+        "reinstate-member-eligiblity-ins.834",
+    ],
 )
 def test_834_model(resource_path, file_name: str):
 

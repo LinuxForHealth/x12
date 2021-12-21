@@ -30,6 +30,8 @@ responsible_person_loop_ids = [
     "X4",
 ]
 
+loop_2100d_to_2100g_entities = ["36", "M8", "S3"] + responsible_person_loop_ids
+
 
 class TransactionLoops(str, Enum):
     """
@@ -259,7 +261,7 @@ def _is_responsible_person(entity_identifier: str):
 
 @match(
     "NM1",
-    conditions={"entity_identifier_code": responsible_person_loop_ids},
+    conditions={"entity_identifier_code": loop_2100d_to_2100g_entities},
 )
 def set_member_2100d_to_2100g_loop(
     context: X12ParserContext, segment_data: Dict
@@ -274,11 +276,11 @@ def set_member_2100d_to_2100g_loop(
     member_loop = _get_member(context)
 
     entity_identifier = segment_data.get("entity_identifier_code")
-    if entity_identifier == TransactionLoops.MEMBER_EMPLOYER:
+    if entity_identifier == "36":
         loop_name = TransactionLoops.MEMBER_EMPLOYER
-    elif entity_identifier == TransactionLoops.MEMBER_SCHOOL:
+    elif entity_identifier == "M8":
         loop_name = TransactionLoops.MEMBER_SCHOOL
-    elif entity_identifier == TransactionLoops.MEMBER_CUSTODIAL_PARENT:
+    elif entity_identifier == "S3":
         loop_name = TransactionLoops.MEMBER_CUSTODIAL_PARENT
     elif _is_responsible_person(entity_identifier):
         loop_name = TransactionLoops.MEMBER_RESPONSIBLE_PERSON
