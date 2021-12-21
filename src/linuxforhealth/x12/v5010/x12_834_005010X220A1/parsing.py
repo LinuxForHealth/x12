@@ -52,6 +52,11 @@ class TransactionLoops(str, Enum):
     MEMBER_DROPOFF_LOCATION = "loop_2100h"
     MEMBER_DISABILITY_INFORMATION = "loop_2200"
     MEMBER_HEALTH_COVERAGE = "loop_2300"
+    MEMBER_PROVIDER_INFORMATION = "loop_2310"
+    MEMBER_COB = "loop_2320"
+    MEMBER_COB_RELATED_ENTITY = "loop_2330"
+    MEMBER_REPORTING_CATEGORIES = "loop_2700"
+    MEMBER_REPORTING_CATEGORY = "loop_2750"
     FOOTER = "footer"
 
 
@@ -63,6 +68,12 @@ def _get_tpa_broker(context):
 def _get_member(context):
     """Returns the current member"""
     return context.transaction_data[TransactionLoops.MEMBER_LEVEL_DETAIL][-1]
+
+
+def _get_coverage(context):
+    """Returns the current coverage"""
+    member = _get_member(context)
+    return member[TransactionLoops.MEMBER_HEALTH_COVERAGE][-1]
 
 
 @match("ST")
@@ -325,6 +336,34 @@ def set_hd_loop(context: X12ParserContext, segment_data: Dict) -> None:
 
     health_coverage = member[TransactionLoops.MEMBER_HEALTH_COVERAGE][-1]
     context.set_loop_context(TransactionLoops.MEMBER_HEALTH_COVERAGE, health_coverage)
+
+
+@match("LX")
+def set_provider_information_loop(
+    context: X12ParserContext, segment_data: Dict
+) -> None:
+    """
+    Sets the Member Coverage Provider Information Loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    if context.loop_name not in (
+        TransactionLoops.MEMBER_HEALTH_COVERAGE,
+        TransactionLoops.MEMBER_PROVIDER_INFORMATION,
+    ):
+        return
+
+    coverage = _get_coverage(context)
+    if TransactionLoops.MEMBER_PROVIDER_INFORMATION not in context:
+        coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION] = []
+
+    coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION].append({"per_segment": []})
+
+    provider_information = coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION][-1]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_PROVIDER_INFORMATION, provider_information
+    )
 
 
 @match("SE")

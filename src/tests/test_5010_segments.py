@@ -609,6 +609,17 @@ def test_pat_segment():
     assert pat_segment.x12() == "PAT*******01*146.00~"
 
 
+def test_pla_segment():
+    segment_data = {
+        "action_code": "2",
+        "entity_identifier_code": "1P",
+        "date": "19970628",
+        "maintenance_reason_code": "AI",
+    }
+    pla_segment: PlaSegment = PlaSegment(**segment_data)
+    assert pla_segment.x12() == "PLA*2*1P*19970628**AI~"
+
+
 def test_plb_segment():
     segment_data = {
         "provider_identifier": "1234567890",

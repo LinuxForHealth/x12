@@ -95,6 +95,7 @@ class X12SegmentName(str, Enum):
     OI = "OI"
     PAT = "PAT"
     PER = "PER"
+    PLA = "PLA"
     PLB = "PLB"
     PRV = "PRV"
     PS1 = "PS1"

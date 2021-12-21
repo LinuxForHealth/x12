@@ -18,6 +18,7 @@ from linuxforhealth.x12.v5010.segments import (
     PerSegment,
     DmgSegment,
     AmtSegment,
+    PlaSegment,
 )
 
 
@@ -231,7 +232,7 @@ class Loop2000InsSegment(InsSegment):
         CHANGE_OF_LOCATION = "43"
         NON_PAYMENT = "59"
         DISSATISFACTION_WITH_OFFICE_STAFF = "AA"
-        DISSATISFACTION_WITH_MEDICAL_CARE_SERVICES = "AA"
+        DISSATISFACTION_WITH_MEDICAL_CARE_SERVICES = "AB"
         INCONVENIENT_OFFICE_LOCATION = "AC"
         DISSATISFACTION_WITH_OFFICE_HOURS = "AD"
         UNABLE_TO_SCHEDULE_APPOINTMENTS_IN_TIMELY_MANNER = "AE"
@@ -748,3 +749,75 @@ class Loop2300RefSegment(RefSegment):
         UNIT_NUMBER = "QQ"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2310Nm1Segment(Nm1Segment):
+    """
+    Member Coverage Provider Information Place/Location
+    """
+
+    class EntityIdentifierCode(str, Enum):
+        """
+        Code values for NM101
+        """
+
+        LABORATORY = "1X"
+        OBGYN_FACILITY = "3D"
+        HOSPITAL = "80"
+        FACILITY = "FA"
+        DOCTOR_OF_OPTOMETRY = "OD"
+        PRIMARY_CARE_PROVIDER = "P3"
+        PHARMACY = "QA"
+        DENTIST = "QN"
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for NM108
+        """
+
+        SOCIAL_SECURITY_NUMBER = "34"
+        FEDERAL_TAXPAYER_IDENTIFICATION_NUMBER = "FI"
+        SERVICE_PROVIDER_NUMBER = "SV"
+        CMS_NPI = "XX"
+
+    class EntityRelationshipCode(str, Enum):
+        """
+        Code values for NM110
+        """
+
+        ESTABLISHED_PATIENT = "25"
+        NOT_ESTABLISHED_PATIENT = "26"
+        UNKNOWN = "72"
+
+    entity_identifier_code: EntityIdentifierCode
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    entity_relationship_code: Optional[EntityRelationshipCode]
+
+
+class Loop2310PlaSegment(PlaSegment):
+    """
+    Member Coverage Provider Information Place/Location
+    """
+
+    class MaintenanceReasonCode(str, Enum):
+        """
+        Code values for PLA05
+        """
+
+        VOLUNTARY_WITHDRAWL = "14"
+        PLAN_CHANGE = "22"
+        CURRENT_CUSTOMER_INFORMATION_FILE_ERROR = "46"
+        DISSATISFACTION_WITH_OFFICE_STAFF = "AA"
+        DISSATISFACTION_WITH_MEDICAL_CARE_SERVICES = "AB"
+        INCONVENIENT_OFFICE_LOCATION = "AC"
+        DISSATISFACTION_WITH_OFFICE_HOURS = "AD"
+        UNABLE_TO_SCHEDULE_APPOINTMENTS_IN_TIMELY_MANNER = "AE"
+        DISSATISFACTION_WITH_PHYSICIANS_REFERRAL_POLICY = "AF"
+        LESS_RESPECT_AND_ATTENTION_GIVEN_THAN_TO_OTHER_PATIENTS = "AG"
+        PATIENT_MOVED_NEW_LOCATION = "AH"
+        NO_REASON_GIVEN = "AI"
+        APPOINTMENT_TIMES_NOT_MET_IN_TIMELY_MANNER = "AJ"
+
+    action_code: Literal["2"]
+    entity_identifier_code: Literal["1P"]
+    maintenance_reason_code: MaintenanceReasonCode

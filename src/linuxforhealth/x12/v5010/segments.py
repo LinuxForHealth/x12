@@ -2635,6 +2635,23 @@ class PerSegment(X12Segment):
         return values
 
 
+class PlaSegment(X12Segment):
+    """
+    Place or location
+    Example:
+        PLA*2*1P*19970628**AI~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PLA
+    action_code: str = Field(min_length=1, max_length=2)
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    date: Union[str, datetime.date]
+    time: Optional[str]
+    maintenance_reason_code: str = Field(min_length=2, max_length=3)
+
+    _validate_x12_date = field_validator("date")(validate_date_field)
+
+
 class PlbSegment(X12Segment):
     """
     Provider Level Adjustment
