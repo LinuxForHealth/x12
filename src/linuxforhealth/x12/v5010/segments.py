@@ -564,6 +564,56 @@ class Cn1Segment(X12Segment):
     contract_version_identifier: Optional[str] = Field(max_length=30)
 
 
+class CobSegment(X12Segment):
+    """
+    Coordination of Benefits
+    Example:
+        COB*P*XYZ123*1~
+    """
+
+    class PayerResponsibilitySequenceCode(str, Enum):
+        """
+        Code values for COB01
+        """
+
+        PRIMARY = "P"
+        SECONDARY = "S"
+        TERTIARY = "T"
+        UNKNOWN = "U"
+
+    class CoordinationOfBenefitsCode(str, Enum):
+        """
+        Code values for COB03
+        """
+
+        COORDINATION_OF_BENEFITS = "1"
+        UNKNOWN = "5"
+        NO_COORDINATION_OF_BENEFITS = "6"
+
+    class ServiceTypeCode(str, Enum):
+        """
+        Code values for COB04
+        """
+
+        MEDICAL_CARE = "1"
+        DENTAL_CARE = "35"
+        HOSPITAL_INPATIENT = "48"
+        HOSPITAL_OUTPATIENT = "50"
+        LONG_TERM_CARE = "54"
+        FREE_STANDING_PRESCRIPTION_DRUG = "89"
+        MAIL_ORDER_PRESCRIPTION_DRUG = "90"
+        PSYCHIATRIC = "A4"
+        SKILLED_NURSING_CARE = "AG"
+        VISION = "AL"
+        PARTIAL_HOSPITALIZATION_PSYCHIATRIC = "BB"
+
+    segment_name: X12SegmentName = X12SegmentName.COB
+    payer_responsibility_sequence_code: PayerResponsibilitySequenceCode
+    group_policy_number: Optional[str] = Field(min_length=1, max_length=50)
+    coordination_of_benefits_code: CoordinationOfBenefitsCode
+    service_type_code: Optional[ServiceTypeCode]
+
+
 class CrcSegment(X12Segment):
     """
     Conditions Indicator

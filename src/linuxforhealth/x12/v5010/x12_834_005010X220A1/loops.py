@@ -44,6 +44,7 @@ from linuxforhealth.x12.v5010.segments import (
     HdSegment,
     IdcSegment,
     LxSegment,
+    CobSegment,
 )
 from .segments import (
     HeaderStSegment,
@@ -74,6 +75,8 @@ from .segments import (
     Loop2300RefSegment,
     Loop2310Nm1Segment,
     Loop2310PlaSegment,
+    Loop2320RefSegment,
+    Loop2320DtpSegment,
 )
 from typing import List, Optional
 from pydantic import Field
@@ -241,6 +244,16 @@ class Loop2310(X12SegmentGroup):
     pla_segment: Optional[Loop2310PlaSegment]
 
 
+class Loop2320(X12SegmentGroup):
+    """
+    Member Health Coverage COB
+    """
+
+    cob_segment: CobSegment
+    ref_segment: Optional[List[Loop2320RefSegment]]
+    dtp_segment: Optional[List[Loop2320DtpSegment]]
+
+
 class Loop2300(X12SegmentGroup):
     """
     Health Coverage
@@ -252,6 +265,7 @@ class Loop2300(X12SegmentGroup):
     ref_segment: Optional[List[Loop2300RefSegment]]
     idc_segment: Optional[List[IdcSegment]]
     loop_2310: Optional[List[Loop2310]]
+    loop_2320: Optional[List[Loop2320]]
 
 
 class Loop2000(X12SegmentGroup):

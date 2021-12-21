@@ -821,3 +821,38 @@ class Loop2310PlaSegment(PlaSegment):
     action_code: Literal["2"]
     entity_identifier_code: Literal["1P"]
     maintenance_reason_code: MaintenanceReasonCode
+
+
+class Loop2320RefSegment(RefSegment):
+    """
+    Member Coverage COB Reference Identification
+    """
+
+    class ReferenceIdentificationQualifier(str, Enum):
+        """
+        Code values for REF01
+        """
+
+        ACCOUNT_SUFFIX_CODE = "60"
+        GROUP_NUMBER = "6P"
+        SOCIAL_SECURITY_NUMBER = "SY"
+        MUTUALLY_DEFINED = "ZZ"
+
+    reference_identification_qualifier: ReferenceIdentificationQualifier
+
+
+class Loop2320DtpSegment(DtpSegment):
+    """
+    Member Coverage COB Date Segment
+    """
+
+    class DateTimeQualifier(str, Enum):
+        """
+        Code values for DTP
+        """
+
+        COORDINATION_BENEFITS_BEGIN = "344"
+        COORDINATION_BENEFITS_END = "345"
+
+    date_time_qualifier: DateTimeQualifier
+    date_time_period_format_qualifier: Literal["D8"]

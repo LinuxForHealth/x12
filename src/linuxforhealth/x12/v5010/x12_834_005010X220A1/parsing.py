@@ -52,9 +52,9 @@ class TransactionLoops(str, Enum):
     MEMBER_DROPOFF_LOCATION = "loop_2100h"
     MEMBER_DISABILITY_INFORMATION = "loop_2200"
     MEMBER_HEALTH_COVERAGE = "loop_2300"
-    MEMBER_PROVIDER_INFORMATION = "loop_2310"
-    MEMBER_COB = "loop_2320"
-    MEMBER_COB_RELATED_ENTITY = "loop_2330"
+    MEMBER_COVERAGE_PROVIDER_INFORMATION = "loop_2310"
+    MEMBER_COVERAGE_COB = "loop_2320"
+    MEMBER_COVERAGE_COB_RELATED_ENTITY = "loop_2330"
     MEMBER_REPORTING_CATEGORIES = "loop_2700"
     MEMBER_REPORTING_CATEGORY = "loop_2750"
     FOOTER = "footer"
@@ -350,20 +350,45 @@ def set_provider_information_loop(
     """
     if context.loop_name not in (
         TransactionLoops.MEMBER_HEALTH_COVERAGE,
-        TransactionLoops.MEMBER_PROVIDER_INFORMATION,
+        TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION,
     ):
         return
 
     coverage = _get_coverage(context)
-    if TransactionLoops.MEMBER_PROVIDER_INFORMATION not in context:
-        coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION] = []
+    if TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION not in context:
+        coverage[TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION] = []
 
-    coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION].append({"per_segment": []})
-
-    provider_information = coverage[TransactionLoops.MEMBER_PROVIDER_INFORMATION][-1]
-    context.set_loop_context(
-        TransactionLoops.MEMBER_PROVIDER_INFORMATION, provider_information
+    coverage[TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION].append(
+        {"per_segment": []}
     )
+
+    provider_information = coverage[
+        TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION
+    ][-1]
+    context.set_loop_context(
+        TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION, provider_information
+    )
+
+
+@match("COB")
+def set_cob_loop(context: X12ParserContext, segment_data: Dict) -> None:
+    """
+    Sets the member coverage COB loop
+
+    :param context: The X12Parsing context which contains the current loop and transaction record.
+    :param segment_data: The current segment's data
+    """
+    coverage = _get_coverage(context)
+
+    if TransactionLoops.MEMBER_COVERAGE_COB not in coverage:
+        coverage[TransactionLoops.MEMBER_COVERAGE_COB] = []
+
+    coverage[TransactionLoops.MEMBER_COVERAGE_COB].append(
+        {"ref_segment": [], "dtp_segment": []}
+    )
+
+    cob = coverage[TransactionLoops.MEMBER_COVERAGE_COB][-1]
+    context.set_loop_context(TransactionLoops.MEMBER_COVERAGE_COB, cob)
 
 
 @match("SE")
