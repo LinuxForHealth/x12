@@ -44,6 +44,25 @@ class AaaSegment(X12Segment):
     follow_up_action_code: str = Field(min_length=1, max_length=1)
 
 
+class ActSegment(X12Segment):
+    """
+    Account Identification
+    Example:
+        ACT*1234*****23498765~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.ACT
+    tpa_account_number: str = Field(min_length=1, max_length=35)
+    name: Optional[str] = Field(max_length=60)
+    identification_code_qualifier: Optional[str] = Field(max_length=2)
+    identification_code: Optional[str] = Field(max_length=80)
+    account_number_qualifier: Optional[str] = Field(max_length=3)
+    tpa_account_number_2: Optional[str] = Field(min_length=1, max_length=35)
+    description: Optional[str] = Field(max_length=80)
+    payment_method_type_code: Optional[str] = Field(max_length=2)
+    benefit_status_code: Optional[str] = Field(max_length=1)
+
+
 class AmtSegment(X12Segment):
     """
     Monetary Amount Information.
@@ -55,6 +74,101 @@ class AmtSegment(X12Segment):
     amount_qualifier_code: str = Field(min_length=1, max_length=3)
     monetary_amount: Decimal
     credit_debit_flag_code: Optional[str] = Field(min_length=0, max_length=1)
+
+
+class BgnSegment(X12Segment):
+    """
+    Beginning Segment
+    Example:
+        BGN*00*12456*20131020*1200****2~
+    """
+
+    class TransactionSetPurposeCode(str, Enum):
+        """
+        Code values for BGN01
+        """
+
+        ORIGINAL = "00"
+        RESUBMISSION = "15"
+        INFORMATION_COPY = "22"
+
+    class TimeZoneCode(str, Enum):
+        """
+        Code values for BGN05
+        """
+
+        ISO_PS01 = "01"
+        ISO_PS02 = "02"
+        ISO_PS03 = "03"
+        ISO_PS04 = "04"
+        ISO_PS05 = "05"
+        ISO_PS06 = "06"
+        ISO_PS07 = "07"
+        ISO_PS08 = "08"
+        ISO_PS09 = "09"
+        ISO_PS10 = "10"
+        ISO_PS11 = "11"
+        ISO_PS12 = "12"
+        ISO_PS13 = "13"
+        ISO_PS14 = "14"
+        ISO_PS15 = "15"
+        ISO_PS16 = "16"
+        ISO_PS17 = "17"
+        ISO_PS18 = "18"
+        ISO_PS19 = "19"
+        ISO_PS20 = "20"
+        ISO_PS21 = "21"
+        ISO_PS22 = "22"
+        ISO_PS23 = "23"
+        ISO_PS24 = "24"
+        ALASKA_DAYLIGHT_TIME = "AD"
+        ALASKA_STANDARD_TIME = "AS"
+        ALASKA_TIME = "AT"
+        CENTRAL_DAYLIGHT_TIME = "CD"
+        CENTRAL_STANDARD_TIME = "CS"
+        CENTRAL_TIME = "CT"
+        EASTERN_DAYLIGHT_TIME = "ED"
+        EASTERN_STANDARD_TIME = "ES"
+        EASTERN_TIME = "ET"
+        GREENWICH_MEAN_TIME = "GM"
+        HAWAII_ALEUTIAN_DAYLIGHT_TIME = "HD"
+        HAWAII_ALEUTIAN_STANDARD_TIME = "HS"
+        HAWAII_ALEUTIAN_TIME = "HT"
+        LOCAL_TIME = "LT"
+        MOUNTAIN_DAYLIGHT_TIME = "MD"
+        MOUNTAIN_STANDARD_TIME = "MS"
+        MOUNTAIN_TIME = "MT"
+        NEWFOUNDLAND_DAYLIGHT_TIME = "ND"
+        NEWFOUNDLAND_STANDARD_TIME = "NS"
+        NEWFOUNDLAND_TIME = "NT"
+        PACIFIC_DAYLIGHT_TIME = "PD"
+        PACIFIC_STANDARD_TIME = "PS"
+        PACIFIC_TIME = "PT"
+        ATLANTIC_DAYLIGHT_TIME = "TD"
+        ATLANTIC_STANDARD_TIME = "TT"
+        UNIVERSAL_TIME_COORDINATE = "UT"
+
+    class ActionCode(str, Enum):
+        """
+        Code values for BGN08
+        """
+
+        CHANGE = "2"
+        VERIFY = "4"
+        REPLACE = "RX"
+
+    segment_name: X12SegmentName = X12SegmentName.BGN
+    transaction_set_purpose_code: TransactionSetPurposeCode
+    transaction_set_reference_number: str = Field(min_length=1, max_length=50)
+    transaction_set_creation_date: Union[str, datetime.date]
+    transaction_set_creation_time: Union[str, datetime.time]
+    time_zone_code: Optional[TimeZoneCode]
+    original_transaction_set_reference_number: Optional[str] = Field(
+        min_length=1, max_length=50
+    )
+    transaction_type_code: Optional[str] = Field(min_length=2, max_length=2)
+    action_code: ActionCode
+    security_level_code: Optional[str] = Field(min_length=2, max_length=2)
 
 
 class BhtSegment(X12Segment):
@@ -450,6 +564,56 @@ class Cn1Segment(X12Segment):
     contract_version_identifier: Optional[str] = Field(max_length=30)
 
 
+class CobSegment(X12Segment):
+    """
+    Coordination of Benefits
+    Example:
+        COB*P*XYZ123*1~
+    """
+
+    class PayerResponsibilitySequenceCode(str, Enum):
+        """
+        Code values for COB01
+        """
+
+        PRIMARY = "P"
+        SECONDARY = "S"
+        TERTIARY = "T"
+        UNKNOWN = "U"
+
+    class CoordinationOfBenefitsCode(str, Enum):
+        """
+        Code values for COB03
+        """
+
+        COORDINATION_OF_BENEFITS = "1"
+        UNKNOWN = "5"
+        NO_COORDINATION_OF_BENEFITS = "6"
+
+    class ServiceTypeCode(str, Enum):
+        """
+        Code values for COB04
+        """
+
+        MEDICAL_CARE = "1"
+        DENTAL_CARE = "35"
+        HOSPITAL_INPATIENT = "48"
+        HOSPITAL_OUTPATIENT = "50"
+        LONG_TERM_CARE = "54"
+        FREE_STANDING_PRESCRIPTION_DRUG = "89"
+        MAIL_ORDER_PRESCRIPTION_DRUG = "90"
+        PSYCHIATRIC = "A4"
+        SKILLED_NURSING_CARE = "AG"
+        VISION = "AL"
+        PARTIAL_HOSPITALIZATION_PSYCHIATRIC = "BB"
+
+    segment_name: X12SegmentName = X12SegmentName.COB
+    payer_responsibility_sequence_code: PayerResponsibilitySequenceCode
+    group_policy_number: Optional[str] = Field(min_length=1, max_length=50)
+    coordination_of_benefits_code: CoordinationOfBenefitsCode
+    service_type_code: Optional[ServiceTypeCode]
+
+
 class CrcSegment(X12Segment):
     """
     Conditions Indicator
@@ -609,6 +773,14 @@ class DmgSegment(X12Segment):
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier]
     date_time_period: Optional[Union[str, datetime.date]]
     gender_code: Optional[GenderCode]
+    marital_status_code: Optional[str] = Field(max_length=1)
+    race_or_ethnicity: Optional[str]
+    citizenship_stats_code: Optional[str] = Field(max_length=2)
+    country_code: Optional[str] = Field(max_length=3)
+    basis_of_verification_code: Optional[str] = Field(max_length=2)
+    quantity: Optional[Decimal]
+    code_list_qualifier_code: Optional[Literal["REC"]]
+    race_or_ethnicity_code: Optional[str] = Field(max_length=30)
 
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
@@ -629,6 +801,42 @@ class DmgSegment(X12Segment):
             )
 
         return values
+
+
+class DsbSegment(X12Segment):
+    """
+    Disability Information
+    Example:
+        DSB*2******DX*585~
+    """
+
+    class DisabilityTypeCode(str, Enum):
+        """
+        Code values for DSB01
+        """
+
+        SHORT_TERM_DISABILITY = "1"
+        LONG_TERM_DISABILITY = "2"
+        PERMANENT_TOTAL_DISABILITY = "3"
+        NO_DISABILITY = "4"
+
+    class ProductServiceIdQualifier(str, Enum):
+        """
+        Code values for DSB07
+        """
+
+        ICD_9_DIAGNOSIS = "DX"
+        MUTUALLY_DEFINED = "ZZ"
+
+    segment_name: X12SegmentName = X12SegmentName.DSB
+    disability_type_code: DisabilityTypeCode
+    quantity: Optional[Decimal]
+    occupation_code: Optional[str] = Field(min_length=4, max_length=6)
+    work_intensity_code: Optional[str] = Field(min_length=1, max_length=1)
+    product_option_code: Optional[str] = Field(min_length=1, max_length=2)
+    monetary_amount: Optional[Decimal]
+    product_service_id_qualifier: Optional[ProductServiceIdQualifier]
+    diagnosis_code: Optional[str] = Field(min_length=1, max_length=15)
 
 
 class DtmSegment(X12Segment):
@@ -1074,6 +1282,44 @@ class EbSegment(X12Segment):
         return values
 
 
+class EcSegment(X12Segment):
+    """
+    Employment Class
+    Example:
+        EC*04*06*07~
+    """
+
+    class EmploymentClassCode(str, Enum):
+        """
+        Code values for EC01, EC02, and EC03
+        """
+
+        UNION = "01"
+        NON_UNION = "02"
+        EXECUTIVE = "03"
+        NON_EXECUTIVE = "04"
+        MANAGEMENT = "05"
+        NON_MANAGEMENT = "06"
+        HOURLY = "07"
+        SALARIED = "08"
+        ADMINISTRATIVE = "09"
+        NON_ADMINISTRATIVE = "10"
+        EXEMPT = "11"
+        NON_EXEMPT = "12"
+        HIGHLY_COMPENSATED = "17"
+        KEY_EMPLOYEE = "18"
+        BARGAINING = "19"
+        NON_BARGAINING = "20"
+        OWNER = "21"
+        PRESIDENT = "22"
+        VICE_PRESIDENT = "23"
+
+    segment_name: X12SegmentName = X12SegmentName.EC
+    employment_class_code_1: EmploymentClassCode
+    employment_class_code_2: Optional[EmploymentClassCode]
+    employment_class_code_3: Optional[EmploymentClassCode]
+
+
 class EqSegment(X12Segment):
     """
     Eligibility Inquiry Segment
@@ -1249,6 +1495,101 @@ class HcpSegment(X12Segment):
     exception_code: Optional[ExceptionCode]
 
 
+class HdSegment(X12Segment):
+    """
+    Health coverage
+    Example:
+        HD*021**HLT*PLAN A BCD*FAM~
+    """
+
+    class MaintenanceTypeCode(str, Enum):
+        """
+        Code values for HD01
+        """
+
+        CHANGE = "001"
+        DELETE = "002"
+        ADDITION = "021"
+        CANCELLATION_OR_TERMINATION = "024"
+        REINSTATEMENT = "025"
+        CORRECTION = "026"
+        AUDIT_OR_COMPARE = "030"
+        EMPLOYEE_INFORMATION_NOT_APPLICABLE = "032"
+
+    class InsuranceLineCode(str, Enum):
+        """
+        Code values for HD03
+        """
+
+        PREVENTATIVE_CARE_WELLNESS = "AG"
+        TWENTY_FOUR_HOUR_CARE_RISK = "AH"
+        MEDICARE_RISK = "AJ"
+        MENTAL_HEALTH = "AK"
+        DENTAL_CAPITATION = "DCP"
+        DENTAL = "DEN"
+        EXCLUSIVE_PROVIDER_ORGANIZATION = "EPO"
+        FACILITY = "FAC"
+        HEARING = "HE"
+        HEALTH = "HLT"
+        HEALTH_MAINTEANCE_ORGANIZATION = "HMO"
+        LONG_TERM_CARE = "LTC"
+        LONG_TERM_DISABILITY = "LTD"
+        MAJOR_MEDICAL = "MM"
+        MAIL_ORDER_DRUG = "MOD"
+        PRESCRIPTION_DRUG = "PDG"
+        POINT_OF_SERVICE = "POS"
+        PREFERRED_PROVIDER_ORGANIZATION = "PPO"
+        PRACTITIONERS = "PRA"
+        SHORT_TERM_DISABILITY = "STD"
+        UTILIZATION_REVIEW = "UR"
+        VISION = "VIS"
+
+    class CoverageLineCode(str, Enum):
+        """
+        Code values for HD05
+        """
+
+        CHILDREN_ONLY = "CHD"
+        DEPENDENTS_ONLY = "DEP"
+        EMPLOYEE_ONE_DEPENDENT = "E1D"
+        EMPLOYEE_TWO_DEPENDENT = "E2D"
+        EMPLOYEE_THREE_DEPENDENT = "E3D"
+        EMPLOYEE_ONE_OR_MORE_DEPENDENTS = "E5D"
+        EMPLOYEE_TWO_OR_MORE_DEPENDENTS = "E6D"
+        EMPLOYEE_THREE_OR_MORE_DEPENDENTS = "E7D"
+        EMPLOYEE_FOUR_OR_MORE_DEPENDENTS = "E8D"
+        EMPLOYEE_FIVE_OR_MORE_DEPENDENTS = "E9D"
+        EMPLOYEE_AND_CHILDREN = "ECH"
+        EMPLOYEE_ONLY = "EMP"
+        EMPLOYEE_AND_SPOUSE = "ESP"
+        FAMILY = "FAM"
+        INDIVIDUAL = "IND"
+        SPOUSE_AND_CHILDREN = "SPC"
+        SPOUSE_ONLY = "SPO"
+        TWO_PARTY = "TWO"
+
+    class LateEnrollmentIndicator(str, Enum):
+        """
+        Code values for HD09
+        """
+
+        NO = "N"
+        YES = "Y"
+
+    segment_name: X12SegmentName = X12SegmentName.HD
+    maintenance_type_code: MaintenanceTypeCode
+    maintenance_reason_code: Optional[str] = Field(min_length=2, max_length=3)
+    insurance_line_code: InsuranceLineCode
+    plan_coverage_description: Optional[str] = Field(min_length=1, max_length=50)
+    coverage_line_code: Optional[CoverageLineCode]
+    count_1: Optional[int]
+    count_2: Optional[int]
+    underwriting_decision_code: Optional[str] = Field(min_length=1, max_length=1)
+    late_enrollment_indicator: Optional[LateEnrollmentIndicator]
+    drug_house_code: Optional[str] = Field(min_length=2, max_length=3)
+    yes_no_condition_response_code: Optional[str] = Field(min_length=1, max_length=1)
+
+
 class HiSegment(X12Segment):
     """
     Health Care Information/Diagnostic Codes
@@ -1279,6 +1620,30 @@ class HlSegment(X12Segment):
     hierarchical_parent_id_number: str = Field(min_length=1, max_length=12)
     hierarchical_level_code: str = Field(min_length=1, max_length=2)
     hierarchical_child_code: str = Field(min_length=1, max_length=1, regex="^0|1$")
+
+
+class HlhSegment(X12Segment):
+    """
+    Member Health Information
+    Example:
+        HLH*X*74*210~
+    """
+
+    class HealthRelatedCode(str, Enum):
+        """
+        Code values for HLH01
+        """
+
+        NONE = "N"
+        SUBSTANCE_ABUSE = "S"
+        TOBACCO_USE = "T"
+        UNKNOWN = "U"
+        TOBACCO_USE_AND_SUBSTANCE_ABUSE = "X"
+
+    segment_name: X12SegmentName = X12SegmentName.HLH
+    health_related_code: HealthRelatedCode
+    member_height: Optional[Decimal]
+    member_weight: Optional[Decimal]
 
 
 class HsdSegment(X12Segment):
@@ -1426,6 +1791,74 @@ class HsdSegment(X12Segment):
         if values.get("period_count") and not values.get("time_period_qualifier"):
             raise ValueError("Period requires a qualifier and value")
         return values
+
+
+class IcmSegment(X12Segment):
+    """
+    Member Income
+    Example:
+        ICM*1*425.25*40.00~
+    """
+
+    class FrequencyCode(str, Enum):
+        """
+        Code values for ICM01
+        """
+
+        WEEKLY = "1"
+        BIWEEKLY = "2"
+        SEMIMONTHLY = "3"
+        MONTHLY = "4"
+        DAILY = "6"
+        ANNUAL = "7"
+        TWO_CALENDAR_MONTHS = "8"
+        LUMP_SUM_SEPARATION_ALLOWANCE = "9"
+        YEAR_TO_DATE = "B"
+        SINGLE = "C"
+        HOURLY = "H"
+        QUARTERLY = "Q"
+        SEMI_ANNUAL = "S"
+        UNKNOWN = "U"
+
+    segment_name: X12SegmentName = X12SegmentName.ICM
+    frequency_code: FrequencyCode
+    wage_amount: Decimal
+    weekly_hours: Optional[Decimal]
+    location_identifier: Optional[str] = Field(max_length=30)
+    salary_grade_code: Optional[str] = Field(max_length=5)
+    currency_code: Optional[str]
+
+
+class IdcSegment(X12Segment):
+    """
+    Identification Card
+    Example:
+        IDC*12345*H~
+    """
+
+    class IdentificationCardTypeCode(str, Enum):
+        """
+        Code values for IDC02
+        """
+
+        DENTAL_INSURANCE = "D"
+        HEALTH_INSURANCE = "H"
+        PRESCRIPTION_DRUG_SERVICE_DRUG_INSURANCE = "P"
+
+    class ActionCode(str, Enum):
+        """
+        Code values for IDC04
+        """
+
+        ADD = "1"
+        CHANGE = "2"
+        REPLACE = "RX"
+
+    segment_name: X12SegmentName = X12SegmentName.IDC
+    plan_coverage_description: str = Field(min_length=1, max_length=50)
+    identification_card_type_code: IdentificationCardTypeCode
+    identification_card_count: Optional[int] = conint(gt=0)
+    action_code: Optional[ActionCode]
 
 
 class IeaSegment(X12Segment):
@@ -1673,6 +2106,38 @@ class LsSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.LS
     loop_id_code: str = Field(min_length=1, max_length=4)
+
+
+class LuiSegment(X12Segment):
+    """
+    Member language
+    Example:
+        LUI*LD*123**8~
+    """
+
+    class IdentificationCodeQualifier(str, Enum):
+        """
+        Code values for LUI01
+        """
+
+        NISO_Z39_53_LANGUAGE_CODES = "LD"
+        ISO_639_LANGUAGE_CODES = "LE"
+
+    class UseOfLanguageIndicator(str, Enum):
+        """
+        Code values for LUI04
+        """
+
+        LANGUAGE_READING = "5"
+        LANGUAGE_WRITING = "6"
+        LANGUAGE_SPEAKING = "7"
+        NATIVE_LANGUAGE = "8"
+
+    segment_name: X12SegmentName = X12SegmentName.LUI
+    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    identification_code: Optional[str] = Field(max_length=80)
+    description: Optional[str] = Field(max_length=80)
+    language_use_indicator: Optional[UseOfLanguageIndicator]
 
 
 class LxSegment(X12Segment):
@@ -1948,7 +2413,7 @@ class N1Segment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.N1
     entity_identifier_code: str = Field(min_length=2, max_length=3)
     name: str = Field(min_length=1, max_length=60)
-    identification_code_qualifier: str = Field(min_length=1, max_length=2)
+    identification_code_qualifier: Optional[str] = Field(min_length=1, max_length=2)
     identification_code: Optional[str] = Field(min_length=2, max_length=80)
 
 
@@ -2218,6 +2683,23 @@ class PerSegment(X12Segment):
             raise ValueError("communication fields require a qualifier and number")
 
         return values
+
+
+class PlaSegment(X12Segment):
+    """
+    Place or location
+    Example:
+        PLA*2*1P*19970628**AI~
+    """
+
+    segment_name: X12SegmentName = X12SegmentName.PLA
+    action_code: str = Field(min_length=1, max_length=2)
+    entity_identifier_code: str = Field(min_length=2, max_length=3)
+    date: Union[str, datetime.date]
+    time: Optional[str]
+    maintenance_reason_code: str = Field(min_length=2, max_length=3)
+
+    _validate_x12_date = field_validator("date")(validate_date_field)
 
 
 class PlbSegment(X12Segment):

@@ -18,10 +18,32 @@ def test_aaa_segment():
     assert aaa_segment.x12() == "AAA*Y**42*Y~"
 
 
+def test_act_segment():
+    segment_data = {
+        "tpa_account_number": "1234",
+        "tpa_account_number_2": "23498765",
+    }
+    act_segment: ActSegment = ActSegment(**segment_data)
+    assert act_segment.x12() == "ACT*1234*****23498765~"
+
+
 def test_amt_segment():
     segment_data = {"amount_qualifier_code": "R", "monetary_amount": Decimal("37.5")}
     amt_segment: AmtSegment = AmtSegment(**segment_data)
     assert amt_segment.x12() == "AMT*R*37.50~"
+
+
+def test_bgn_segment():
+    segment_data = {
+        "transaction_set_purpose_code": "00",
+        "transaction_set_reference_number": "12456",
+        "transaction_set_creation_date": "20131020",
+        "transaction_set_creation_time": "1200",
+        "action_code": "2",
+    }
+
+    bgn_segment: BgnSegment = BgnSegment(**segment_data)
+    assert bgn_segment.x12() == "BGN*00*12456*20131020*1200****2~"
 
 
 def test_bht_segment():
@@ -188,6 +210,16 @@ def test_dmg_segment():
     assert dmg_segment.x12() == "DMG*D8*19430917*M~"
 
 
+def test_dsb_segment():
+    segment_data = {
+        "disability_type_code": "2",
+        "product_service_id_qualifier": "DX",
+        "diagnosis_code": "585",
+    }
+    dsb_segment: DsbSegment = DsbSegment(**segment_data)
+    assert dsb_segment.x12() == "DSB*2******DX*585~"
+
+
 def test_dtm_segment():
     segment_data = {"date_time_qualifier": "405", "production_date": "20020317"}
     dtm_segment: DtmSegment = DtmSegment(**segment_data)
@@ -245,6 +277,16 @@ def test_eb_segment():
     )
 
 
+def test_ec_segment():
+    segment_data = {
+        "employment_class_code_1": "04",
+        "employment_class_code_2": "06",
+        "employment_class_code_3": "07",
+    }
+    ec_segment: EcSegment = EcSegment(**segment_data)
+    assert ec_segment.x12() == "EC*04*06*07~"
+
+
 def test_eq_segment():
     segment_data = {
         "service_type_code": ["98", "34", "44", "81", "A0", "A3"],
@@ -299,6 +341,17 @@ def test_hcp_segment():
     assert hcp_segment.x12() == "HCP*03*100.00*10.00*RPO12345~"
 
 
+def test_hd_segment():
+    segment_data = {
+        "maintenance_type_code": "021",
+        "insurance_line_code": "HLT",
+        "plan_coverage_description": "PLAN A BCD",
+        "coverage_line_code": "FAM",
+    }
+    hd_segment: HdSegment = HdSegment(**segment_data)
+    assert hd_segment.x12() == "HD*021**HLT*PLAN A BCD*FAM~"
+
+
 def test_hi_segment():
     segment_data = {
         "health_care_code_1": ["BK", "8901"],
@@ -321,6 +374,17 @@ def test_hl_segment():
     assert hl_segment.x12() == "HL*3*2*22*0~"
 
 
+def test_hlh_segment():
+    segment_data = {
+        "health_related_code": "X",
+        "member_height": "74.00",
+        "member_weight": "210.00",
+    }
+
+    hlh_segment: HlhSegment = HlhSegment(**segment_data)
+    assert hlh_segment.x12() == "HLH*X*74.00*210.00~"
+
+
 def test_hsd_segment():
     segment_data = {
         "quantity_qualifier": "VS",
@@ -332,6 +396,21 @@ def test_hsd_segment():
     }
     hsd_segment: HsdSegment = HsdSegment(**segment_data)
     assert hsd_segment.x12() == "HSD*VS*12.00*WK*3.00*34*1.00~"
+
+
+def test_icm_segment():
+    segment_data = {"frequency_code": "1", "wage_amount": "800", "weekly_hours": "40"}
+    icm_segment: IcmSegment = IcmSegment(**segment_data)
+    assert icm_segment.x12() == "ICM*1*800.00*40.00~"
+
+
+def test_idc_segment():
+    segment_data = {
+        "plan_coverage_description": "12345",
+        "identification_card_type_code": "H",
+    }
+    idc_segment: IdcSegment = IdcSegment(**segment_data)
+    assert idc_segment.x12() == "IDC*12345*H~"
 
 
 def test_iea_segment():
@@ -421,6 +500,16 @@ def test_ls_segment():
     segment_data = {"loop_id_code": "2120"}
     ls_segment: LsSegment = LsSegment(**segment_data)
     assert ls_segment.x12() == "LS*2120~"
+
+
+def test_lui_segment():
+    segment_data = {
+        "identification_code_qualifier": "LD",
+        "identification_code": "123",
+        "language_use_indicator": "8",
+    }
+    lui_segment: LuiSegment = LuiSegment(**segment_data)
+    assert lui_segment.x12() == "LUI*LD*123**8~"
 
 
 def test_lx_segment():
@@ -518,6 +607,17 @@ def test_pat_segment():
     }
     pat_segment: PatSegment = PatSegment(**segment_data)
     assert pat_segment.x12() == "PAT*******01*146.00~"
+
+
+def test_pla_segment():
+    segment_data = {
+        "action_code": "2",
+        "entity_identifier_code": "1P",
+        "date": "19970628",
+        "maintenance_reason_code": "AI",
+    }
+    pla_segment: PlaSegment = PlaSegment(**segment_data)
+    assert pla_segment.x12() == "PLA*2*1P*19970628**AI~"
 
 
 def test_plb_segment():

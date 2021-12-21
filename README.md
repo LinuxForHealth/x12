@@ -20,8 +20,6 @@ Supported formats include:
 * 005010X279 Eligibility
 * 005010X220 Enrollment and Maintenance
 
-This project is currently under construction. Please refer to the [LinuxForHealth X12 Issue Board](https://github.com/LinuxForHealth/x12/issues) to review current issues and progress.
-
 ## Quickstart
 
 ### Pre-requisites
@@ -148,9 +146,6 @@ Use the `--help` flag to view all available options for the black code formatter
 ```shell
 (venv) user@mbp x12 % black --help
 ```
-
-### REST API
-Under Development
 
 ## Building The Project
 LinuxForHealth X12 is aligned, to a degree, with the PEP-517 standard. `setup.cfg` stores build metadata/configuration.
