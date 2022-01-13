@@ -31,7 +31,7 @@ class HeaderStSegment(StSegment):
     """
 
     transaction_set_identifier_code: Literal["271"]
-    implementation_convention_reference: Literal["005010X279A1"]
+    implementation_convention_reference: Literal["005010X279", "005010X279A1"]
 
 
 class HeaderBhtSegment(BhtSegment):

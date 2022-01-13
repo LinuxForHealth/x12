@@ -33,7 +33,9 @@ class HeaderStSegment(StSegment):
     """
 
     transaction_set_identifier_code: Literal["837"]
-    implementation_convention_reference: Literal["005010X222A2"]
+    implementation_convention_reference: Literal[
+        "005010X222", "005010X222A1", "005010X222A2"
+    ]
 
 
 class HeaderBhtSegment(BhtSegment):
@@ -208,6 +210,7 @@ class Loop2000BSbrSegment(SbrSegment):
     payer_responsibility_code: PayerResponsibilityCode
     individual_relationship_code: Optional[Literal["18"]]
     insurance_type_code: Optional[InsuranceTypeCode]
+    claim_filing_indicator_code: ClaimFilingIndicatorCode
 
 
 class Loop2000CHlSegment(HlSegment):
@@ -864,7 +867,7 @@ class Loop2310BNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["82"]
-    identification_code_qualifier: Literal["XX"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2310BPrvSegment(PrvSegment):
@@ -1042,9 +1045,39 @@ class Loop2320SbrSegment(SbrSegment):
         MEDICARE_SECONDARY_DISABLED_BENEFICIARY = "43"
         MEDICARE_SECONDARY_LIABILITY_PRIMARY = "47"
 
+    class ClaimFilingIndicatorCode(str, Enum):
+        """
+        Code values for SBR09
+        """
+
+        OTHER_NON_FEDERAL_PROGRAMS = "11"
+        PPO = "12"
+        POS = "13"
+        EPO = "14"
+        INDEMNITY_INSURANCE = "14"
+        HMO_MEDICARE_RISK = "16"
+        DENTAL_MAINTENANCE_ORGANIZATION = "17"
+        AUTOMOBILE_MEDICAL = "AM"
+        BLUE_CROSS_BLUE_SHIELD = "BL"
+        CHAMPUS = "CH"
+        COMMERCIAL_INSURANCE_CO = "CI"
+        DISABILITY = "DS"
+        FEDERAL_EMPLOYEE_PROGRAM = "FI"
+        HEALTH_MAINTENANCE_ORGANIZATION = "HM"
+        LIBABILITY_MEDICAL = "LM"
+        MEDICARE_PART_A = "MA"
+        MEDICARE_PART_B = "MB"
+        MEDICAID = "MC"
+        OTHER_FEDERAL_PROGRAM = "OF"
+        TITLE_V = "TV"
+        VETERANS_AFFAIR_PLAN = "VA"
+        WORKERS_COMPENSATION_HEALTH_CLAIM = "WC"
+        MUTUALLY_DEFINED = "ZZ"
+
     payer_responsibility_code: PayerResponsibilityCode
     individual_relationship_code: Optional[IndividualRelationshipCode]
-    claim_filing_indicator_code: InsuranceTypeCode
+    insurance_type_code: Optional[InsuranceTypeCode]
+    claim_filing_indicator_code: ClaimFilingIndicatorCode
 
 
 class Loop2330aNm1Segment(Nm1Segment):
@@ -1110,10 +1143,14 @@ class Loop2300BRefSegment(RefSegment):
         Code values for REF01
         """
 
-        PAYOR_IDENTIFICATION = "PI"
+        PAYOR_IDENTIFICATION_NUMBER = "2U"
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        REFERRAL_NUMBER = "9F"
+        SIGNAL_CODE = "T4"
+        ORIGINAL_REFERENCE_NUMBER = "F8"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 

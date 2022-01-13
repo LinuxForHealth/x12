@@ -1606,6 +1606,10 @@ class HiSegment(X12Segment):
     health_care_code_6: Optional[List] = Field(is_component=True)
     health_care_code_7: Optional[List] = Field(is_component=True)
     health_care_code_8: Optional[List] = Field(is_component=True)
+    health_care_code_9: Optional[List] = Field(is_component=True)
+    health_care_code_10: Optional[List] = Field(is_component=True)
+    health_care_code_11: Optional[List] = Field(is_component=True)
+    health_care_code_12: Optional[List] = Field(is_component=True)
 
 
 class HlSegment(X12Segment):
