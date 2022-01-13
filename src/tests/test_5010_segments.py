@@ -354,12 +354,21 @@ def test_hd_segment():
 
 def test_hi_segment():
     segment_data = {
-        "health_care_code_1": ["BK", "8901"],
-        "health_care_code_2": ["BF", "87200"],
-        "health_care_code_3": ["BF", "5559"],
+        "health_care_code_1": ["ABK", "M2578"],
+        "health_care_code_2": ["ABF", "M4802"],
+        "health_care_code_3": ["ABF", "M5023"],
+        "health_care_code_4": ["ABF", "M5136"],
+        "health_care_code_5": ["ABF", "M4126"],
+        "health_care_code_6": ["ABF", "M4316"],
+        "health_care_code_7": ["ABF", "M5416"],
+        "health_care_code_8": ["ABF", "M5030"],
+        "health_care_code_9": ["ABF", "M5412"],
     }
     hi_segment: HiSegment = HiSegment(**segment_data)
-    assert hi_segment.x12() == "HI*BK:8901*BF:87200*BF:5559~"
+    assert (
+        hi_segment.x12()
+        == "HI*ABK:M2578*ABF:M4802*ABF:M5023*ABF:M5136*ABF:M4126*ABF:M4316*ABF:M5416*ABF:M5030*ABF:M5412~"
+    )
 
 
 def test_hl_segment():

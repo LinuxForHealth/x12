@@ -25,6 +25,12 @@ PARSING_FUNCTION_REGEX = "set\\_(.)*\\_loop"
 BASE_TRANSACTION_PREFIX = "linuxforhealth.x12.v"
 
 
+class X12ParseException(Exception):
+    """Raised when an X12 unit of work such as a transaction or segment encounters a parsing error"""
+
+    pass
+
+
 def match(segment_name: str, conditions: Dict = None) -> Callable:
     """
     The match decorator matches a X12 segment to a decorated function.
@@ -248,7 +254,11 @@ class X12Parser(ABC):
         # drive the mapping with segment_fields as it includes all fields within the transactional context
         # field_names includes ALL available fields within the specification
         for index, value in enumerate(segment_fields):
-            field_name: str = field_names[index]
+            try:
+                field_name: str = field_names[index]
+            except IndexError as ie:
+                msg = f"Error parsing {segment_name} segment field {index}"
+                raise X12ParseException(msg)
 
             multivalue_separator: str = multivalue_fields.get(field_name)
             if multivalue_separator:
