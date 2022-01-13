@@ -13,7 +13,7 @@ from importlib import import_module
 from typing import Callable, Dict, List, Optional, Set
 
 from .models import X12SegmentGroup, X12Segment, X12Delimiters
-from .support import parse_x12_major_version
+from .support import parse_x12_major_version, get_latest_implementation_version
 
 logger = logging.getLogger(__name__)
 
@@ -345,8 +345,12 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
     loop_parsers = defaultdict(list)
 
     major_version = parse_x12_major_version(implementation_version)
+    latest_implementation_version = get_latest_implementation_version(
+        implementation_version
+    )
+
     parsing_module = import_module(
-        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.parsing"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{latest_implementation_version}.parsing"
     )
 
     funcs = [
@@ -368,9 +372,12 @@ def _load_transaction_model(
     """Returns the transaction model for the x12 transaction"""
 
     major_version = parse_x12_major_version(implementation_version)
+    latest_implementation_version = get_latest_implementation_version(
+        implementation_version
+    )
 
     transaction_module = import_module(
-        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{implementation_version}.transaction_set"
+        f"{BASE_TRANSACTION_PREFIX}{major_version}.x12_{transaction_code}_{latest_implementation_version}.transaction_set"
     )
 
     # return transaction set model
