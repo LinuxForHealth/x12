@@ -866,7 +866,7 @@ class Loop2310BNm1Segment(Nm1Segment):
     """
 
     entity_identifier_code: Literal["82"]
-    identification_code_qualifier: Literal["XX"]
+    identification_code_qualifier: Optional[Literal["XX"]]
 
 
 class Loop2310BPrvSegment(PrvSegment):
