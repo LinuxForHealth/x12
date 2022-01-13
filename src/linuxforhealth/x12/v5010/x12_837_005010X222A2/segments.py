@@ -1142,10 +1142,14 @@ class Loop2300BRefSegment(RefSegment):
         Code values for REF01
         """
 
-        PAYOR_IDENTIFICATION = "PI"
+        PAYOR_IDENTIFICATION_NUMBER = "2U"
         EMPLOYER_IDENTIFICATION_NUMBER = "EI"
         CLAIM_OFFICE_NUMBER = "FY"
         NAIC_CODE = "NF"
+        PRIOR_AUTHORIZATION_NUMBER = "G1"
+        REFERRAL_NUMBER = "9F"
+        SIGNAL_CODE = "T4"
+        ORIGINAL_REFERENCE_NUMBER = "F8"
 
     reference_identification_qualifier: ReferenceIdentificationQualifier
 
