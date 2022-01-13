@@ -6,7 +6,10 @@ the implementation within the `x12_270_005010X279A1` transaction set before addi
 ## Add Transaction Package
 
 Add a new transaction package to the appropriate top level version package such as `x12.v5010`. The new transaction package name must
-adhere to the following convention to support transaction discovery - `x12_[transaction set code]_[implementation version]`.
+adhere to the following convention to support transaction discovery - `x12_[transaction set code]_[implementation version]`. The
+`implementation version` used in the package name should be the LATEST revision listed in the specification guide. For example
+the claim payment specification includes the following versions: 005010X221 and 005010X221A1. In this case the complete package name
+is `x12_835_005010X221A1` which supports implementation versions `005010X221` and `005010X221A1`.
 
 Add the following modules to the new transaction package:
 

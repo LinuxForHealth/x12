@@ -12,6 +12,54 @@ from pydantic import validator, BaseModel
 
 from .config import IsaDelimiters
 
+# maps a X12 transaction implementation version to the latest version in the "major" version
+X12_IMPLEMENTATION_VERSIONS = {
+    # benefit enrollment and maintenance
+    "005010X220": "005010X220A1",
+    "005010X220A1": "005010X220A1",
+    # claims status
+    "005010X212": "005010X212",
+    # claim payment
+    "005010X221": "005010X221A1",
+    "005010X221A1": "005010X221A1",
+    # eligibility inquiry
+    "005010X279": "005010X279A1",
+    "005010X279A1": "005010X279A1",
+    # institutional claim
+    "004010X096": "004010X096A1",
+    "004010X096A1": "004010X096A1",
+    "005010X223": "005010X223A3",
+    "005010X223A1": "005010X223A3",
+    "005010X223A2": "005010X223A3",
+    "005010X223A3": "005010X223A3",
+    # professional claim
+    "004010X098": "004010X098A1",
+    "004010X098A1": "004010X098A1",
+    "005010X222": "005010X222A2",
+    "005010X222A1": "005010X222A2",
+    "005010X222A2": "005010X222A2",
+}
+
+
+def get_latest_implementation_version(requested_version: str) -> str:
+    """
+    Returns the latest implementation version for a requested version.
+    For example, the claim payment specification includes the following versions: 005010X221 and 005010X221A1.
+
+    get_latest_implementation_version("005010X221") returns "005010X221A1"
+    get_latest_implementation_version("005010X221A1") returns "005010X221A1"
+
+    :param requested_version: The requested version used for lookup.
+    :returns: The latest implementation version
+    :raises: KeyError if the requested version is not supported
+
+    """
+    if requested_version not in X12_IMPLEMENTATION_VERSIONS:
+        raise KeyError(
+            f"Unable to match {requested_version} to a specification guide. {requested_version} is not supported"
+        )
+    return X12_IMPLEMENTATION_VERSIONS[requested_version]
+
 
 def is_x12_data(input_data: str) -> bool:
     """

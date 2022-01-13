@@ -12,6 +12,7 @@ from linuxforhealth.x12.support import (
     parse_interchange_date,
     count_segments,
     parse_x12_major_version,
+    get_latest_implementation_version,
 )
 from linuxforhealth.x12.io import X12ModelReader
 
@@ -86,3 +87,12 @@ def test_parse_x12_major_version():
     assert parse_x12_major_version("005010X279A1") == "5010"
     assert parse_x12_major_version("00501") == ""
     assert parse_x12_major_version(None) == ""
+
+
+def test_get_final_implementation_version():
+    assert get_latest_implementation_version("005010X222") == "005010X222A2"
+    assert get_latest_implementation_version("005010X222A1") == "005010X222A2"
+    assert get_latest_implementation_version("005010X222A2") == "005010X222A2"
+
+    with pytest.raises(KeyError):
+        get_latest_implementation_version("invalid-version")
