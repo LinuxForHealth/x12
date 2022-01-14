@@ -25,4 +25,4 @@ class BenefitEnrollmentAndMaintenance(X12SegmentGroup):
     loop_2000: List[Loop2000]
     footer: Footer
 
-    _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
+    # _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
