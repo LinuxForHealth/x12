@@ -123,7 +123,6 @@ class X12Segment(abc.ABC, BaseModel):
     X12BaseSegment serves as the abstract base class for all X12 segment models.
     """
 
-    delimiters: X12Delimiters = X12Delimiters()
     segment_name: X12SegmentName
 
     class Config:
@@ -134,37 +133,55 @@ class X12Segment(abc.ABC, BaseModel):
         use_enum_values = True
         extra = "forbid"
 
-    def _process_multivalue_field(self, field_name: str, field_value: List) -> str:
+    def _process_multivalue_field(
+        self,
+        field_name: str,
+        field_value: List,
+        custom_delimiters: X12Delimiters = None,
+    ) -> str:
         """
         Converts a X12 multi-value (list) field into a a single delimited string.
 
         A "multi-value" field is a field which contains sub-fields, or components, or allows repeats.
         The X12 specification uses separate delimiters for component and repeating fields.
 
+        By default the method will use default X12 delimiters. Custom delimiters may be specified if desired using
+        the `custom_delimiters` parameter.
+
         :param field_name: The field name used to lookup field metadata.
         :param field_value: The field's list values
+        :param custom_delimiters: Used when custom delimiters are required. Defaults to None.
         """
 
+        delimiters = custom_delimiters or X12Delimiters()
         is_component_field: bool = self.__fields__[field_name].field_info.extra.get(
             "is_component", False
         )
         if is_component_field:
-            join_character = self.delimiters.component_separator
+            join_character = delimiters.component_separator
         else:
-            join_character = self.delimiters.repetition_separator
+            join_character = delimiters.repetition_separator
         return join_character.join(field_value)
 
-    def x12(self) -> str:
+    def x12(self, custom_delimiters: X12Delimiters = None) -> str:
         """
+        Generates a X12 formatted string for the segment.
+        By default the method will use default X12 delimiters. Custom delimiters may be specified if desired using
+        the `custom_delimiters` parameter.
+
+        :param custom_delimiters: Used when custom delimiters are required. Defaults to None.
         :return: the X12 representation of the model instance
         """
 
+        delimiters = custom_delimiters or X12Delimiters()
         x12_values = []
-        for k, v in self.dict(exclude={"delimiters"}).items():
+        for k, v in self.dict().items():
             if isinstance(v, str):
                 x12_values.append(v)
             elif isinstance(v, list):
-                x12_values.append(self._process_multivalue_field(k, v))
+                x12_values.append(
+                    self._process_multivalue_field(k, v, custom_delimiters=delimiters)
+                )
             elif isinstance(v, datetime.datetime):
                 x12_values.append(v.strftime("%Y%m%d%H%M"))
             elif isinstance(v, datetime.date):
@@ -178,10 +195,10 @@ class X12Segment(abc.ABC, BaseModel):
             else:
                 x12_values.append(str(v))
 
-        x12_str = self.delimiters.element_separator.join(x12_values).rstrip(
-            self.delimiters.element_separator
+        x12_str = delimiters.element_separator.join(x12_values).rstrip(
+            delimiters.element_separator
         )
-        return x12_str + self.delimiters.segment_terminator
+        return x12_str + delimiters.segment_terminator
 
 
 class X12SegmentGroup(abc.ABC, BaseModel):
@@ -189,10 +206,20 @@ class X12SegmentGroup(abc.ABC, BaseModel):
     Abstract base class for a container, typically a loop or transaction, which groups x12 segments.
     """
 
-    def x12(self, use_new_lines=True) -> str:
+    def x12(
+        self, use_new_lines: bool = True, custom_delimiters: X12Delimiters = None
+    ) -> str:
         """
+        Generates a X12 formatted string for the segment.
+
+        By default the method will use default X12 delimiters. Custom delimiters may be specified if desired using
+        the `custom_delimiters` parameter.
+
+        :param use_new_lines: Indicates if the X12 output includes newline characters. Defaults to True.
+        :param custom_delimiters: Used when custom delimiters are required. Defaults to None.
         :return: Generates a X12 representation of the loop using its segments.
         """
+        delimiters = custom_delimiters or X12Delimiters()
         x12_segments: List[str] = []
         fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
 
@@ -204,14 +231,25 @@ class X12SegmentGroup(abc.ABC, BaseModel):
             elif isinstance(field_instance, list):
                 for item in field_instance:
                     if isinstance(item, X12Segment):
-                        x12_segments.append(item.x12())
+                        x12_segments.append(item.x12(custom_delimiters=delimiters))
                     else:
-                        x12_segments.append(item.x12(use_new_lines=use_new_lines))
+                        x12_segments.append(
+                            item.x12(
+                                use_new_lines=use_new_lines,
+                                custom_delimiters=delimiters,
+                            )
+                        )
             else:
                 if isinstance(field_instance, X12Segment):
-                    x12_segments.append(field_instance.x12())
+                    x12_segments.append(
+                        field_instance.x12(custom_delimiters=delimiters)
+                    )
                 else:
-                    x12_segments.append(field_instance.x12(use_new_lines=use_new_lines))
+                    x12_segments.append(
+                        field_instance.x12(
+                            use_new_lines=use_new_lines, custom_delimiters=delimiters
+                        )
+                    )
 
         join_char: str = "\n" if use_new_lines else ""
         return join_char.join(x12_segments)

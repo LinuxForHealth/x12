@@ -843,7 +843,6 @@ def test_x12_with_custom_delimiters():
     )
 
     segment_data = {
-        "delimiters": x12_delimiters.dict(),
         "trace_type_code": "1",
         "reference_identification_1": "98175-012547",
         "originating_company_identifier": "8877281234",
@@ -851,4 +850,7 @@ def test_x12_with_custom_delimiters():
     }
 
     trn_segment: TrnSegment = TrnSegment(**segment_data)
-    assert trn_segment.x12() == "TRN|1|98175-012547|8877281234|RADIOLOGY?"
+    assert (
+        trn_segment.x12(custom_delimiters=x12_delimiters)
+        == "TRN|1|98175-012547|8877281234|RADIOLOGY?"
+    )
