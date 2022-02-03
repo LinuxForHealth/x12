@@ -50,10 +50,16 @@ def _create_arg_parser():
     parser.add_argument(
         "-p", "--pretty", help="Pretty print output", action="store_true"
     )
+    parser.add_argument(
+        "-d",
+        "--delimiters",
+        help="Include X12 delimiters in output. Only valid when -m (model mode) is used",
+        action="store_true",
+    )
 
     parser.add_argument("file", help="The path to a ASC X12 file")
 
-    return parser.parse_args()
+    return parser
 
 
 def _parse_segments(file_path: str) -> List:
@@ -75,19 +81,30 @@ def _parse_segments(file_path: str) -> List:
         return segments
 
 
-def _parse_models(file_path: str, exclude_none: bool = False) -> List:
+def _parse_models(
+    file_path: str, exclude_none: bool = False, output_delimiters: bool = False
+) -> List:
     """
     Parses a X12 segment model from a X12 input file.
 
     :param file_path: The path to the X12 file.
     :param exclude_none: Excludes fields set to None from the model output.
+    :param output_delimiters: When True delimiter metadata is included with each segment.
     :return: List of X12 models
     """
 
-    with X12ModelReader(file_path) as r:
+    with X12ModelReader(file_path, output_delimiters=output_delimiters) as r:
+        # if field is not set it will be omitted
+        # fields explicitly set to None will be included if exclude_none is True
+        export_params = {
+            "exclude_unset": True,
+            "exclude_none": exclude_none,
+        }
+
         models = []
+
         for m in r.models():
-            model_data = m.dict(exclude_unset=exclude_none, exclude_none=exclude_none)
+            model_data = m.dict(**export_params)
             models.append(model_data)
         return models
 
@@ -96,13 +113,16 @@ def main():
     """
     CLI module entrypoint
     """
-    args = _create_arg_parser()
+    parser = _create_arg_parser()
+    args = parser.parse_args()
 
-    x12_data = (
-        _parse_segments(args.file)
-        if args.segment
-        else _parse_models(args.file, args.exclude)
-    )
+    if args.segment and args.delimiters:
+        parser.error("-s (segment mode) does not support -d (output delimiters)")
+
+    if args.segment:
+        x12_data = _parse_segments(args.file)
+    else:
+        x12_data = _parse_models(args.file, args.exclude, args.delimiters)
 
     json_opts = {"cls": X12JsonEncoder}
 
