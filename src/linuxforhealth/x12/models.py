@@ -6,7 +6,7 @@ Base models for X12 parsing and validation.
 import abc
 import datetime
 from enum import Enum
-from typing import List
+from typing import List, Optional
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -123,6 +123,7 @@ class X12Segment(abc.ABC, BaseModel):
     X12BaseSegment serves as the abstract base class for all X12 segment models.
     """
 
+    delimiters: Optional[X12Delimiters] = None
     segment_name: X12SegmentName
 
     class Config:
@@ -166,7 +167,7 @@ class X12Segment(abc.ABC, BaseModel):
     def x12(self, custom_delimiters: X12Delimiters = None) -> str:
         """
         Generates a X12 formatted string for the segment.
-        By default the method will use default X12 delimiters. Custom delimiters may be specified if desired using
+        By default, the method will use default X12 delimiters. Custom delimiters may be specified if desired using
         the `custom_delimiters` parameter.
 
         :param custom_delimiters: Used when custom delimiters are required. Defaults to None.
@@ -175,7 +176,7 @@ class X12Segment(abc.ABC, BaseModel):
 
         delimiters = custom_delimiters or X12Delimiters()
         x12_values = []
-        for k, v in self.dict().items():
+        for k, v in self.dict(exclude={"delimiters"}).items():
             if isinstance(v, str):
                 x12_values.append(v)
             elif isinstance(v, list):

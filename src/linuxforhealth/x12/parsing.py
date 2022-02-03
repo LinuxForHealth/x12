@@ -283,7 +283,10 @@ class X12Parser(ABC):
         return self._transaction_model(**self._context.transaction_data)
 
     def parse(
-        self, segment_name: str, segment_fields: List[str]
+        self,
+        segment_name: str,
+        segment_fields: List[str],
+        output_delimiters: bool = False,
     ) -> Optional[X12SegmentGroup]:
         """
         Parses an X12 segment into the instance's data record attribute.
@@ -295,6 +298,8 @@ class X12Parser(ABC):
 
         :param segment_name: The name of the X12 segment (ST, HL, NM1, etc)
         :param segment_fields: List of segment field values
+        :param output_delimiters: Set to True to include delimiter metadata in the model with each segment.
+            Defaults to False
         :return: The X12 Transaction Model if ready, otherwise None.
         """
 
@@ -302,6 +307,8 @@ class X12Parser(ABC):
 
         # convert segment data to a dictionary "record"
         segment_data: Dict = self._parse_segment(segment_name, segment_fields)
+        if output_delimiters:
+            segment_data["delimiters"] = self._delimiters.dict()
 
         if segment_name.lower() == "hl":
             self._context.hl_segment = segment_data
