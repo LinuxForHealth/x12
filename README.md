@@ -36,7 +36,7 @@ git clone https://github.com/LinuxForHealth/x12
 cd x12
 
 python3 -m venv venv && source venv/bin/activate && pip install --upgrade pip setuptools 
-pip install -e .[dev]
+pip install -e .[dev, api] # installs dev packages and optional API endpoint
 pytest
 ```
 
@@ -129,6 +129,27 @@ To parse a X12 message into models with pretty printing enabled
 ```
 
 In "model" mode, the `-x` option excludes `None` values from output.
+
+### API
+LinuxForHealth X12 includes an experimental "api" setup "extra" which activates a [Fast API](https://fastapi.tiangolo.com/) 
+endpoint used to submit X12 payloads.
+
+```shell
+user@mbp x12 % source venv/bin/activate
+(venv) user@mbp x12 % pip install -e ".[api]"
+(venv) user@mbp x12 % lfhx12-api
+```
+Browse to http://localhost:5000/docs to view the Open API UI.
+
+API server configurations are located in the [config module](./src/linuxforhealth/x12/config.py). The `X12ApiConfig` model
+is a [Pydantic Settings Model](https://pydantic-docs.helpmanual.io/usage/settings/) which can be configured using environment
+variables.
+
+```shell
+user@mbp x12 % source venv/bin/activate
+(venv) user@mbp x12 % export X12_UVICORN_PORT=5002
+(venv) user@mbp x12 % lfhx12-api
+```
 
 ### Code Formatting
 
