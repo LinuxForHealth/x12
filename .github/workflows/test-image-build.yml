@@ -1,0 +1,27 @@
+name: Test X12 Image Build
+
+on:
+  push:
+    branches: [ 0.57.0, main ]
+  pull_request:
+    branches: [ 0.57.0, main ]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: QEMU setup
+        uses: docker/setup-qemu-action@v2
+      - name: Docker buildx setup
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          build-args: |
+            X12_SEM_VER=0.57.0
+          platforms: linux/amd64
+          push: false
+          tags: ci-testing
