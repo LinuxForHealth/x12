@@ -20,6 +20,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          build-args: |
+            X12_SEM_VER=0.57.0
           platforms: linux/amd64,linux/arm64,linux/s390x
           push: false
           tags: ci-testing
