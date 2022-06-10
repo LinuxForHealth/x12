@@ -63,3 +63,26 @@ class X12Config(BaseSettings):
 def get_config() -> "X12Config":
     """Returns the X12Config"""
     return X12Config()
+
+
+class X12ApiConfig(BaseSettings):
+    """
+    Settings for optional Fast API "server" components.
+    """
+
+    x12_uvicorn_app: str = Field(
+        "linuxforhealth.x12.api:app", description="The path the ASGI app object"
+    )
+    x12_uvicorn_host: str = Field(
+        "0.0.0.0", description="The ASGI listening address (host)"
+    )
+    x12_uvicorn_port: int = Field(5000, description="The ASGI listening port (host)")
+    x12_uvicorn_reload: bool = Field(
+        False, description="Set to True to support hot reloads. Defaults to False"
+    )
+
+
+@lru_cache
+def get_x12_api_config() -> "X12ApiConfig":
+    """Returns the X12ApiConfig"""
+    return X12ApiConfig()

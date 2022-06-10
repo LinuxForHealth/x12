@@ -1,0 +1,11 @@
+.github
+.idea
+.vscode
+**/.pytest_cache
+**/linuxforhealth_x12.egg-info
+demo-file
+repo-docs
+**/tests
+venv
+.gitignore
+LICENSE
