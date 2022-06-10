@@ -2,9 +2,9 @@ name: Test X12 Image Build
 
 on:
   push:
-    branches: [ 0.57.0, main ]
+    branches: [ main ]
   pull_request:
-    branches: [ 0.57.0, main ]
+    branches: [ main ]
 
 jobs:
   build-image:
