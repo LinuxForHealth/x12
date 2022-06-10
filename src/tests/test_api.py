@@ -33,19 +33,15 @@ def mock_x12_payload(simple_270_with_new_lines: str) -> Dict:
 @pytest.mark.parametrize(
     "header, expected_first_value",
     [
-        # the response payload and resulting "first value" varies based on the request header
         (None, "header"),
         ("models", "header"),
         ("Models", "header"),
         ("MODELS", "header"),
-        ("segments", "ISA"),
-        ("Segments", "ISA"),
-        ("SEGMENTS", "ISA"),
     ],
 )
-def test_x12_ok(mock_x12_payload, api_test_client, header, expected_first_value):
+def test_x12_ok_models(mock_x12_payload, api_test_client, header, expected_first_value):
     """
-    Tests the x12 segment response with parameterized header and expected values.
+    Tests the x12 models response with parameterized header and expected values.
     :param mock_x12_payload: The X12 request payload for the test
     :param api_test_client: The configured Fast API test client
     :param header: The parameterized header value
@@ -56,6 +52,30 @@ def test_x12_ok(mock_x12_payload, api_test_client, header, expected_first_value)
     )
     assert api_response.status_code == 200
     assert expected_first_value in api_response.json()[0]
+
+
+@pytest.mark.skipif(is_fastapi_disabled, reason="X12 API endpoint is not enabled")
+@pytest.mark.parametrize(
+    "header, expected_key",
+    [
+        ("segments", "ISA01"),
+        ("Segments", "ISA01"),
+        ("SEGMENTS", "ISA01"),
+    ],
+)
+def test_x12_ok_segments(mock_x12_payload, api_test_client, header, expected_key):
+    """
+    Tests the x12 segments response with parameterized header and expected values.
+    :param mock_x12_payload: The X12 request payload for the test
+    :param api_test_client: The configured Fast API test client
+    :param header: The parameterized header value
+    :param expected_key: The parameterized expected key
+    """
+    api_response = api_test_client.post(
+        "/x12", json=mock_x12_payload, headers={"LFH-X12-RESPONSE": header}
+    )
+    assert api_response.status_code == 200
+    assert expected_key in api_response.json()[0].keys()
 
 
 @pytest.mark.skipif(is_fastapi_disabled, reason="X12 API endpoint is not enabled")

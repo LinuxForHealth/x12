@@ -69,7 +69,13 @@ async def post_x12(
                 api_results = [m.dict() for m in r.models()]
         else:
             with X12SegmentReader(x12_request.x12) as r:
-                api_results = [s for s in r.segments()]
+                api_results = []
+                for segment_name, segment in r.segments():
+                    segment_data = {
+                        f"{segment_name}{str(i).zfill(2)}": v
+                        for i, v in enumerate(segment)
+                    }
+                    api_results.append(segment_data)
 
     except (X12ParseException, ValidationError) as error:
         raise HTTPException(
