@@ -13,9 +13,15 @@ jobs:
       - name: Check out the Repo
         uses: actions/checkout@v3
 
-      - name: Build Image from Dockerfile
-        run: |
-          docker build -t linuxforhealh/x12:${{ github.sha }} .
+      - name: Build Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          build-args: |
+            X12_SEM_VER=0.57.0
+          platforms: linux/amd64
+          push: false
+          tags: linuxforhealth/x12:${{ github.sha }}
 
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@master
