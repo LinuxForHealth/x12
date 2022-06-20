@@ -1,0 +1,30 @@
+name: Test X12 Image Build
+
+on:
+  push:
+    branches: [ main, 0.58.0 ]
+  pull_request:
+    branches: [ main, 0.58.0 ]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the Repo
+        uses: actions/checkout@v3
+
+      - name: Build Image from Dockerfile
+        run: |
+          docker build -t linuxforhealh/x12:${{ github.sha }} .
+
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'linuxforhealh/x12:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-image-scan-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-image-scan-results.sarif'
