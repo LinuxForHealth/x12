@@ -28,6 +28,7 @@ RUN python -m pip install dist/linuxforhealth_x12-"$X12_SEM_VER"-py3-none-any.wh
 # main image
 FROM python:3.10-slim-buster
 
+RUN apk upgrade -U -a
 # container build arguments
 # lfh user id and group ids
 ARG LFH_USER_ID=1000
@@ -46,4 +47,5 @@ ENV PATH="/home/lfh/venv/bin:$PATH"
 # listening address for application
 ENV X12_UVICORN_HOST=0.0.0.0
 EXPOSE 5000
+
 CMD ["python", "-m", "linuxforhealth.x12.api"]
