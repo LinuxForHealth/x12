@@ -7,6 +7,7 @@ from typing import Dict, Optional, List
 from linuxforhealth.x12.config import get_x12_api_config, X12ApiConfig
 from linuxforhealth.x12.io import X12SegmentReader, X12ModelReader
 from linuxforhealth.x12.parsing import X12ParseException
+from linuxforhealth.x12 import __version__
 from pydantic import ValidationError, BaseModel, Field
 
 app = FastAPI()
@@ -84,6 +85,14 @@ async def post_x12(
         )
     else:
         return api_results
+
+
+@app.get("/status")
+def get_status():
+    return {
+        "version": __version__,
+        "status": "ok",
+    }
 
 
 def run_server():
