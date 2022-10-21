@@ -94,3 +94,14 @@ def test_x12_invalid_request(api_test_client, mock_x12_payload):
     invalid_payload = {"x12": invalid_x12}
     api_response = api_test_client.post("/x12", json=invalid_payload)
     assert api_response.status_code == 400
+
+
+@pytest.mark.skipif(is_fastapi_disabled, reason="X12 API endpoint is not enabled")
+def test_status_request(api_test_client, mock_x12_payload):
+    """
+    Validates that invalid
+    :param api_test_client: The configured Fast API test client
+    :param mock_x12_payload: The X12 request payload for the test
+    """
+    api_response = api_test_client.get("/status")
+    assert api_response.status_code == 200
