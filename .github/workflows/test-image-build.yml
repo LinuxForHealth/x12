@@ -21,7 +21,7 @@ jobs:
         with:
           context: .
           build-args: |
-            X12_SEM_VER=0.57.0
+            X12_SEM_VER=0.58.0
           platforms: linux/amd64
           push: false
           tags: ci-testing
