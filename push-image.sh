@@ -27,7 +27,7 @@ fi
 
 IMAGE_TAG=$1
 IMAGE_URL="${2:-ghcr.io/linuxforhealth/x12}"
-PLATFORMS="${3:-linux/amd64,linux/arm64,linux/s390x}"
+PLATFORMS="${3:-linux/amd64,linux/arm64}"
 
 docker buildx build \
               --pull \

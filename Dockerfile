@@ -1,7 +1,7 @@
 # Builds the LinuxForHealth X12 API container using a multi-stage build
 
 # build stage
-FROM python:3.10-slim-buster AS builder
+FROM python:slim-buster AS builder
 
 # the full semantic version number, used to match to the generated wheel file in dist/
 ARG X12_SEM_VER
