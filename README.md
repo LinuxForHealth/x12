@@ -10,6 +10,15 @@
 ![GitHub Stars](https://img.shields.io/github/stars/LinuxForHealth/x12)
 
 
+> **Maintained fork**
+>
+> Active development of this repository stopped in 2022. The project is continued as
+> **[x12sdk](https://github.com/owgreen-dev/x12sdk)**, which keeps the models, parser and
+> test corpus here and updates them for current runtimes: Pydantic v2 and Python 3.10–3.13.
+> If you are starting a new project, or need a release that installs on a supported Python,
+> use that fork. See [#141](https://github.com/LinuxForHealth/x12/issues/141) for the
+> background.
+
 LinuxForHealth x12 streams ASC 5010 X12 health care transactions into [Pydantic Models](https://pydantic-docs.helpmanual.io/)  for a pleasant pythonic parsing experience! Integration options include REST endpoints, CLI (command line), or direct access using the Python SDK.
 
 Supported formats include:
